@@ -101,6 +101,7 @@ class NominatimGeocoder:
         user_agent: str = "codex-news-ingestor/0.1 (https://example.com/contact)",
         failure_ttl_days: int = 7,
         google_api_key: str | None = None,
+        ignore_failures: bool = False,
     ) -> None:
         self.cache = SQLiteCache(cache_path)
         self.min_interval = min_interval
@@ -108,6 +109,7 @@ class NominatimGeocoder:
         self.failure_ttl_days = failure_ttl_days
         self._last_request = 0.0
         self.google_api_key = google_api_key
+        self.ignore_failures = ignore_failures
         self.stats: dict[str, int] = {
             "cache_hits": 0,
             "nominatim_hits": 0,
@@ -125,16 +127,17 @@ class NominatimGeocoder:
             if lat is not None and lon is not None:
                 self.stats["cache_hits"] += 1
                 return GeocodeResult(query=query, latitude=lat, longitude=lon, raw=raw)
-            if fetched_at:
+            if fetched_at and not self.ignore_failures:
+                ts = None
                 try:
                     ts = datetime.fromisoformat(fetched_at)
                     if ts.tzinfo is None:
                         ts = ts.replace(tzinfo=timezone.utc)
                 except ValueError:
                     ts = None
-            if ts and datetime.now(timezone.utc) - ts < timedelta(days=self.failure_ttl_days):
-                LOGGER.debug("Skipping geocode for '%s' due to recent failure cache.", query)
-                return None
+                if ts and datetime.now(timezone.utc) - ts < timedelta(days=self.failure_ttl_days):
+                    LOGGER.debug("Skipping geocode for '%s' due to recent failure cache.", query)
+                    return None
         payload = self._fetch(query)
         source = None
         if payload:
