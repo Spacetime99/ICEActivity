@@ -18,8 +18,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence, Set
-from urllib.parse import urlparse
+from typing import Any, Dict, Iterable, List, Pattern, Sequence, Set
+from urllib.parse import urljoin, urlparse
 
 import feedparser
 import requests
@@ -46,10 +46,15 @@ DEFAULT_SEARCH_TERMS = [
     "immigration raid",
     "border patrol",
     "deportation",
+    "visa",
+    "green card",
+    "national guard",
+    "asylum",
+    "refugee",
 ]
 
 DEFAULT_RELEVANCE_KEYWORDS = [
-    "ice",
+    "ICE",
     "immigration",
     "immigration and customs enforcement",
     "customs enforcement",
@@ -58,6 +63,41 @@ DEFAULT_RELEVANCE_KEYWORDS = [
     "detention center",
     "immigration raid",
     "immigration court",
+    "visa",
+    "green card",
+    "national guard",
+    "asylum",
+    "refugee",
+]
+
+CASE_SENSITIVE_KEYWORDS = frozenset({"ICE"})
+
+RELATED_HEADING_PREFIXES = (
+    "related",
+    "more stories",
+    "more from",
+    "recommended",
+    "trending",
+    "watch next",
+    "around the web",
+)
+RELATED_ATTR_SIGNALS = (
+    "related",
+    "more-stories",
+    "morestories",
+    "more_from",
+    "recommended",
+    "trending",
+    "promo",
+    "readnext",
+    "read-next",
+    "watchnext",
+)
+RELATED_SECTION_PATTERNS = [
+    re.compile(r"\brelated (?:topics|stories|coverage)\b", re.IGNORECASE),
+    re.compile(r"\bmore (?:stories|from)\b", re.IGNORECASE),
+    re.compile(r"\brecommended\b", re.IGNORECASE),
+    re.compile(r"\btrending\b", re.IGNORECASE),
 ]
 
 STATE_NAMES = [
@@ -294,6 +334,33 @@ def _clean_geocode_phrase(value: str) -> str:
     return cleaned
 
 
+def _clean_html_fragment(value: str | None) -> str:
+    """Best-effort HTML to text converter for summaries/descriptions."""
+    if not value:
+        return ""
+    soup = BeautifulSoup(value, "html.parser")
+    for tag in soup(["script", "style", "noscript"]):
+        tag.decompose()
+    text = soup.get_text(" ", strip=True)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _strip_related_sections(value: str | None) -> str:
+    """Drop trailing related/recommended link lists from extracted article text."""
+    if not value:
+        return ""
+    text = value.strip()
+    lowered = text.lower()
+    cutoff = len(text)
+    for pattern in RELATED_SECTION_PATTERNS:
+        match = pattern.search(lowered)
+        if match:
+            cutoff = min(cutoff, match.start())
+    if cutoff < len(text):
+        return text[:cutoff].rstrip()
+    return text
+
+
 @dataclass
 class NewsReport:
     source: str
@@ -306,6 +373,7 @@ class NewsReport:
     city_mentions: List[str]
     facility_mentions: List[str]
     raw: dict[str, Any]
+    content: str | None = None
     latitude: float | None = None
     longitude: float | None = None
     geocode_query: str | None = None
@@ -321,6 +389,7 @@ class NewsReport:
             "locations": self.locations or [],
             "city_mentions": self.city_mentions or [],
             "facility_mentions": self.facility_mentions or [],
+            "content": self.content,
             "latitude": self.latitude,
             "longitude": self.longitude,
             "geocode_query": self.geocode_query,
@@ -344,6 +413,13 @@ class RSSFeedConfig:
 
 
 @dataclass
+class HtmlPageConfig:
+    name: str
+    url: str
+    selectors: Sequence[str] | None = None
+
+
+@dataclass
 class FacilityRecord:
     name: str
     address: str
@@ -357,6 +433,147 @@ class FacilityRecord:
         parts = [self.address, self.city, self.state]
         return ", ".join(part for part in parts if part)
 
+
+LOCAL_RSS_FEEDS: list[RSSFeedConfig] = [
+    # ABC owned-and-operated
+    RSSFeedConfig(name="abc-wabc", url="https://abc7ny.com/feed"),
+    RSSFeedConfig(name="abc-kabc", url="https://abc7.com/feed"),
+    RSSFeedConfig(name="abc-kgo", url="https://abc7news.com/feed"),
+    RSSFeedConfig(name="abc-wls", url="https://abc7chicago.com/feed"),
+    RSSFeedConfig(name="abc-wpvi", url="https://6abc.com/feed"),
+    RSSFeedConfig(name="abc-wtvd", url="https://abc11.com/feed"),
+    RSSFeedConfig(name="abc-ktrk", url="https://abc13.com/feed"),
+    RSSFeedConfig(name="abc-kfsn", url="https://abc30.com/feed"),
+    # NBC owned-and-operated + strong affiliates
+    RSSFeedConfig(name="nbc-wnbc", url="https://www.nbcnewyork.com/feed/"),
+    RSSFeedConfig(name="nbc-knbc", url="https://www.nbclosangeles.com/feed/"),
+    RSSFeedConfig(name="nbc-kntv", url="https://www.nbcbayarea.com/feed/"),
+    RSSFeedConfig(name="nbc-wmaq", url="https://www.nbcchicago.com/feed/"),
+    RSSFeedConfig(name="nbc-wcau", url="https://www.nbcphiladelphia.com/feed/"),
+    RSSFeedConfig(name="nbc-wrc", url="https://www.nbcwashington.com/feed/"),
+    RSSFeedConfig(name="nbc-wbts", url="https://www.nbcboston.com/feed/"),
+    RSSFeedConfig(name="nbc-kxas", url="https://www.nbcdfw.com/feed/"),
+    RSSFeedConfig(
+        name="nbc-kprc",
+        url="https://www.click2houston.com/arc/outboundfeeds/rss/?outputType=xml",
+    ),
+    RSSFeedConfig(name="nbc-wtvj", url="https://www.nbcmiami.com/feed/"),
+    RSSFeedConfig(name="nbc-knsd", url="https://www.nbcsandiego.com/feed/"),
+    # CBS owned-and-operated
+    # (CBS local feeds responded with 404 HTML; temporarily removed.)
+    # Fox owned-and-operated
+    RSSFeedConfig(name="fox-wnyw", url="https://www.fox5ny.com/rss/category/news"),
+    RSSFeedConfig(name="fox-kttv", url="https://www.foxla.com/rss/category/news"),
+    RSSFeedConfig(name="fox-ktvu", url="https://www.ktvu.com/rss/category/news"),
+    RSSFeedConfig(name="fox-wfld", url="https://www.fox32chicago.com/rss/category/news"),
+    RSSFeedConfig(name="fox-wtxf", url="https://www.fox29.com/rss/category/news"),
+    RSSFeedConfig(name="fox-kdfw", url="https://www.fox4news.com/rss/category/news"),
+    RSSFeedConfig(name="fox-kriv", url="https://www.fox26houston.com/rss/category/news"),
+    RSSFeedConfig(name="fox-waga", url="https://www.fox5atlanta.com/rss/category/news"),
+    RSSFeedConfig(name="fox-wttg", url="https://www.fox5dc.com/rss/category/news"),
+    RSSFeedConfig(name="fox-ksaz", url="https://www.fox10phoenix.com/rss/category/news"),
+    RSSFeedConfig(name="fox-wofl", url="https://www.fox35orlando.com/rss/category/news"),
+    # Regional TV groups (Nexstar/Gray/TEGNA examples)
+    # NPR member stations
+    RSSFeedConfig(name="npr-wnyc", url="https://www.wnyc.org/feeds/articles/"),
+    RSSFeedConfig(name="npr-laist", url="https://laist.com/feed"),
+    RSSFeedConfig(name="npr-kqed", url="https://www.kqed.org/news/rss"),
+    RSSFeedConfig(name="npr-wamu", url="https://wamu.org/feed/"),
+    RSSFeedConfig(name="npr-wbur", url="https://www.wbur.org/feed"),
+    RSSFeedConfig(name="npr-whyy", url="https://whyy.org/feed/"),
+    RSSFeedConfig(name="npr-kut", url="https://www.kut.org/rss"),
+    RSSFeedConfig(name="npr-mpr", url="https://www.mprnews.org/stories.rss"),
+    RSSFeedConfig(name="npr-cpr", url="https://www.cpr.org/rss/news/"),
+    RSSFeedConfig(name="npr-opb", url="https://www.opb.org/feeds/all/"),
+    # iHeart local newsrooms
+    # (iHeart RSS endpoints redirect to HTML apps; temporarily removed.)
+    # Supplemental RSS.app feed (politics stream with immigration coverage)
+    RSSFeedConfig(name="rssapp-cnn-politics", url="https://rss.app/feeds/ZaG4vCohPDJWTwru.xml"),
+]
+
+WEB_PAGE_SOURCES: list[HtmlPageConfig] = [
+    HtmlPageConfig(name="wral-local", url="https://www.wral.com/local", selectors=("article a", "h2 a")),
+    HtmlPageConfig(name="wtop-local", url="https://wtop.com/local/", selectors=("article a", "h2 a")),
+    HtmlPageConfig(
+        name="nydailynews-local",
+        url="https://www.nydailynews.com/news/local/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="latimes-california",
+        url="https://www.latimes.com/california",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="sfchronicle-local",
+        url="https://www.sfchronicle.com/local/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="houstonchronicle-local",
+        url="https://www.houstonchronicle.com/news/houston-texas/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="azcentral-local",
+        url="https://www.azcentral.com/local/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="denverpost-local",
+        url="https://www.denverpost.com/news/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="bostonglobe-metro",
+        url="https://www.bostonglobe.com/metro/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="wapo-local",
+        url="https://www.washingtonpost.com/dc-md-va/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="chicagotribune-local",
+        url="https://www.chicagotribune.com/news/breaking/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="nbcchicago-local",
+        url="https://www.nbcchicago.com/news/local/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="abc7chicago-local",
+        url="https://abc7chicago.com/local-news/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="fox32chicago-local",
+        url="https://www.fox32chicago.com/news/local-news",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="suntimes-local",
+        url="https://chicago.suntimes.com/news",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(
+        name="abc7ny-local",
+        url="https://abc7ny.com/local-news/",
+        selectors=("article a", "h2 a"),
+    ),
+    HtmlPageConfig(name="kron4-local", url="https://www.kron4.com/news/", selectors=("article a", "h2 a")),
+]
+
+AP_RSS_FEEDS: list[RSSFeedConfig] = [
+]
+
+NATIONAL_RSS_FEEDS: list[RSSFeedConfig] = [
+    RSSFeedConfig(name="nbc-us", url="https://feeds.nbcnews.com/nbcnews/public/news"),
+    RSSFeedConfig(name="ice-press", url="https://www.ice.gov/rss.xml"),
+]
 
 def load_facility_catalog(path: Path = FACILITY_CATALOG_PATH) -> list[FacilityRecord]:
     if not path.exists():
@@ -414,6 +631,23 @@ def load_domain_blacklist(path: Path = DOMAIN_BLACKLIST_PATH) -> set[str]:
         return set()
 
 
+def _build_keyword_pattern(keywords: Sequence[str]) -> Pattern[str] | None:
+    """Compile keywords with word boundaries, respecting simple wildcards."""
+    if not keywords:
+        return None
+    processed: list[str] = []
+    for term in keywords:
+        stripped = term.strip()
+        if not stripped:
+            continue
+        exact = re.escape(stripped)
+        exact = exact.replace(r"\*", ".*")
+        processed.append(rf"\b{exact}\b")
+    if not processed:
+        return None
+    return re.compile("|".join(processed), re.IGNORECASE)
+
+
 class RSSFeedSource(BaseNewsSource):
     def __init__(
         self,
@@ -428,20 +662,17 @@ class RSSFeedSource(BaseNewsSource):
 
     def fetch(self, search_terms: Sequence[str]) -> List[NewsReport]:
         reports: List[NewsReport] = []
-        search_pattern = (
-            re.compile("|".join(re.escape(term) for term in search_terms), re.IGNORECASE)
-            if search_terms
-            else None
-        )
+        search_pattern = _build_keyword_pattern(search_terms)
         for feed in self.feeds:
             matched = 0
             parsed = feedparser.parse(feed.url)
             if parsed.bozo:
                 LOGGER.warning("RSS parse issue for %s: %s", feed.url, parsed.bozo_exception)
             for entry in parsed.entries:
-                summary = getattr(entry, "summary", "")
+                raw_summary = getattr(entry, "summary", "")
+                summary = _clean_html_fragment(raw_summary)
                 title = getattr(entry, "title", "")
-                text_blob = f"{title}\n{summary}"
+                text_blob = " ".join(part for part in (title, summary) if part)
                 if search_pattern and not self.include_all and not search_pattern.search(text_blob):
                     continue
                 matched += 1
@@ -453,7 +684,7 @@ class RSSFeedSource(BaseNewsSource):
                     source_id=getattr(entry, "id", getattr(entry, "link", "")),
                     title=title,
                     url=getattr(entry, "link", ""),
-                    summary=summary or None,
+                    summary=summary or raw_summary or None,
                     published_at=published,
                     locations=extract_locations(text_blob),
                     city_mentions=city_mentions,
@@ -485,6 +716,84 @@ class RSSFeedSource(BaseNewsSource):
         except (TypeError, ValueError):
             LOGGER.debug("Unable to parse RSS date %s", raw, exc_info=True)
             return None
+
+
+class HtmlPageSource(BaseNewsSource):
+    def __init__(
+        self,
+        pages: Sequence[HtmlPageConfig],
+        include_all: bool = False,
+        timeout: int = 15,
+        max_links: int = 50,
+    ) -> None:
+        self.name = "html"
+        self.pages = pages
+        self.include_all = include_all
+        self.timeout = timeout
+        self.max_links = max_links
+        self._headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+            )
+        }
+
+    def fetch(self, search_terms: Sequence[str]) -> List[NewsReport]:
+        reports: List[NewsReport] = []
+        search_pattern = _build_keyword_pattern(search_terms)
+        for page in self.pages:
+            before_count = len(reports)
+            try:
+                resp = requests.get(page.url, headers=self._headers, timeout=self.timeout)
+                resp.raise_for_status()
+            except Exception as exc:  # noqa: BLE001
+                LOGGER.warning("Failed to fetch HTML page %s: %s", page.url, exc)
+                continue
+            soup = BeautifulSoup(resp.text, "html.parser")
+            selectors = list(page.selectors or [])
+            candidates = []
+            if selectors:
+                for selector in selectors:
+                    candidates.extend(soup.select(selector))
+            else:
+                candidates.extend(soup.find_all("a"))
+            seen_links: set[str] = set()
+            for tag in candidates:
+                if len(reports) >= self.max_links:
+                    break
+                href = tag.get("href")
+                if not href:
+                    continue
+                full_url = urljoin(page.url, href)
+                if full_url in seen_links:
+                    continue
+                title = tag.get_text(strip=True)
+                if not title:
+                    continue
+                text_blob = title
+                if search_pattern and not self.include_all and not search_pattern.search(text_blob):
+                    continue
+                seen_links.add(full_url)
+                reports.append(
+                    NewsReport(
+                        source=f"html:{page.name}",
+                        source_id=full_url,
+                        title=title,
+                        url=full_url,
+                        summary=None,
+                        published_at=None,
+                        locations=extract_locations(text_blob),
+                        city_mentions=extract_city_mentions(text_blob),
+                        facility_mentions=extract_facility_mentions(text_blob),
+                        raw={"source_url": page.url},
+                    )
+                )
+            LOGGER.debug(
+                "HTML page %s yielded %s candidate links (post-filter)",
+                page.name,
+                len(reports) - before_count,
+            )
+        return reports
 
 
 class NewsApiSource(BaseNewsSource):
@@ -532,12 +841,14 @@ class NewsApiSource(BaseNewsSource):
         articles = payload.get("articles", [])
         reports: List[NewsReport] = []
         for article in articles:
+            description = _clean_html_fragment(article.get("description"))
+            content = _clean_html_fragment(article.get("content"))
             content_blob = "\n".join(
                 part
                 for part in (
                     article.get("title"),
-                    article.get("description"),
-                    article.get("content"),
+                    description,
+                    content,
                 )
                 if part
             )
@@ -550,12 +861,13 @@ class NewsApiSource(BaseNewsSource):
                     source_id=article.get("url", ""),
                     title=article.get("title", ""),
                     url=article.get("url", ""),
-                    summary=article.get("description"),
+                    summary=description or article.get("description"),
                     published_at=self._parse_date(article.get("publishedAt")),
                     locations=states,
                     city_mentions=cities,
                     facility_mentions=facilities,
                     raw=article,
+                    content=content or article.get("content"),
                 )
             )
         return reports
@@ -663,12 +975,31 @@ class GdeltDocSource(BaseNewsSource):
     def _parse_date(raw: str | None) -> datetime | None:
         if not raw:
             return None
+        raw = raw.strip()
+        # Handle common GDELT shapes plus general ISO-8601 (with/without Z).
+        formats = [
+            "%Y%m%dT%H%M%SZ",  # e.g., 20251126T071500Z
+            "%Y%m%d%H%M%S",  # legacy GDELT, no separators
+            "%Y-%m-%dT%H:%M:%S%z",  # ISO with offset
+            "%Y-%m-%dT%H:%M:%S",  # ISO without offset (assume UTC)
+        ]
+        for fmt in formats:
+            try:
+                parsed = datetime.strptime(raw, fmt)
+                if parsed.tzinfo is None:
+                    parsed = parsed.replace(tzinfo=timezone.utc)
+                return parsed
+            except ValueError:
+                continue
+        # Fallback: fromisoformat handles offsets; normalize 'Z' first.
+        iso_candidate = raw[:-1] + "+00:00" if raw.endswith("Z") else raw
         try:
-            parsed = datetime.strptime(raw, "%Y%m%d%H%M%S")
-            parsed = parsed.replace(tzinfo=timezone.utc)
+            parsed = datetime.fromisoformat(iso_candidate)
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
             return parsed
         except ValueError:
-            LOGGER.debug("Unable to parse GDELT date %s", raw, exc_info=True)
+            LOGGER.debug("Unable to parse date %s", raw, exc_info=True)
             return None
 
     @staticmethod
@@ -692,13 +1023,19 @@ class NewsIngestor:
         fetch_content: bool = False,
         fetch_content_limit: int | None = None,
         geocode_max_queries: int | None = None,
+        resolve_google_news: bool = False,
+        google_news_resolve_limit: int = 0,
     ) -> None:
         self.sources = list(sources)
         self.output_dir = output_dir
         self.search_terms = list(search_terms or DEFAULT_SEARCH_TERMS)
         self.print_headlines = print_headlines
+        raw_keywords = list(relevance_keywords or DEFAULT_RELEVANCE_KEYWORDS)
+        self.case_sensitive_keywords: list[tuple[str, Pattern[str]]] = [
+            (kw, re.compile(rf"\b{re.escape(kw)}\b")) for kw in raw_keywords if kw in CASE_SENSITIVE_KEYWORDS
+        ]
         self.relevance_keywords = [
-            kw.lower() for kw in (relevance_keywords or DEFAULT_RELEVANCE_KEYWORDS)
+            kw.lower() for kw in raw_keywords if kw not in CASE_SENSITIVE_KEYWORDS
         ]
         self.min_keyword_matches = max(1, min_keyword_matches)
         self.disable_filtering = disable_filtering
@@ -715,6 +1052,12 @@ class NewsIngestor:
         self.force_refetch = False
         self.ignore_geocode_failures = False
         self.disable_geocoding = False
+        self.resolve_google_news = resolve_google_news
+        self.google_news_resolve_limit = max(0, google_news_resolve_limit or 0)
+        self._google_news_resolved = 0
+        self._playwright = None
+        self._browser = None
+        self._gn_page = None
         self._facility_norms = [
             (
                 _normalize_text(record.name),
@@ -801,6 +1144,7 @@ class NewsIngestor:
         self._save_story_index(story_index)
         LOGGER.info("Wrote %s reports to %s", len(deduped_reports), output_path)
         self._write_run_log(deduped_reports, metrics)
+        self._close_google_news_browser()
         return output_path
 
     def _apply_relevance_filter(self, reports: list[NewsReport]) -> list[NewsReport]:
@@ -827,15 +1171,21 @@ class NewsIngestor:
         for segment in (report.title, report.summary):
             if segment:
                 text_segments.append(segment)
+        if report.content:
+            text_segments.append(report.content)
         if isinstance(report.raw, dict):
-            for key in ("description", "content", "body", "text"):
+            for key in ("description", "content", "body", "text", "fetched_content"):
                 value = report.raw.get(key)
                 if isinstance(value, str):
                     text_segments.append(value)
-        blob = " ".join(text_segments).lower()
+        blob = " ".join(text_segments).strip()
         if not blob:
             return False
-        hits = [kw for kw in self.relevance_keywords if kw in blob]
+        blob_lower = blob.lower()
+        hits = [kw for kw in self.relevance_keywords if kw in blob_lower]
+        for keyword, pattern in self.case_sensitive_keywords:
+            if pattern.search(blob):
+                hits.append(keyword)
         if len(hits) >= self.min_keyword_matches:
             LOGGER.debug("Report '%s' matched keywords %s", report.title, hits)
             return True
@@ -929,7 +1279,7 @@ class NewsIngestor:
             if not report.url:
                 continue
             LOGGER.info("Fetching full content for [%s] %s", report.source, report.title)
-            content, status, error = self._fetch_article_text(report.url)
+            content, status, error = self._fetch_article_text(report)
             if isinstance(report.raw, dict):
                 report.raw["fetch_status"] = status
                 if error:
@@ -938,6 +1288,7 @@ class NewsIngestor:
                 continue
             fetched += 1
             report.raw["fetched_content"] = content
+            report.content = content
             report.locations = sorted(
                 set(report.locations or []) | set(extract_locations(content) or [])
             )
@@ -949,28 +1300,367 @@ class NewsIngestor:
             )
         LOGGER.info("Fetched full content for %s articles.", fetched)
 
-    def _fetch_article_text(self, url: str, timeout: int = 12) -> tuple[str | None, str, str | None]:
+    @staticmethod
+    def _strip_junk_nodes(soup: BeautifulSoup) -> None:
+        """Remove obvious non-body elements to reduce noise."""
+
+        def _remove_related_block(tag: Any) -> None:
+            """Climb to a containing node marked as related content and remove it."""
+            candidate = None
+            current = tag
+            while current and current.parent and current.parent.name not in {"article", "main", "body"}:
+                parent = current.parent
+                attr_values: list[str] = []
+                for attr in ("id", "class", "role", "aria-label", "data-component", "data-testid"):
+                    raw_value = parent.get(attr)
+                    values = raw_value if isinstance(raw_value, list) else [raw_value]
+                    attr_values.extend(str(value).lower() for value in values if value)
+                attr_blob = " ".join(attr_values)
+                if any(signal in attr_blob for signal in RELATED_ATTR_SIGNALS):
+                    candidate = parent
+                current = parent
+            target = candidate or tag
+            target.decompose()
+
+        removable_tags = [
+            "script",
+            "style",
+            "noscript",
+            "iframe",
+            "svg",
+            "button",
+            "form",
+            "header",
+            "footer",
+            "nav",
+            "aside",
+        ]
+        for tag in soup(removable_tags):
+            tag.decompose()
+        junk_signals = (
+            "advert",
+            "ads-",
+            "ad-",
+            "ad_",
+            "sponsor",
+            "subscription",
+            "paywall",
+            "promo",
+            "breadcrumb",
+            "comment",
+            "newsletter",
+            "cookie",
+            "share",
+            "social",
+            "related",
+            "recommend",
+            "popup",
+        )
+        for tag in soup.find_all(True):
+            if not hasattr(tag, "get") or not getattr(tag, "attrs", None):
+                continue
+            if tag.name in {"article", "main", "p", "h1", "h2", "h3", "h4"}:
+                continue
+            attr_values: list[str] = []
+            for attr in ("id", "class", "role", "aria-label", "data-component", "data-testid"):
+                raw_value = tag.get(attr)
+                values = raw_value if isinstance(raw_value, list) else [raw_value]
+                attr_values.extend(str(value).lower() for value in values if value)
+            attr_blob = " ".join(attr_values)
+            if any(signal in attr_blob for signal in junk_signals):
+                tag.decompose()
+                continue
+            if any(signal in attr_blob for signal in RELATED_ATTR_SIGNALS):
+                tag.decompose()
+
+        candidate_headings = soup.find_all(["h2", "h3", "h4", "p", "span", "strong"])
+        for heading in candidate_headings:
+            text = heading.get_text(" ", strip=True).lower()
+            if not text:
+                continue
+            if any(text.startswith(prefix) for prefix in RELATED_HEADING_PREFIXES):
+                _remove_related_block(heading)
+
+    @staticmethod
+    def _extract_main_text(soup: BeautifulSoup) -> str | None:
+        """Select the main article text by favoring semantic containers and paragraphs."""
+        NewsIngestor._strip_junk_nodes(soup)
+
+        def collect_text(node: Any) -> str:
+            if not node:
+                return ""
+            paragraphs = [
+                p.get_text(" ", strip=True)
+                for p in node.find_all("p")
+                if p.get_text(strip=True)
+            ]
+            if paragraphs:
+                return "\n\n".join(paragraphs)
+            return node.get_text(" ", strip=True)
+
+        candidates: list[tuple[int, str]] = []
+        for selector in ("article", "main"):
+            for node in soup.find_all(selector):
+                text = collect_text(node)
+                candidates.append((len(text), text))
+        if not candidates:
+            for node in soup.find_all("div"):
+                text = collect_text(node)
+                # Skip very short snippets that are likely nav or captions.
+                if len(text) < 200:
+                    continue
+                candidates.append((len(text), text))
+        if not candidates:
+            text = collect_text(soup.body or soup)
+            if text:
+                return re.sub(r"\s+", " ", text).strip()
+            return None
+        _, best_text = max(candidates, key=lambda item: item[0])
+        cleaned = re.sub(r"\s+", " ", best_text).strip()
+        return cleaned or None
+
+    def _fetch_article_text(self, report: NewsReport, timeout: int = 12) -> tuple[str | None, str, str | None]:
+        url = report.url
         netloc = urlparse(url).netloc.lower()
         if any(netloc.endswith(domain) for domain in self.domain_blacklist):
             LOGGER.info("Skipping body fetch for blacklisted domain %s", netloc)
             return None, "skipped_blacklist", None
+        if netloc.endswith("news.google.com") and self.resolve_google_news:
+            if self.google_news_resolve_limit and self._google_news_resolved >= self.google_news_resolve_limit:
+                LOGGER.info("Google News resolve limit (%s) reached; skipping %s", self.google_news_resolve_limit, url)
+                return None, "skipped_google_news_limit", None
+            resolved = self._resolve_google_news_url(url)
+            if resolved:
+                LOGGER.info("Resolved Google News URL to %s", resolved)
+                url = resolved
+                netloc = urlparse(url).netloc.lower()
+                self._google_news_resolved += 1
+            else:
+                LOGGER.info("Failed to resolve Google News URL %s", url)
+                return None, "error_google_news_resolve", None
         try:
             response = requests.get(
                 url,
                 timeout=timeout,
-                headers={"User-Agent": "news-ingestor/1.0 (+https://example.org)"},
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Referer": url,
+                },
+                allow_redirects=True,
             )
             response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            text = self._extract_main_text(soup)
+            if text:
+                text = _strip_related_sections(text)
+                if len(text) < 100:
+                    newsapi_text = self._newsapi_fallback(report)
+                    if newsapi_text:
+                        return newsapi_text, "ok_newsapi_fallback", None
+                return text, "ok", None
+            # As a last resort, try Playwright to render JS-heavy pages.
+            rendered = self._fetch_via_playwright(url, timeout=timeout)
+            if rendered:
+                rendered = _strip_related_sections(rendered)
+                if len(rendered) < 100:
+                    newsapi_text = self._newsapi_fallback(report)
+                    if newsapi_text:
+                        return newsapi_text, "ok_newsapi_fallback", None
+                return rendered, "ok_playwright", None
+            # Fallback to NewsAPI snippet if available.
+            newsapi_text = self._newsapi_fallback(report)
+            if newsapi_text:
+                newsapi_text = _strip_related_sections(newsapi_text)
+                return newsapi_text, "ok_newsapi_fallback", None
+            return None, "empty", None
         except Exception:  # noqa: BLE001
             LOGGER.warning("Failed to fetch article body for %s", url, exc_info=True)
+            rendered = self._fetch_via_playwright(url, timeout=timeout)
+            if rendered:
+                rendered = _strip_related_sections(rendered)
+                return rendered, "ok_playwright", None
+            newsapi_text = self._newsapi_fallback(report)
+            if newsapi_text:
+                newsapi_text = _strip_related_sections(newsapi_text)
+                return newsapi_text, "ok_newsapi_fallback", None
             return None, "error", str(getattr(sys.exc_info()[1], "args", ""))  # type: ignore[arg-type]
-        soup = BeautifulSoup(response.text, "html.parser")
-        for tag in soup(["script", "style", "noscript"]):
-            tag.decompose()
-        text = soup.get_text(separator=" ", strip=True)
-        if not text:
-            return None, "empty", None
-        return text, "ok", None
+
+    def _fetch_via_playwright(self, url: str, timeout: int = 12) -> str | None:
+        """Render a page with Playwright and extract main text."""
+        try:
+            from playwright.sync_api import sync_playwright  # type: ignore
+        except Exception:
+            return None
+        try:
+            if self._playwright is None:
+                self._playwright = sync_playwright().start()
+                self._browser = self._playwright.chromium.launch(headless=True)
+                self._gn_page = self._browser.new_page()
+            page = self._browser.new_page() if self._browser else None
+            if page is None:
+                return None
+            page.goto(url, wait_until="networkidle", timeout=timeout * 1000)
+            try:
+                page.wait_for_selector("article", timeout=4000)
+            except Exception:
+                pass
+            try:
+                article_text = page.inner_text("article")
+                if article_text and len(article_text.split()) > 30:
+                    page.close()
+                    return re.sub(r"\\s+", " ", article_text).strip()
+            except Exception:
+                pass
+            html = page.content()
+            page.close()
+            soup = BeautifulSoup(html, "html.parser")
+            return self._extract_main_text(soup)
+        except Exception:
+            LOGGER.debug("Playwright render failed for %s", url, exc_info=True)
+            return None
+
+    def _newsapi_fallback(self, report: NewsReport) -> str | None:
+        """If Reuters blocks scraping, use NewsAPI snippet as a fallback body."""
+        api_key = os.getenv("NEWSAPI_KEY")
+        if not api_key or not report.title:
+            return None
+        try:
+            params = {
+                "q": report.title,
+                "language": "en",
+                "pageSize": 1,
+                "apiKey": api_key,
+            }
+            resp = requests.get("https://newsapi.org/v2/everything", params=params, timeout=8)
+            resp.raise_for_status()
+            payload = resp.json()
+            articles = payload.get("articles") or []
+            if not articles:
+                return None
+            candidate = articles[0]
+            parts = []
+            for field in ("title", "description", "content"):
+                value = candidate.get(field)
+                if value and isinstance(value, str):
+                    parts.append(value)
+            text = "\n".join(parts).strip()
+            cleaned = _strip_related_sections(text)
+            return cleaned or None
+        except Exception:
+            LOGGER.debug("NewsAPI fallback failed for %s", report.title, exc_info=True)
+            return None
+
+    def _resolve_google_news_url(self, url: str) -> str | None:
+        """Resolve a news.google.com wrapper to its canonical target.
+
+        Strategy: try the batchexecute API (fast, no JS). If that fails, fall back to a
+        headless browser (slower, best-effort)."""
+        # Fast path: replicate the Google News batchexecute call.
+        try:
+            resp = requests.get(
+                url,
+                timeout=10,
+                headers={"User-Agent": "Mozilla/5.0 (compatible; news-ingestor/1.0)"},
+            )
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+            node = soup.select_one("c-wiz[data-p]")
+            data_p = node.get("data-p") if node else None
+            if data_p:
+                try:
+                    payload_obj = json.loads(data_p.replace("%.@.", '["garturlreq",'))
+                    payload = {
+                        "f.req": json.dumps(
+                            [[["Fbv4je", json.dumps(payload_obj[:-6] + payload_obj[-2:]), "null", "generic"]]]
+                        )
+                    }
+                    headers = {
+                        "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+                        "user-agent": "Mozilla/5.0 (compatible; news-ingestor/1.0)",
+                    }
+                    api_resp = requests.post(
+                        "https://news.google.com/_/DotsSplashUi/data/batchexecute",
+                        headers=headers,
+                        data=payload,
+                        timeout=10,
+                    )
+                    api_resp.raise_for_status()
+                    # Strip XSSI prefix and decode nested payload.
+                    cleaned = api_resp.text.replace(")]}'", "")
+                    outer = json.loads(cleaned)
+                    array_string = outer[0][2] if outer and outer[0] else None
+                    resolved = None
+                    if array_string:
+                        parsed = json.loads(array_string)
+                        if isinstance(parsed, list) and len(parsed) > 1 and isinstance(parsed[1], str):
+                            resolved = parsed[1]
+                    if resolved and resolved.startswith("http"):
+                        return resolved
+                except Exception:  # noqa: BLE001
+                    LOGGER.debug("Google News batchexecute resolution failed", exc_info=True)
+        except Exception:  # noqa: BLE001
+            LOGGER.debug("Initial Google News fetch failed", exc_info=True)
+
+        # Fallback: headless browser best-effort.
+        try:
+            from playwright.sync_api import sync_playwright  # type: ignore
+        except Exception:  # noqa: BLE001
+            LOGGER.warning("Playwright is not installed; cannot resolve Google News URL %s", url)
+            return None
+        try:
+            if self._playwright is None:
+                self._playwright = sync_playwright().start()
+                self._browser = self._playwright.chromium.launch(headless=True)
+                self._gn_page = self._browser.new_page()
+            page = self._gn_page
+            if page is None:
+                return None
+            captured: list[str] = []
+
+            def _capture(route_url: str) -> None:
+                if "news.google.com" in route_url or "googleusercontent.com" in route_url:
+                    return
+                if route_url.startswith("http"):
+                    captured.append(route_url)
+
+            page.on("response", lambda resp: _capture(resp.url))
+            page.on("request", lambda req: _capture(req.url))
+            page.goto(url, wait_until="networkidle", timeout=15000)
+            # Also check meta tags for canonical links.
+            canonical = page.eval_on_selector("head link[rel='canonical']", "el => el?.href")  # type: ignore[arg-type]
+            if isinstance(canonical, str) and canonical.startswith("http") and "news.google.com" not in canonical:
+                return canonical
+            if captured:
+                # Prefer non-static assets.
+                for candidate in captured:
+                    if any(
+                        candidate.endswith(ext)
+                        for ext in (".js", ".css", ".png", ".jpg", ".jpeg", ".svg", ".gif")
+                    ):
+                        continue
+                    return candidate
+                return captured[0]
+        except Exception:  # noqa: BLE001
+            LOGGER.debug("Failed to resolve Google News URL via Playwright", exc_info=True)
+            return None
+        return None
+
+    def _close_google_news_browser(self) -> None:
+        try:
+            if self._gn_page:
+                self._gn_page.close()
+            if self._browser:
+                self._browser.close()
+            if self._playwright:
+                self._playwright.stop()
+        except Exception:  # noqa: BLE001
+            LOGGER.debug("Failed to close Playwright browser cleanly", exc_info=True)
+        finally:
+            self._gn_page = None
+            self._browser = None
+            self._playwright = None
 
     def _dedupe_with_index(
         self, reports: list[NewsReport], story_index: dict[str, dict[str, Any]]
@@ -1231,18 +1921,7 @@ def build_default_sources(
     newsapi_page_size: int = 100,
     skip_newsapi: bool = False,
 ) -> List[BaseNewsSource]:
-    rss_feeds = [
-        RSSFeedConfig(
-            name="reuters-us",
-            url="https://feeds.reuters.com/reuters/domesticNews",
-        ),
-        RSSFeedConfig(
-            name="reuters-gnews-fallback",
-            url="https://news.google.com/rss/search?q=site:reuters.com+ICE&hl=en-US&gl=US&ceid=US:en",
-        ),
-        RSSFeedConfig(name="nbc-us", url="https://feeds.nbcnews.com/nbcnews/public/news"),
-        RSSFeedConfig(name="ice-press", url="https://www.ice.gov/rss.xml"),
-    ]
+    rss_feeds = [*AP_RSS_FEEDS, *LOCAL_RSS_FEEDS, *NATIONAL_RSS_FEEDS]
     newsapi_key = os.getenv("NEWSAPI_KEY")
     sources: List[BaseNewsSource] = [
         RSSFeedSource(rss_feeds, include_all=include_all_rss),
@@ -1253,6 +1932,8 @@ def build_default_sources(
             max_days=gdelt_max_days,
         ),
     ]
+    if WEB_PAGE_SOURCES:
+        sources.append(HtmlPageSource(WEB_PAGE_SOURCES, include_all=include_all_rss))
     if not skip_newsapi:
         sources.append(
             NewsApiSource(
@@ -1380,6 +2061,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=None,
         help="Path to the SQLite cache used for geocoding (default: <output-dir>/geocache.sqlite).",
     )
+    parser.add_argument(
+        "--resolve-google-news",
+        action="store_true",
+        help="Use a headless browser to resolve news.google.com wrapper URLs to canonical links.",
+    )
+    parser.add_argument(
+        "--google-news-resolve-limit",
+        type=int,
+        default=0,
+        help="Maximum number of Google News URLs to resolve per run (0 for no limit).",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -1422,6 +2114,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         fetch_content=args.fetch_content,
         fetch_content_limit=args.fetch_content_limit,
         geocode_max_queries=args.geocode_max_queries,
+        resolve_google_news=args.resolve_google_news,
+        google_news_resolve_limit=args.google_news_resolve_limit,
     )
     ingestor.force_refetch = args.force_refetch
     ingestor.ignore_geocode_failures = args.ignore_geocode_failures
