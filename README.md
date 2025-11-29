@@ -15,6 +15,41 @@ News ingestion pipeline for ICE-related activity. It gathers headlines, filters 
 - `scripts/ingest_news.py`: CLI entrypoint (same as `python -m src.services.news_ingestion`).
 - `assets/ice_facilities.csv`: Seeded ICE/HSI facility catalog with lat/lon, used before external geocoding.
 - `scripts/geocode_facilities_google.py`: One-off script to fill missing facility lat/lon via Google Geocoding API using `GOOGLE_ACC_KEY`.
+- `src/services/news_triplets.py`: LLM-powered who/what/where extraction from the latest news dump (writes triplet JSONL + SQLite index).
+- `scripts/extract_triplets.py`: CLI entrypoint for triplet extraction.
+
+## Prerequisites & setup
+1. **System requirements**
+   - Python 3.11+ (Linux/macOS recommended; Windows WSL works).
+   - Git, curl, and build tools for Python dependencies.
+   - CUDA-capable GPU + NVIDIA drivers if you plan to run the Phi-3 extractor locally.
+
+2. **Create a virtual environment**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+3. **Environment variables** (copy `config/.env.example` → `.env` and fill in as needed)
+   ```bash
+   cp config/.env.example .env
+   # edit .env with NEWSAPI_KEY / GOOGLE_ACC_KEY / HF_HOME overrides
+   ```
+   - `NEWSAPI_KEY` (optional) enables NewsAPI fetches.
+   - `GOOGLE_ACC_KEY` (optional) enables Google Geocoding fallback and the facility geocoder script.
+   - Hugging Face cache defaults to `~/.cache/huggingface`; override with `export HF_HOME=/path/to/cache` if desired.
+
+4. **LLM weights**
+   - No model files live in the repo. Running `scripts/extract_triplets.py` or `scripts/phi_test.py` automatically downloads `microsoft/Phi-3-mini-128k-instruct` via Hugging Face and stores it in your HF cache.
+   - Ensure you have enough disk space (tens of GB) and GPU memory (or pass `--load-in-4bit` in `phi_test.py` for lower VRAM usage).
+
+5. **Optional: facility geocoding**
+   ```bash
+   GOOGLE_ACC_KEY=... python scripts/geocode_facilities_google.py
+   ```
+   This backfills missing coordinates in `assets/ice_facilities.csv`.
 
 ## Outputs
 - JSONL snapshots: `datasets/news_ingest/news_reports_<timestamp>.jsonl` (deduped per run).
@@ -44,6 +79,20 @@ Useful flags:
 - `--disable-geocoding`: skip geocoding for quick dry runs.
 - `--geocode-max-queries N`: cap external geocode lookups per run.
 - `--include-all-rss`: pull all RSS entries (no keyword filter) for debugging.
+
+## Triplet extraction (who/what/where)
+Use the latest `news_reports_*.jsonl` dump and geocode each `where` with the shared cache:
+```
+python scripts/extract_triplets.py \
+  --input-dir datasets/news_ingest \
+  --output-dir datasets/news_ingest \
+  --model-id microsoft/Phi-3-mini-128k-instruct \
+  --max-new-tokens 160 \
+  --repetition-penalty 1.05
+```
+Outputs:
+- JSONL: `datasets/news_ingest/triplets_<timestamp>.jsonl`
+- SQLite index: `datasets/news_ingest/triplets_index.sqlite` (one row per triplet, keyed by story_id+who+what+where)
 
 ## Environment variables
 - `NEWSAPI_KEY`: optional; NewsAPI free tier only covers ~30 days.
