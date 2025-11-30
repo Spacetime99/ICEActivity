@@ -109,6 +109,8 @@ class TripletExtractor:
             "- When (and only when) the article clearly states both the actor and the affected person, output two triplets: "
             "one from the affected person's perspective (\"<victim> was arrested by ICE\"), and one from the actor's perspective "
             "(\"ICE agents arrested <victim>\"). If the actor is not explicitly stated, omit the actor-side triplet.\n"
+            "- When the subject of a triplet is the victim (e.g., they were shot, arrested, detained), phrase the action in passive voice "
+            "such as \"was shot\" or \"was arrested\" to avoid implying they were the aggressor.\n"
             "- Output JSON only; no commentary.\n\n"
             f"{location_clause}"
             f"Text:\n{article_text}\n\nJSON:"
