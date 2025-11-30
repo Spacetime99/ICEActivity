@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, List, Optional, Sequence
+from uuid import uuid4
 
 from bs4 import BeautifulSoup
 import torch
@@ -44,6 +45,12 @@ class Triplet:
     title: str
     published_at: Optional[str]
     extracted_at: str
+    run_id: str
+    geocode_status: Optional[str] = None
+
+
+VALID_LAT_RANGE = NominatimGeocoder.US_LAT_RANGE
+VALID_LON_RANGE = NominatimGeocoder.US_LON_RANGE
 
 
 class TripletExtractor:
@@ -146,11 +153,15 @@ class TripletIndex:
                 latitude REAL,
                 longitude REAL,
                 geocode_query TEXT,
+                geocode_status TEXT,
                 extracted_at TEXT,
+                run_id TEXT,
                 PRIMARY KEY (story_id, who, what, where_text)
             )
             """
         )
+        self._ensure_column("triplets", "geocode_status", "TEXT")
+        self._ensure_column("triplets", "run_id", "TEXT")
         self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_triplets_published ON triplets(published_at)"
         )
@@ -173,7 +184,25 @@ class TripletIndex:
             FROM triplets
             """
         )
+        self.conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS runs (
+                id TEXT PRIMARY KEY,
+                started_at TEXT,
+                finished_at TEXT,
+                articles_processed INTEGER,
+                triplets_extracted INTEGER
+            )
+            """
+        )
         self.conn.commit()
+
+    def _ensure_column(self, table: str, column: str, ddl: str) -> None:
+        cursor = self.conn.execute(f"PRAGMA table_info({table})")
+        existing = {row[1] for row in cursor.fetchall()}
+        if column not in existing:
+            self.conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
+            self.conn.commit()
 
     def upsert(self, records: Iterable[Triplet]) -> None:
         with self.conn:
@@ -182,9 +211,9 @@ class TripletIndex:
                 INSERT OR REPLACE INTO triplets (
                     story_id, source, url, title, published_at,
                     who, what, where_text, latitude, longitude,
-                    geocode_query, extracted_at
+                    geocode_query, geocode_status, extracted_at, run_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     (
@@ -199,10 +228,37 @@ class TripletIndex:
                         rec.latitude,
                         rec.longitude,
                         rec.geocode_query,
+                        rec.geocode_status,
                         rec.extracted_at,
+                        rec.run_id,
                     )
                     for rec in records
                 ],
+            )
+
+    def record_run(
+        self,
+        run_id: str,
+        started_at: datetime,
+        finished_at: datetime,
+        articles_processed: int,
+        triplets_extracted: int,
+    ) -> None:
+        with self.conn:
+            self.conn.execute(
+                """
+                INSERT OR REPLACE INTO runs (
+                    id, started_at, finished_at, articles_processed, triplets_extracted
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    run_id,
+                    started_at.isoformat(),
+                    finished_at.isoformat(),
+                    articles_processed,
+                    triplets_extracted,
+                ),
             )
 
 
@@ -260,24 +316,35 @@ def combine_article_text(article: dict) -> str:
     return "\n\n".join(parts).strip()
 
 
+def _coordinates_within_bounds(lat: Optional[float], lon: Optional[float]) -> bool:
+    if lat is None or lon is None:
+        return False
+    return VALID_LAT_RANGE[0] <= lat <= VALID_LAT_RANGE[1] and VALID_LON_RANGE[0] <= lon <= VALID_LON_RANGE[1]
+
+
 def geocode_where(
     where_value: Optional[str],
     geocoder: NominatimGeocoder,
-) -> tuple[Optional[float], Optional[float], Optional[str]]:
+) -> tuple[Optional[float], Optional[float], Optional[str], str]:
     if not where_value:
-        return None, None, None
+        return None, None, None, "missing_where"
     result: Optional[GeocodeResult] = geocoder.lookup(where_value)
     if not result:
-        return None, None, where_value
-    return result.latitude, result.longitude, result.query
+        return None, None, where_value, "failed"
+    lat = result.latitude
+    lon = result.longitude
+    if not _coordinates_within_bounds(lat, lon):
+        return None, None, result.query, "out_of_bounds"
+    return lat, lon, result.query, result.source or "external"
 
 
 def geocode_triplets(records: list[Triplet], geocoder: NominatimGeocoder) -> None:
     for record in records:
-        lat, lon, geocode_query = geocode_where(record.where_text, geocoder)
+        lat, lon, geocode_query, status = geocode_where(record.where_text, geocoder)
         record.latitude = lat
         record.longitude = lon
         record.geocode_query = geocode_query
+        record.geocode_status = status
 
 
 def extract_triplets_from_dump(
@@ -287,6 +354,8 @@ def extract_triplets_from_dump(
     extractor: TripletExtractor,
     limit: Optional[int] = None,
 ) -> Path:
+    run_id = uuid4().hex
+    run_started = datetime.now(timezone.utc)
     articles = read_articles(dump_path)
     if limit:
         articles = articles[:limit]
@@ -300,6 +369,7 @@ def extract_triplets_from_dump(
     extracted_path.parent.mkdir(parents=True, exist_ok=True)
     index = TripletIndex(output_dir / "triplets_index.sqlite")
     extracted_records: list[Triplet] = []
+    articles_processed = 0
     for article in articles:
         story_key = article.get("source_id") or article.get("url")
         if story_key:
@@ -310,6 +380,7 @@ def extract_triplets_from_dump(
         article_text = combine_article_text(article)
         if not article_text:
             continue
+        articles_processed += 1
         model_triplets = extractor.extract(article_text)
         story_id = article.get("source_id") or article.get("url") or "unknown"
         source = article.get("source") or "unknown"
@@ -339,6 +410,7 @@ def extract_triplets_from_dump(
                 title=title,
                 published_at=published_at,
                 extracted_at=extracted_at,
+                run_id=run_id,
             )
             extracted_records.append(record)
 
@@ -360,7 +432,9 @@ def extract_triplets_from_dump(
                             "latitude": record.latitude,
                             "longitude": record.longitude,
                             "geocode_query": record.geocode_query,
+                            "geocode_status": record.geocode_status,
                             "extracted_at": record.extracted_at,
+                            "run_id": record.run_id,
                         },
                         ensure_ascii=False,
                     )
@@ -369,6 +443,14 @@ def extract_triplets_from_dump(
         index.upsert(extracted_records)
     else:
         extracted_path.touch()
+    run_finished = datetime.now(timezone.utc)
+    index.record_run(
+        run_id=run_id,
+        started_at=run_started,
+        finished_at=run_finished,
+        articles_processed=articles_processed,
+        triplets_extracted=len(extracted_records),
+    )
     return extracted_path
 
 

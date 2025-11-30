@@ -24,6 +24,7 @@ class GeocodeResult:
     latitude: float
     longitude: float
     raw: dict[str, str]
+    source: str = "unknown"
 
 
 class SQLiteCache:
@@ -129,7 +130,7 @@ class NominatimGeocoder:
             lat, lon, raw, fetched_at = cached
             if lat is not None and lon is not None:
                 self.stats["cache_hits"] += 1
-                return GeocodeResult(query=query, latitude=lat, longitude=lon, raw=raw)
+                return GeocodeResult(query=query, latitude=lat, longitude=lon, raw=raw, source="cache")
             if fetched_at and not self.ignore_failures:
                 ts = None
                 try:
@@ -158,6 +159,7 @@ class NominatimGeocoder:
             latitude=float(payload["lat"]),
             longitude=float(payload["lon"]),
             raw=payload,
+            source=source or "nominatim",
         )
         self.cache.set(query, result.latitude, result.longitude, payload)
         if source == "nominatim":
