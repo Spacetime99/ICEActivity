@@ -1,0 +1,62 @@
+Triplet Mapping Roadmap
+=======================
+
+Pipeline Summary
+----------------
+1. Ingest (`scripts/ingest_news.py` → `src/services/news_ingestion.py`)
+   - Sources: curated RSS feeds, HTML landing pages, NewsAPI (optional), GDELT fallback.
+   - Filtering: RSS/HTML search tokens with word boundaries; NewsAPI/GDELT filter via `_apply_relevance_filter` (title/summary/content and fetched body).
+   - Content fetch: optional (requests + Playwright) with `_strip_related_sections` to drop "Related" junk.
+   - Geocoding: facility catalog → cache → Nominatim → Google, with TTL for failures and query caps.
+   - Outputs: deduped JSONL (`news_reports_<ts>.jsonl`), run log CSV, story index JSON, SQLite `news_index.sqlite`, geocode cache.
+
+2. Triplet Extraction (`scripts/extract_triplets.py` → `src/services/news_triplets.py`)
+   - Model: `microsoft/Phi-3-mini-128k-instruct` via `transformers` (GPU/4-bit friendly).
+   - Process: prompt with article text, parse JSON array of `{who, what, where}`, geocode `where` via shared geocoder, write JSONL (`triplets_<ts>.jsonl`) + SQLite (`triplets_index.sqlite`).
+   - Triplet schema: `story_id`, `source`, `url`, `title`, `published_at`, `who`, `what`, `where_text`, `latitude`, `longitude`, `geocode_query`, `extracted_at`.
+
+Current Data Snapshot
+---------------------
+- `datasets/news_ingest/news_reports_20251129T153221Z.jsonl`: 117 articles with summaries, fetched bodies, and lat/lon.
+- `datasets/news_ingest/triplets_index.sqlite`: 77 triplets (indexed via `triplets_fast` view).
+
+Map Requirements
+----------------
+- Need cumulative dataset (SQLite) rather than per-run JSONL.
+- Essential fields: `latitude`, `longitude`, `title`, `published_at`, `source`, `url`, `who`, `what`, `where_text`.
+- Each triplet point corresponds to an article context; duplicates (multiple who/what per story) appear as separate dots at the same lat/lon.
+
+Design Outline for Map Application
+----------------------------------
+1. **ETL / API**
+   - Export `triplets_index.sqlite` to GeoJSON periodically (`triplets.geojson`) or expose via API (`/triplets?from=...&to=...`).
+   - Include metadata for filtering (date range, source, keyword).
+   - Optionally enrich with article snippet from `news_reports`.
+
+2. **Frontend**
+   - Stack: React + Mapbox GL (or Leaflet). Use vector basemap of US, support zoom & pan.
+   - Load GeoJSON as a data source; enable clustering at low zoom.
+   - Popups show headline, published date, `who/what`, `where_text`, and “Read more” link.
+   - Filters: date picker, source list, keyword search on `who`/`what`.
+   - Timeline slider to animate new incidents over time.
+
+3. **Interactions**
+   - Clicking a cluster zooms in; clicking a dot opens a detail card.
+   - Provide summary stats (total incidents, top sources) alongside map.
+   - Allow toggling layers (e.g., heatmap vs. dots).
+
+4. **Backend Ops**
+   - Scheduled job: run ingest with `--fetch-content` + `scripts/extract_triplets.py` nightly.
+   - Monitor geocode success/failure; alert on anomalies.
+   - Host SQLite on server or convert to PostGIS/Cloud DB for scaling.
+
+Next Steps for AI / Dev Team
+----------------------------
+- Build exporter to convert `triplets_index.sqlite` → GeoJSON with required fields.
+- Implement REST endpoint (if dynamic) or static hosting of GeoJSON.
+- Prototype map UI with clustering, popups, filters.
+- Integrate timeline controls and article detail panel.
+- Add CI task to run ingestion + extraction + GeoJSON export.
+- Document deployment (API keys, env vars, cron schedule).
+
+This file summarizes the full pipeline and the requirements for the map overlay, providing enough detail for an AI or engineering team to architect the visualization layer.
