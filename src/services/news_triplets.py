@@ -76,7 +76,17 @@ class TripletExtractor:
         self.max_new_tokens = max_new_tokens
         self.stop_text = stop_text
 
-    def build_prompt(self, article_text: str) -> str:
+    def build_prompt(self, article_text: str, location_hints: Sequence[str] | None = None) -> str:
+        location_clause = ""
+        if location_hints:
+            unique_hints = sorted({hint.strip() for hint in location_hints if hint and hint.strip()})
+            if unique_hints:
+                hints_blob = "; ".join(unique_hints)
+                location_clause = (
+                    "\nKnown valid locations from the article metadata (use these exact names "
+                    "whenever possible, and do not invent new places):\n"
+                    f"{hints_blob}\n"
+                )
         return (
             "Extract concise triplets from the news text. "
             "Return a JSON array of objects: "
@@ -95,11 +105,12 @@ class TripletExtractor:
             "- Keep 'what' short and verb-focused "
             "(e.g., 'is detained by immigration authorities').\n"
             "- Output JSON only; no commentary.\n\n"
+            f"{location_clause}"
             f"Text:\n{article_text}\n\nJSON:"
         )
 
-    def extract(self, article_text: str) -> list[dict[str, str]]:
-        prompt = self.build_prompt(article_text)
+    def extract(self, article_text: str, location_hints: Sequence[str] | None = None) -> list[dict[str, str]]:
+        prompt = self.build_prompt(article_text, location_hints=location_hints)
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
         outputs = self.model.generate(
             **inputs,
@@ -381,7 +392,16 @@ def extract_triplets_from_dump(
         if not article_text:
             continue
         articles_processed += 1
-        model_triplets = extractor.extract(article_text)
+        location_hints: list[str] = []
+        for key in ("city_mentions", "facility_mentions", "locations"):
+            values = article.get(key)
+            if isinstance(values, list):
+                location_hints.extend(str(value) for value in values if value)
+        for key in ("geocode_query", "where_text"):
+            value = article.get(key)
+            if isinstance(value, str):
+                location_hints.append(value)
+        model_triplets = extractor.extract(article_text, location_hints=location_hints)
         story_id = article.get("source_id") or article.get("url") or "unknown"
         source = article.get("source") or "unknown"
         url = article.get("url") or ""
