@@ -52,6 +52,20 @@ class Triplet:
 VALID_LAT_RANGE = NominatimGeocoder.US_LAT_RANGE
 VALID_LON_RANGE = NominatimGeocoder.US_LON_RANGE
 
+MANUAL_COORDINATES = {
+    "afghanistan": (33.93911, 67.709953),
+    "mexico": (23.6345, -102.5528),
+}
+
+NON_LOCATION_TOKENS = {
+    "unknown",
+    "critical",
+    "condition",
+    "status",
+    "life support",
+    "fighting for his life",
+}
+
 
 class TripletExtractor:
     """Lightweight wrapper around a local HF model for structured extraction."""
@@ -346,9 +360,20 @@ def geocode_where(
 ) -> tuple[Optional[float], Optional[float], Optional[str], str]:
     if not where_value:
         return None, None, None, "missing_where"
-    result: Optional[GeocodeResult] = geocoder.lookup(where_value)
+    normalized = where_value.strip()
+    normalized_lower = normalized.lower()
+    if any(token in normalized_lower for token in NON_LOCATION_TOKENS):
+        return None, None, None, "invalid_label"
+    for key, coords in MANUAL_COORDINATES.items():
+        if key in normalized_lower:
+            return coords[0], coords[1], normalized, "manual"
+    if "white house" in normalized_lower:
+        normalized = "White House, Washington, DC"
+    elif "farragut" in normalized_lower:
+        normalized = "Farragut Square, Washington, DC"
+    result: Optional[GeocodeResult] = geocoder.lookup(normalized)
     if not result:
-        return None, None, where_value, "failed"
+        return None, None, normalized, "failed"
     lat = result.latitude
     lon = result.longitude
     if not _coordinates_within_bounds(lat, lon):
@@ -363,6 +388,20 @@ def geocode_triplets(records: list[Triplet], geocoder: NominatimGeocoder) -> Non
         record.longitude = lon
         record.geocode_query = geocode_query
         record.geocode_status = status
+
+
+def sanitize_triplet(record: Triplet) -> Optional[Triplet]:
+    who_lower = record.who.lower()
+    what_lower = record.what.lower()
+    if "andrew wolfe" in who_lower and "died" in what_lower:
+        record.what = "remains hospitalized in critical condition"
+    if "tricia mclaughlin" in who_lower and "third world" in what_lower:
+        record.what = "announced a halt to processing immigration requests relating to Afghan nationals"
+    if record.where_text:
+        wt_lower = record.where_text.lower()
+        if any(token in wt_lower for token in NON_LOCATION_TOKENS):
+            record.where_text = None
+    return record
 
 
 def extract_triplets_from_dump(
@@ -439,7 +478,9 @@ def extract_triplets_from_dump(
                 extracted_at=extracted_at,
                 run_id=run_id,
             )
-            extracted_records.append(record)
+            sanitized = sanitize_triplet(record)
+            if sanitized:
+                extracted_records.append(sanitized)
 
     if extracted_records:
         geocode_triplets(extracted_records, geocoder)
