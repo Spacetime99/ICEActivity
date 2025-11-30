@@ -17,6 +17,9 @@ News ingestion pipeline for ICE-related activity. It gathers headlines, filters 
 - `scripts/geocode_facilities_google.py`: One-off script to fill missing facility lat/lon via Google Geocoding API using `GOOGLE_ACC_KEY`.
 - `src/services/news_triplets.py`: LLM-powered who/what/where extraction from the latest news dump (writes triplet JSONL + SQLite index).
 - `scripts/extract_triplets.py`: CLI entrypoint for triplet extraction.
+- `scripts/phi_test.py`: Lightweight developer harness to sanity-check Phi-3 prompts (no shared state).
+
+The pattern is: every runnable CLI under `scripts/` just adds the repo root to `sys.path` and calls into the corresponding module in `src/services/`. That keeps business logic reusable while keeping the developer workflows simple (e.g., `python scripts/ingest_news.py` vs. `python -m src.services.news_ingestion`).
 
 ## Prerequisites & setup
 1. **System requirements**
