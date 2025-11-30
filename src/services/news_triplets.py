@@ -104,6 +104,8 @@ class TripletExtractor:
             "- Use null only if no location is given. Never output 'unknown'.\n"
             "- Keep 'what' short and verb-focused "
             "(e.g., 'is detained by immigration authorities').\n"
+            "- Only describe who performed an action when the article explicitly states it "
+            "(e.g., \"<who> shot <person>\"). Do not guess or infer shooters or other actors.\n"
             "- Output JSON only; no commentary.\n\n"
             f"{location_clause}"
             f"Text:\n{article_text}\n\nJSON:"
