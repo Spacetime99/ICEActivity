@@ -93,6 +93,9 @@ class NominatimGeocoder:
     """Fetch coordinates using the public Nominatim endpoint and cache locally."""
 
     endpoint = "https://nominatim.openstreetmap.org/search"
+    # Inclusive latitude/longitude bounds that cover the U.S. (including AK/HI/territories).
+    US_LAT_RANGE = (18.0, 72.0)
+    US_LON_RANGE = (-179.0, -60.0)
 
     def __init__(
         self,
@@ -163,7 +166,7 @@ class NominatimGeocoder:
             self.stats["google_hits"] += 1
         return result
 
-    def _fetch(self, query: str) -> Optional[dict[str, str]]:
+    def _fetch(self, query: str) -> Optional[dict[str, object]]:
         elapsed = time.monotonic() - self._last_request
         if elapsed < self.min_interval:
             time.sleep(self.min_interval - elapsed)
@@ -171,6 +174,8 @@ class NominatimGeocoder:
             "q": query,
             "format": "json",
             "limit": 1,
+            "addressdetails": 1,
+            "countrycodes": "us",
         }
         headers = {
             "User-Agent": self.user_agent,
@@ -181,12 +186,15 @@ class NominatimGeocoder:
             response.raise_for_status()
             results = response.json()
             if results:
-                return results[0]
+                candidate = results[0]
+                if self._is_us_payload(candidate):
+                    return candidate
+                LOGGER.debug("Discarding non-US geocode candidate for query '%s': %s", query, candidate)
         except requests.RequestException:
             LOGGER.exception("Geocoding request failed for query '%s'", query)
         return None
 
-    def _fetch_google(self, query: str) -> Optional[dict[str, str]]:
+    def _fetch_google(self, query: str) -> Optional[dict[str, object]]:
         if not self.google_api_key:
             return None
         url = "https://maps.googleapis.com/maps/api/geocode/json"
@@ -200,8 +208,38 @@ class NominatimGeocoder:
             payload = response.json()
             if payload.get("status") != "OK" or not payload.get("results"):
                 return None
-            location = payload["results"][0]["geometry"]["location"]
+            result = payload["results"][0]
+            location = result["geometry"]["location"]
+            if not self._is_us_coordinate(location.get("lat"), location.get("lng")):
+                return None
+            if not self._is_us_google_result(result):
+                return None
             return {"lat": location.get("lat"), "lon": location.get("lng")}
         except requests.RequestException:
             LOGGER.exception("Google geocoding failed for query '%s'", query)
         return None
+
+    @classmethod
+    def _is_us_coordinate(cls, lat: float | str | None, lon: float | str | None) -> bool:
+        try:
+            lat_f = float(lat)  # type: ignore[arg-type]
+            lon_f = float(lon)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return False
+        return cls.US_LAT_RANGE[0] <= lat_f <= cls.US_LAT_RANGE[1] and cls.US_LON_RANGE[0] <= lon_f <= cls.US_LON_RANGE[1]
+
+    @classmethod
+    def _is_us_payload(cls, payload: dict[str, object]) -> bool:
+        address = payload.get("address") if isinstance(payload, dict) else None
+        country_code = address.get("country_code") if isinstance(address, dict) else None
+        if country_code and country_code.lower() != "us":
+            return False
+        return cls._is_us_coordinate(payload.get("lat"), payload.get("lon"))
+
+    @classmethod
+    def _is_us_google_result(cls, result: dict[str, object]) -> bool:
+        components = result.get("address_components", [])
+        country = next((c for c in components if "country" in c.get("types", [])), None)
+        if country and country.get("short_name") != "US":
+            return False
+        return True
