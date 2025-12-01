@@ -1419,6 +1419,43 @@ class NewsIngestor:
         cleaned = re.sub(r"\s+", " ", best_text).strip()
         return cleaned or None
 
+    def _extract_published_at(
+        self,
+        soup_or_html: BeautifulSoup | str,
+        url: str | None = None,
+        parsed: bool = False,
+    ) -> datetime | None:
+        if isinstance(soup_or_html, str) and parsed:
+            soup = BeautifulSoup(soup_or_html, "html.parser")
+        elif isinstance(soup_or_html, BeautifulSoup):
+            soup = soup_or_html
+        else:
+            return None
+        selectors = [
+            ("meta", {"property": "article:published_time"}),
+            ("meta", {"name": "article:published_time"}),
+            ("time", {}),
+        ]
+        for name, attrs in selectors:
+            node = soup.find(name, attrs=attrs)
+            if not node:
+                continue
+            content = None
+            if name == "meta":
+                content = node.get("content")
+            elif name == "time":
+                content = node.get("datetime") or node.get_text(strip=True)
+            if not content:
+                continue
+            try:
+                parsed_dt = parser.parse(content)
+                if parsed_dt.tzinfo is None:
+                    parsed_dt = parsed_dt.replace(tzinfo=timezone.utc)
+                return parsed_dt
+            except Exception:
+                continue
+        return None
+
     def _fetch_article_text(self, report: NewsReport, timeout: int = 12) -> tuple[str | None, str, str | None]:
         url = report.url
         netloc = urlparse(url).netloc.lower()
@@ -1452,6 +1489,9 @@ class NewsIngestor:
             )
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
+            published_at = self._extract_published_at(soup)
+            if published_at and not report.published_at:
+                report.published_at = published_at.isoformat()
             text = self._extract_main_text(soup)
             if text:
                 text = _strip_related_sections(text)
@@ -1464,6 +1504,9 @@ class NewsIngestor:
             rendered = self._fetch_via_playwright(url, timeout=timeout)
             if rendered:
                 rendered = _strip_related_sections(rendered)
+                published_at = self._extract_published_at(rendered, parsed=True)
+                if published_at and not report.published_at:
+                    report.published_at = published_at.isoformat()
                 if len(rendered) < 100:
                     newsapi_text = self._newsapi_fallback(report)
                     if newsapi_text:
@@ -1480,6 +1523,9 @@ class NewsIngestor:
             rendered = self._fetch_via_playwright(url, timeout=timeout)
             if rendered:
                 rendered = _strip_related_sections(rendered)
+                published_at = self._extract_published_at(rendered, parsed=True)
+                if published_at and not report.published_at:
+                    report.published_at = published_at.isoformat()
                 return rendered, "ok_playwright", None
             newsapi_text = self._newsapi_fallback(report)
             if newsapi_text:
