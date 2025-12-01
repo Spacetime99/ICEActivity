@@ -66,6 +66,17 @@ NON_LOCATION_TOKENS = {
     "fighting for his life",
 }
 
+INVALID_LOCATION_PHRASES = {
+    "operation allies welcome",
+    "operation lone star",
+}
+
+LOCATION_PREFIX_PATTERN = re.compile(
+    r"^(?:(?:and|the|this|that|these|those|family|families|community|group|people|residents)\s+)?"
+    r"(?:in|at|near|around|outside|inside|under|during|while|amid|through|along|within|by|after|before)\s+",
+    re.IGNORECASE,
+)
+
 
 class TripletExtractor:
     """Lightweight wrapper around a local HF model for structured extraction."""
@@ -115,6 +126,9 @@ class TripletExtractor:
             "- Use the smallest explicit location stated in the text for 'where' "
             "(facility > street > city > region). If a city like 'El Centro' is present, "
             "do not return null even if the venue is unknown.\n"
+            "- For 'where', return only the actual place name (e.g., 'Farragut Square, Washington, DC'). "
+            "Strip any surrounding prepositions ('in', 'at', 'near', 'under') and never output policy names, "
+            "operations, programs, timelines, or phrases such as 'under Operation Allies Welcome'.\n"
             "- Use null only if no location is given. Never output 'unknown'.\n"
             "- Keep 'what' short and verb-focused "
             "(e.g., 'is detained by immigration authorities').\n"
@@ -348,6 +362,19 @@ def combine_article_text(article: dict) -> str:
     return "\n\n".join(parts).strip()
 
 
+def _normalize_location_label(value: str | None) -> str:
+    if not value:
+        return ""
+    cleaned = value.strip()
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    previous = None
+    current = cleaned
+    while previous != current:
+        previous = current
+        current = LOCATION_PREFIX_PATTERN.sub("", current).strip(" ,.;:-")
+    return current
+
+
 def _coordinates_within_bounds(lat: Optional[float], lon: Optional[float]) -> bool:
     if lat is None or lon is None:
         return False
@@ -391,16 +418,32 @@ def geocode_triplets(records: list[Triplet], geocoder: NominatimGeocoder) -> Non
 
 
 def sanitize_triplet(record: Triplet) -> Optional[Triplet]:
+    def _drop(reason: str) -> Optional[Triplet]:
+        LOGGER.info(
+            "Skipping triplet for story_id=%s who=%s reason=%s",
+            record.story_id,
+            record.who or "<unknown>",
+            reason,
+        )
+        return None
+
     who_lower = record.who.lower()
     what_lower = record.what.lower()
     if "andrew wolfe" in who_lower and "died" in what_lower:
         record.what = "remains hospitalized in critical condition"
     if "tricia mclaughlin" in who_lower and "third world" in what_lower:
         record.what = "announced a halt to processing immigration requests relating to Afghan nationals"
-    if record.where_text:
-        wt_lower = record.where_text.lower()
-        if any(token in wt_lower for token in NON_LOCATION_TOKENS):
-            record.where_text = None
+    if not record.where_text:
+        return _drop("missing location in model output")
+    normalized_where = _normalize_location_label(record.where_text)
+    if not normalized_where:
+        return _drop(f"location label empty after normalization ('{record.where_text}')")
+    wt_lower = normalized_where.lower()
+    if any(token in wt_lower for token in NON_LOCATION_TOKENS):
+        return _drop(f"location label flagged as non-place ('{normalized_where}')")
+    if any(phrase in wt_lower for phrase in INVALID_LOCATION_PHRASES):
+        return _drop(f"location label contains policy/program phrase ('{normalized_where}')")
+    record.where_text = normalized_where
     return record
 
 
@@ -428,7 +471,7 @@ def extract_triplets_from_dump(
     extracted_records: list[Triplet] = []
     articles_processed = 0
     for article in articles:
-        story_key = article.get("source_id") or article.get("url")
+        story_key = article.get("url") or article.get("source_id")
         if story_key:
             if story_key in seen_story_keys:
                 LOGGER.debug("Skipping duplicate article with story_id/url=%s", story_key)
@@ -448,7 +491,7 @@ def extract_triplets_from_dump(
             if isinstance(value, str):
                 location_hints.append(value)
         model_triplets = extractor.extract(article_text, location_hints=location_hints)
-        story_id = article.get("source_id") or article.get("url") or "unknown"
+        story_id = article.get("url") or article.get("source_id") or "unknown"
         source = article.get("source") or "unknown"
         url = article.get("url") or ""
         title = article.get("title") or ""
