@@ -14,6 +14,8 @@ import { STATIC_LOCATIONS } from "./staticLocations";
 import { FIELD_OFFICES } from "./fieldOffices";
 import { DETENTION_FACILITIES } from "./detentionFacilities";
 import type { DetentionFacility } from "./detentionFacilities";
+import { RESOURCE_SECTIONS } from "./resources";
+import type { FieldOffice } from "./fieldOffices";
 
 type Triplet = {
   story_id: string;
@@ -36,6 +38,7 @@ type TripletGroup = {
 };
 
 type TimeRangeValue = number | "all";
+type ViewMode = "map" | "list" | "resources";
 
 // Keep one hour under the API's 90-day upper bound to avoid validation errors on
 // deployments that still enforce a strict "< 90 days" check.
@@ -167,7 +170,13 @@ const TripletsMap = () => {
   const [showFacilities, setShowFacilities] = useState(true);
   const [showChildCamps, setShowChildCamps] = useState(true);
   const [showFieldOffices, setShowFieldOffices] = useState(true);
-  const [showDetentionFacilities, setShowDetentionFacilities] = useState(true);
+  const [showDetentionFacilities, setShowDetentionFacilities] = useState(false);
+  const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [viewMode, setViewMode] = useState<ViewMode>("map");
+  const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
+  const [selectedFieldOffice, setSelectedFieldOffice] = useState<FieldOffice | null>(null);
+  const [selectedDetentionFacility, setSelectedDetentionFacility] =
+    useState<DetentionFacility | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -245,7 +254,41 @@ const TripletsMap = () => {
     return () => controller.abort();
   }, [sinceHours]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const updateViewport = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setViewport("mobile");
+      } else if (width < 1024) {
+        setViewport("tablet");
+      } else {
+        setViewport("desktop");
+      }
+    };
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
+
   const groups = useMemo(() => groupTriplets(triplets), [triplets]);
+  const selectedGroup = useMemo(() => {
+    if (!selectedGroupKey) {
+      return null;
+    }
+    return groups.find((group) => group.key === selectedGroupKey) ?? null;
+  }, [groups, selectedGroupKey]);
+  const sortedTriplets = useMemo(
+    () =>
+      triplets
+        .slice()
+        .sort(
+          (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+        ),
+    [triplets],
+  );
   const totalEvents = triplets.length + generalTriplets.length;
   const activeRangeLabel =
     TIME_RANGES.find((range) => range.value === sinceHours)?.label ?? "custom";
@@ -299,8 +342,236 @@ const TripletsMap = () => {
     [],
   );
 
+  const isMobile = viewport === "mobile";
+  const isTablet = viewport === "tablet";
+  const selectedItems = useMemo(() => {
+    if (!selectedGroup) {
+      return [] as Triplet[];
+    }
+    return selectedGroup.items
+      .slice()
+      .sort(
+        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+      );
+  }, [selectedGroup]);
+  const selectedLocationLabel = selectedItems[0]?.where_text
+    ? selectedItems[0]?.where_text
+    : selectedGroup
+      ? `${selectedGroup.lat.toFixed(2)}, ${selectedGroup.lon.toFixed(2)}`
+      : "";
+  const clearSelection = () => {
+    setSelectedGroupKey(null);
+    setSelectedFieldOffice(null);
+    setSelectedDetentionFacility(null);
+  };
+
+  useEffect(() => {
+    if (!isMobile || viewMode !== "map") {
+      setSelectedGroupKey(null);
+      setSelectedFieldOffice(null);
+      setSelectedDetentionFacility(null);
+    }
+  }, [isMobile, viewMode]);
+
+  useEffect(() => {
+    if (selectedGroupKey && !selectedGroup) {
+      setSelectedGroupKey(null);
+    }
+  }, [selectedGroupKey, selectedGroup]);
+  const brandCard = (
+    <div className="brand-card">
+      <div className="brand-mark">ICE</div>
+      <div>
+        <h2>Incidents Map</h2>
+        <p>Interactive overview of ICE-related events.</p>
+      </div>
+    </div>
+  );
+  const legendCard = (
+    <div className="legend-section">
+      <h3>Recency</h3>
+      <ul>
+        {LEGEND.map((entry) => (
+          <li key={entry.label}>
+            <span className="legend-dot" style={{ backgroundColor: entry.color }} />
+            {entry.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+  const layerControls = (
+    <div className="info-card layer-card">
+      <p>
+        Zoom + drag to explore. Click a marker to see who/what/where and open the source
+        article.
+      </p>
+      <div className="layer-toggle">
+        <span className="layer-icon facility-marker">▲</span>
+        <label>
+          <input
+            type="checkbox"
+            checked={showFacilities}
+            onChange={() => setShowFacilities((prev) => !prev)}
+          />{" "}
+          ICE facilities ({FACILITY_COUNT})
+        </label>
+      </div>
+      <div className="layer-toggle">
+        <span className="layer-icon child-camp-marker">☠</span>
+        <label>
+          <input
+            type="checkbox"
+            checked={showChildCamps}
+            onChange={() => setShowChildCamps((prev) => !prev)}
+          />{" "}
+          Unaccompanied children camps ({CHILD_CAMP_COUNT})
+        </label>
+      </div>
+      <div className="layer-toggle">
+        <span className="layer-icon camp-marker">☠</span>
+        <label>
+          <input
+            type="checkbox"
+            checked={showDetentionFacilities}
+            onChange={() => setShowDetentionFacilities((prev) => !prev)}
+          />{" "}
+          ICE detention facilities ({detentionFacilities.length})
+        </label>
+      </div>
+      <div className="layer-toggle">
+        <span className="layer-icon field-office-marker">▲</span>
+        <label>
+          <input
+            type="checkbox"
+            checked={showFieldOffices}
+            onChange={() => setShowFieldOffices((prev) => !prev)}
+          />{" "}
+          Field offices ({FIELD_OFFICES.length})
+        </label>
+      </div>
+    </div>
+  );
+  const generalCoverageBody =
+    generalTriplets.length === 0 ? (
+      <p>No general national coverage in this time range.</p>
+    ) : (
+      <ul>
+        {generalTriplets.map((item) => (
+          <li key={item.story_id + item.who}>
+            <div className="general-title">
+              {item.url ? (
+                <a href={item.url} target="_blank" rel="noreferrer">
+                  {item.title}
+                </a>
+              ) : (
+                item.title
+              )}
+            </div>
+            {(item.who || item.what) && (
+              <div className="general-summary">
+                <strong>Summary:</strong>{" "}
+                <span>
+                  {item.who && <strong>{item.who}</strong>} {item.what}
+                </span>
+              </div>
+            )}
+            <div>{formatter.format(new Date(item.publishedAt))}</div>
+            {item.url && (
+              <a href={item.url} target="_blank" rel="noreferrer">
+                View article
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    );
+  const generalPanel = (
+    <section className="general-panel">
+      <h2>General coverage</h2>
+      {generalCoverageBody}
+    </section>
+  );
+  const resourcesView = (
+    <div className="resources-view">
+      {RESOURCE_SECTIONS.map((section) => (
+        <section key={section.title} className="resource-card">
+          <h2>{section.title}</h2>
+          <ul>
+            {section.links.map((link) => (
+              <li key={link.url}>
+                <a href={link.url} target="_blank" rel="noreferrer">
+                  {link.label}
+                </a>
+                {link.description && <p>{link.description}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
+  const listView = (
+    <div className="list-view">
+      <h2>Latest incidents</h2>
+      {sortedTriplets.length === 0 ? (
+        <p>No incidents in this window.</p>
+      ) : (
+        sortedTriplets.slice(0, 200).map((item) => (
+          <article className="list-card" key={item.story_id + item.who}>
+            <div className="list-card-meta">
+              {formatter.format(new Date(item.publishedAt))} •{" "}
+              {item.where_text || `${item.lat.toFixed(2)}, ${item.lon.toFixed(2)}`}
+            </div>
+            <h3>
+              {item.url ? (
+                <a href={item.url} target="_blank" rel="noreferrer">
+                  {item.title}
+                </a>
+              ) : (
+                item.title
+              )}
+            </h3>
+            <p>
+              <strong>{item.who}</strong> {item.what}
+            </p>
+          </article>
+        ))
+      )}
+      <div className="list-general">
+        <h3>General coverage</h3>
+        {generalCoverageBody}
+      </div>
+    </div>
+  );
+  const viewTabs = (
+    <div className="view-tabs">
+      <button
+        type="button"
+        className={viewMode === "map" ? "active" : ""}
+        onClick={() => setViewMode("map")}
+      >
+        Map
+      </button>
+      <button
+        type="button"
+        className={viewMode === "list" ? "active" : ""}
+        onClick={() => setViewMode("list")}
+      >
+        Headlines
+      </button>
+      <button
+        type="button"
+        className={viewMode === "resources" ? "active" : ""}
+        onClick={() => setViewMode("resources")}
+      >
+        Resources
+      </button>
+    </div>
+  );
+
   return (
-    <div className="map-page">
+    <div className={`map-page viewport-${viewport}`}>
       <header className="map-header">
         <div>
           <h1>ICE Incidents Map</h1>
@@ -325,21 +596,28 @@ const TripletsMap = () => {
           ))}
         </div>
       </header>
+      {!isMobile && viewTabs}
       {error && <div className="banner error">{error}</div>}
       {loading && <div className="banner">Loading…</div>}
-      <div className="map-content">
-        <div className="map-frame">
-          <MapContainer
-            center={[39.5, -98.35]}
-            zoom={4}
-            scrollWheelZoom
-            className="leaflet-map"
-          >
-            <MapBounds />
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+      <div className={`map-content ${isMobile ? "mobile" : ""}`}>
+        {viewMode === "resources" ? (
+          <div className="resources-view-wrapper">{resourcesView}</div>
+        ) : viewMode === "list" ? (
+          listView
+        ) : (
+          <>
+            <div className="map-frame">
+              <MapContainer
+                center={[39.5, -98.35]}
+                zoom={4}
+                scrollWheelZoom
+                className="leaflet-map"
+              >
+                <MapBounds />
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
             {groups.map((group) => {
               const count = group.items.length;
               const radius = Math.min(16, 8 + Math.log2(count || 1) * 3);
@@ -351,61 +629,74 @@ const TripletsMap = () => {
                 .map((item) => item.who)
                 .filter(Boolean)
                 .slice(0, 5);
-              const topItems = group.items
+              const sortedItems = group.items
                 .slice()
                 .sort(
                   (a, b) =>
                     new Date(b.publishedAt).getTime() -
                     new Date(a.publishedAt).getTime(),
-                )
-                .slice(0, 5);
-              const primary = topItems[0];
+                );
+              const primary = sortedItems[0];
+              const markerHandlers = isMobile
+                ? {
+                    click() {
+                      setSelectedGroupKey(group.key);
+                      setSelectedFieldOffice(null);
+                      setSelectedDetentionFacility(null);
+                    },
+                  }
+                : undefined;
               return (
                 <CircleMarker
                   key={group.key}
                   center={[group.lat, group.lon]}
                   radius={radius}
                   pathOptions={{ color, weight: 1, fillOpacity: 0.7 }}
+                  eventHandlers={markerHandlers}
                 >
-                  <Tooltip direction="top" offset={[0, -12]} opacity={0.95}>
-                    {primary ? (
-                      <>
-                        <div>
-                          <strong>{primary.who}</strong> {primary.what}
-                        </div>
-                        <div className="tooltip-title">{primary.title}</div>
-                      </>
-                    ) : (
-                      <div>
-                        <strong>{count} event{count > 1 ? "s" : ""}</strong>
-                      </div>
-                    )}
-                    {count > 1 && (
-                      <div>+ {count - 1} more nearby — click for details.</div>
-                    )}
-                  </Tooltip>
-                  <Popup>
-                    <strong>{count} event{count > 1 ? "s" : ""}</strong>
-                    <ul>
-                      {topItems.map((item) => (
-                        <li key={item.story_id + item.who}>
+                  {!isMobile && (
+                    <Tooltip direction="top" offset={[0, -12]} opacity={0.95}>
+                      {primary ? (
+                        <>
                           <div>
-                            <strong>{item.who}</strong> {item.what}
+                            <strong>{primary.who}</strong> {primary.what}
                           </div>
-                          <div>{item.title}</div>
-                          <div>{formatter.format(new Date(item.publishedAt))}</div>
-                          {item.url && (
-                            <a href={item.url} target="_blank" rel="noreferrer">
-                              Read article
-                            </a>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                    {count > topItems.length && (
-                      <div>+ {count - topItems.length} more…</div>
-                    )}
-                  </Popup>
+                          <div className="tooltip-title">{primary.title}</div>
+                        </>
+                      ) : (
+                        <div>
+                          <strong>{count} event{count > 1 ? "s" : ""}</strong>
+                        </div>
+                      )}
+                      {count > 1 && (
+                        <div>+ {count - 1} more nearby — click for details.</div>
+                      )}
+                    </Tooltip>
+                  )}
+                  {!isMobile && (
+                    <Popup>
+                      <strong>{count} event{count > 1 ? "s" : ""}</strong>
+                      <ul className="popup-event-list">
+                        {sortedItems.map((item) => (
+                          <li key={item.story_id + item.who}>
+                            <div>
+                              <strong>{item.who}</strong> {item.what}
+                            </div>
+                            <div className="popup-article-title">
+                              {item.url ? (
+                                <a href={item.url} target="_blank" rel="noreferrer">
+                                  {item.title}
+                                </a>
+                              ) : (
+                                item.title
+                              )}
+                            </div>
+                            <div>{formatter.format(new Date(item.publishedAt))}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    </Popup>
+                  )}
                 </CircleMarker>
               );
             })}
@@ -416,14 +707,21 @@ const TripletsMap = () => {
                   position={[loc.latitude, loc.longitude]}
                   icon={facilityIcon}
                 >
-                  <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
-                    {loc.name}
-                  </Tooltip>
-                  <Popup>
-                    <strong>{loc.name}</strong>
-                    <div>ICE facility</div>
-                    {loc.note && <div>{loc.note}</div>}
-                  </Popup>
+                  {!isMobile && (
+                    <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                      {loc.name}
+                    </Tooltip>
+                  )}
+                  {!isMobile && (
+                    <Popup>
+                      <strong>{loc.name}</strong>
+                      <div>ICE facility</div>
+                      {loc.addressFull && (
+                        <div className="popup-address">{loc.addressFull}</div>
+                      )}
+                      {loc.note && <div>{loc.note}</div>}
+                    </Popup>
+                  )}
                 </Marker>
               ))}
             {showChildCamps &&
@@ -433,14 +731,21 @@ const TripletsMap = () => {
                   position={[loc.latitude, loc.longitude]}
                   icon={childCampIcon}
                 >
-                  <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
-                    {loc.name}
-                  </Tooltip>
-                  <Popup>
-                    <strong>{loc.name}</strong>
-                    <div>Unaccompanied children site</div>
-                    {loc.note && <div>{loc.note}</div>}
-                  </Popup>
+                  {!isMobile && (
+                    <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                      {loc.name}
+                    </Tooltip>
+                  )}
+                  {!isMobile && (
+                    <Popup>
+                      <strong>{loc.name}</strong>
+                      <div>Unaccompanied children site</div>
+                      {loc.addressFull && (
+                        <div className="popup-address">{loc.addressFull}</div>
+                      )}
+                      {loc.note && <div>{loc.note}</div>}
+                    </Popup>
+                  )}
                 </Marker>
               ))}
             {showDetentionFacilities &&
@@ -449,22 +754,38 @@ const TripletsMap = () => {
                   key={`${facility.name}-${facility.city}-${facility.state}`}
                   position={[facility.latitude, facility.longitude]}
                   icon={detentionCampIcon}
+                  eventHandlers={
+                    isMobile
+                      ? {
+                          click() {
+                            setSelectedDetentionFacility(facility);
+                            setSelectedGroupKey(null);
+                            setSelectedFieldOffice(null);
+                          },
+                        }
+                      : undefined
+                  }
                 >
-                  <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
-                    {facility.name}
-                  </Tooltip>
-                  <Popup>
-                    <strong>{facility.name}</strong>
-                    <div>Detention facility</div>
-                    <div>
-                      {facility.city}, {facility.state} {facility.postalCode}
-                    </div>
-                    {facility.detailUrl && (
-                      <a href={facility.detailUrl} target="_blank" rel="noreferrer">
-                        View facility page
-                      </a>
-                    )}
-                  </Popup>
+                  {!isMobile && (
+                    <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                      {facility.name}
+                    </Tooltip>
+                  )}
+                  {!isMobile && (
+                    <Popup>
+                      <strong>{facility.name}</strong>
+                      <div>Detention facility</div>
+                      <div className="popup-address">
+                        {facility.addressFull ||
+                          `${facility.city}, ${facility.state} ${facility.postalCode}`}
+                      </div>
+                      {facility.detailUrl && (
+                        <a href={facility.detailUrl} target="_blank" rel="noreferrer">
+                          View facility page
+                        </a>
+                      )}
+                    </Popup>
+                  )}
                 </Marker>
               ))}
             {showFieldOffices &&
@@ -473,132 +794,178 @@ const TripletsMap = () => {
                   key={`${office.name}-${office.city}-${office.state}`}
                   position={[office.latitude, office.longitude]}
                   icon={fieldOfficeIcon}
+                  eventHandlers={
+                    isMobile
+                      ? {
+                          click() {
+                            setSelectedFieldOffice(office);
+                            setSelectedGroupKey(null);
+                          },
+                        }
+                      : undefined
+                  }
                 >
-                  <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
-                    {office.name}
-                  </Tooltip>
-                  <Popup>
-                    <strong>{office.name}</strong>
-                    <div>Field office</div>
-                    <div>
-                      {office.city}, {office.state}
-                    </div>
-                  </Popup>
+                  {!isMobile && (
+                    <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                      {office.name}
+                    </Tooltip>
+                  )}
+                  {!isMobile && (
+                    <Popup>
+                      <strong>{office.name}</strong>
+                      <div>Field office</div>
+                      <div className="popup-address">
+                        {office.addressFull || `${office.city}, ${office.state}`}
+                      </div>
+                    </Popup>
+                  )}
                 </Marker>
               ))}
           </MapContainer>
         </div>
-        <aside className="map-side">
-          <div className="brand-card">
-            <div className="brand-mark">ICE</div>
-            <div>
-              <h2>Incidents Map</h2>
-              <p>Interactive overview of ICE-related events.</p>
-            </div>
-          </div>
-          <div className="legend-section">
-            <h3>Recency</h3>
-            <ul>
-              {LEGEND.map((entry) => (
-                <li key={entry.label}>
-                  <span
-                    className="legend-dot"
-                    style={{ backgroundColor: entry.color }}
-                  />
-                  {entry.label}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="info-card">
-            <p>
-              Zoom + drag to explore. Click a marker to see who/what/where and open the
-              source article.
-            </p>
-            <div className="layer-toggle">
-              <span className="layer-icon facility-marker">▲</span>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showFacilities}
-                  onChange={() => setShowFacilities((prev) => !prev)}
-                />{" "}
-                ICE facilities ({FACILITY_COUNT})
-              </label>
-            </div>
-            <div className="layer-toggle">
-              <span className="layer-icon child-camp-marker">☠</span>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showChildCamps}
-                  onChange={() => setShowChildCamps((prev) => !prev)}
-                />{" "}
-                Unaccompanied children camps ({CHILD_CAMP_COUNT})
-              </label>
-            </div>
-            <div className="layer-toggle">
-              <span className="layer-icon camp-marker">☠</span>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showDetentionFacilities}
-                  onChange={() => setShowDetentionFacilities((prev) => !prev)}
-                />{" "}
-                ICE detention facilities ({detentionFacilities.length})
-              </label>
-            </div>
-            <div className="layer-toggle">
-              <span className="layer-icon field-office-marker">▲</span>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showFieldOffices}
-                  onChange={() => setShowFieldOffices((prev) => !prev)}
-                />{" "}
-                Field offices ({FIELD_OFFICES.length})
-              </label>
-            </div>
-          </div>
-        </aside>
+            {viewport === "desktop" && (
+              <aside className="map-side">
+                {brandCard}
+                {legendCard}
+                {layerControls}
+              </aside>
+            )}
+            {isTablet && (
+              <div className="map-side tablet-stack">
+                {legendCard}
+                {layerControls}
+              </div>
+            )}
+          </>
+        )}
       </div>
-      <section className="general-panel">
-        <h2>General coverage</h2>
-        {generalTriplets.length === 0 ? (
-          <p>No general national coverage in this time range.</p>
-        ) : (
-          <ul>
-            {generalTriplets.map((item) => (
-              <li key={item.story_id + item.who}>
-                <div className="general-title">
-                  {item.url ? (
-                    <a href={item.url} target="_blank" rel="noreferrer">
-                      {item.title}
-                    </a>
-                  ) : (
-                    item.title
-                  )}
+      {!isMobile && viewMode === "map" && generalPanel}
+      {isMobile && viewMode === "resources" && (
+        <div className="mobile-side-panels resources-mobile">{resourcesView}</div>
+      )}
+      {isMobile && (
+        <>
+          {viewMode === "map" && (
+            <div className="mobile-side-panels">
+              {legendCard}
+              {layerControls}
+              <section className="general-panel mobile">
+                <h2>General coverage</h2>
+                {generalCoverageBody}
+              </section>
+            </div>
+          )}
+          <nav className="bottom-nav">
+              <button
+                type="button"
+                className={viewMode === "map" ? "active" : ""}
+                onClick={() => setViewMode("map")}
+              >
+                Map
+              </button>
+              <button
+                type="button"
+                className={viewMode === "list" ? "active" : ""}
+                onClick={() => setViewMode("list")}
+              >
+                Headlines
+              </button>
+              <button
+                type="button"
+                className={viewMode === "resources" ? "active" : ""}
+                onClick={() => setViewMode("resources")}
+              >
+                Resources
+              </button>
+          </nav>
+        </>
+      )}
+      {isMobile &&
+        viewMode === "map" &&
+        (selectedGroup || selectedFieldOffice || selectedDetentionFacility) && (
+          <div className="mobile-event-sheet">
+            <div className="mobile-event-sheet-header">
+              <div>
+                <div className="mobile-event-sheet-meta">
+                  {selectedGroup
+                    ? `${selectedItems.length} event${selectedItems.length === 1 ? "" : "s"}`
+                    : selectedFieldOffice
+                      ? "Field office"
+                      : "Detention facility"}
                 </div>
-                {(item.who || item.what) && (
-                  <div className="general-summary">
-                    <strong>Summary:</strong>{" "}
-                    <span>
-                      {item.who && <strong>{item.who}</strong>}{" "}
-                      {item.what}
-                    </span>
-                  </div>
-                )}
-                <div>{formatter.format(new Date(item.publishedAt))}</div>
-                {item.url && (
-                  <a href={item.url} target="_blank" rel="noreferrer">
-                    View article
+                <h3>
+                  {selectedGroup
+                    ? selectedLocationLabel
+                    : selectedFieldOffice?.name || selectedDetentionFacility?.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                className="sheet-close-btn"
+                onClick={clearSelection}
+                aria-label="Close details"
+              >
+                ×
+              </button>
+            </div>
+            {selectedGroup && (
+              <ul>
+                {selectedItems.map((item) => (
+                  <li key={item.story_id + item.who}>
+                    <div className="sheet-item-meta">
+                      {formatter.format(new Date(item.publishedAt))}
+                    </div>
+                    <p className="sheet-item-text">
+                      <strong>{item.who}</strong> {item.what}
+                    </p>
+                    <p className="sheet-item-title">
+                      {item.url ? (
+                        <a href={item.url} target="_blank" rel="noreferrer">
+                          {item.title}
+                        </a>
+                      ) : (
+                        item.title
+                      )}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {selectedFieldOffice && !selectedGroup && (
+              <div className="sheet-field-office">
+                <p className="sheet-item-text">
+                  {selectedFieldOffice.addressFull ||
+                    `${selectedFieldOffice.city}, ${selectedFieldOffice.state}`}
+                </p>
+                <p className="sheet-item-meta">
+                  Coordinates: {selectedFieldOffice.latitude.toFixed(3)}, {selectedFieldOffice.longitude.toFixed(3)}
+                </p>
+              </div>
+            )}
+            {selectedDetentionFacility && !selectedGroup && !selectedFieldOffice && (
+              <div className="sheet-field-office">
+                <p className="sheet-item-text">
+                  {selectedDetentionFacility.addressFull ||
+                    `${selectedDetentionFacility.city}, ${selectedDetentionFacility.state} ${selectedDetentionFacility.postalCode}`}
+                </p>
+                <p className="sheet-item-meta">
+                  Coordinates: 
+                  {selectedDetentionFacility.latitude !== null
+                    ? selectedDetentionFacility.latitude.toFixed(3)
+                    : "n/a"}
+                  {selectedDetentionFacility.longitude !== null
+                    ? `, ${selectedDetentionFacility.longitude.toFixed(3)}`
+                    : ""}
+                </p>
+                {selectedDetentionFacility.detailUrl && (
+                  <a href={selectedDetentionFacility.detailUrl} target="_blank" rel="noreferrer">
+                    Facility details
                   </a>
                 )}
-              </li>
-            ))}
-          </ul>
+              </div>
+            )}
+          </div>
         )}
-      </section>
     </div>
   );
 };
