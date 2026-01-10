@@ -97,6 +97,83 @@ Outputs:
 - JSONL: `datasets/news_ingest/triplets_<timestamp>.jsonl`
 - SQLite index: `datasets/news_ingest/triplets_index.sqlite` (one row per triplet, keyed by story_id+who+what+where)
 
+## Scheduling the pipeline
+The helper script `scripts/run_ingest_and_extract.sh` chains a full ingest + triplet extraction run, activates the repo virtualenv if needed, and appends logs to `logs/ingest.log`. You can wire it up to cron or systemd:
+
+**cron (hourly example)**
+```
+0 * * * * cd /home/spacetime/codex && ./scripts/run_ingest_and_extract.sh >> logs/cron.log 2>&1
+```
+
+**systemd timer**
+1. Create `/etc/systemd/system/icepipeline.service`:
+   ```
+   [Unit]
+   Description=ICEActivity ingest + triplet extraction
+   After=network.target
+
+   [Service]
+   Type=oneshot
+   WorkingDirectory=/home/spacetime/codex
+   ExecStart=/home/spacetime/codex/scripts/run_ingest_and_extract.sh
+   ```
+2. Create `/etc/systemd/system/icepipeline.timer`:
+   ```
+   [Unit]
+   Description=Run ICEActivity pipeline hourly
+
+   [Timer]
+   OnCalendar=hourly
+   Persistent=true
+
+   [Install]
+   WantedBy=timers.target
+   ```
+3. Enable and start:
+   ```
+   sudo systemctl enable --now icepipeline.timer
+   ```
+The script recreates the SQLite caches and JSONL outputs automatically if they’re missing, so new environments can just schedule the timer and let the pipeline bootstrap itself.
+
+## Triplet API & Map Frontend
+
+### FastAPI backend
+The FastAPI service lives in `src/api/main.py` and reads directly from `datasets/news_ingest/triplets_index.sqlite`. It exposes:
+
+- `GET /health` → `{"status":"ok"}`
+- `GET /api/triplets?since_hours=24&bbox=west,south,east,north` → JSON array of triplets (lat/lon required, ordered by `published_at` desc, max 2000 rows).
+
+Run it locally with:
+```bash
+source .venv/bin/activate
+uvicorn src.api.main:app --reload --host 127.0.0.1 --port 5000
+# or use the helper script (honors $PORT/$HOST):
+./scripts/run_icemap_api.sh
+```
+
+Example request (last 6 hours, no bounding box):
+```bash
+curl "http://localhost:5000/api/triplets?since_hours=6"
+```
+
+### React + Leaflet frontend
+A lightweight Vite/React map client lives under `frontend/`.
+
+Setup & run (base path defaults to `/ice/` for production builds):
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:3000 for local work
+npm run build      # outputs to frontend/dist (served at /ice)
+```
+
+The frontend fetches map data from the FastAPI base URL (`VITE_API_BASE_URL`, defaults to `http://localhost:5000`). You can override it via:
+```bash
+VITE_API_BASE_URL=https://api.example.com npm run dev
+```
+
+The UI provides 6h/24h/3d/7d filters, groups triplets by rounded coordinates, colors markers by recency, and links back to the source articles.
+
 ## Environment variables
 - `NEWSAPI_KEY`: optional; NewsAPI free tier only covers ~30 days.
 - `GOOGLE_ACC_KEY`: optional; used as a fallback geocoder after Nominatim.
