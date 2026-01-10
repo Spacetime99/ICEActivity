@@ -35,6 +35,8 @@ LOGGER = logging.getLogger(__name__)
 
 FACILITY_CATALOG_PATH = Path("assets/ice_facilities.csv")
 DOMAIN_BLACKLIST_PATH = Path("assets/domain_blacklist.txt")
+DOMAIN_FAILURES_PATH = Path("datasets/domain_failures.json")
+FAILURE_THRESHOLD = 3
 
 # Broad search tokens that surface ICE activity regardless of outlet.
 DEFAULT_SEARCH_TERMS = [
@@ -72,6 +74,17 @@ DEFAULT_RELEVANCE_KEYWORDS = [
 ]
 
 CASE_SENSITIVE_KEYWORDS = frozenset({"ICE"})
+GENERIC_FACILITY_PREFIXES = {
+    "ice office",
+    "detention center",
+    "detention facility",
+    "processing center",
+    "county jail",
+    "county courthouse",
+    "immigration court",
+    "field office",
+}
+RETRY_STATUS_CODES = {401, 402, 403, 408, 429, 500, 502, 503, 504}
 
 RELATED_HEADING_PREFIXES = (
     "related",
@@ -332,6 +345,19 @@ def _clean_geocode_phrase(value: str) -> str:
     cleaned = value
     cleaned = re.sub(r"^(according to|before heading into|came out of|day with|group of|had been|has been|was|were|to be|to reappear at|scheduled to attend|procession at)\s+", "", cleaned, flags=re.IGNORECASE)
     cleaned = cleaned.strip(",;:- ").strip()
+    if not cleaned:
+        return ""
+    segments = [segment.strip() for segment in cleaned.split(",") if segment.strip()]
+    if len(segments) > 1:
+        filtered: list[str] = []
+        for segment in segments:
+            normalized = segment.lower()
+            if normalized in GENERIC_FACILITY_PREFIXES and len(segments) > 2:
+                continue
+            filtered.append(segment)
+        if filtered:
+            segments = filtered
+    cleaned = ", ".join(dict.fromkeys(segments))
     return cleaned
 
 
@@ -360,6 +386,31 @@ def _strip_related_sections(value: str | None) -> str:
     if cutoff < len(text):
         return text[:cutoff].rstrip()
     return text
+
+
+DATE_ATTR_KEYWORDS = ("date", "time", "publish", "posted", "update")
+MONTH_PATTERN = r"(?:Jan(?:uary)?\.?|Feb(?:ruary)?\.?|Mar(?:ch)?\.?|Apr(?:il)?\.?|May|Jun(?:e)?\.?|Jul(?:y)?\.?|Aug(?:ust)?\.?|Sep(?:t(?:ember)?)?\.?|Oct(?:ober)?\.?|Nov(?:ember)?\.?|Dec(?:ember)?)"
+TEXTUAL_DATE_PATTERN = re.compile(
+    rf"{MONTH_PATTERN}\s+\d{{1,2}},\s+\d{{4}}(?:\s+\d{{1,2}}(?::\d{{2}})?\s*(?:a\.m\.|p\.m\.|am|pm)?)?",
+    re.IGNORECASE,
+)
+DATE_FROM_URL_PATTERNS = [
+    re.compile(r"/(20\d{2})/(0[1-9]|1[0-2])/(0[1-9]|[12]\d|3[01])/"),
+    re.compile(r"/(20\d{2})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])/"),
+]
+
+
+def _parse_textual_timestamp(text: str) -> datetime | None:
+    for match in TEXTUAL_DATE_PATTERN.finditer(text):
+        candidate = match.group(0)
+        try:
+            parsed_dt = date_parser.parse(candidate, fuzzy=True)
+        except (ValueError, TypeError):
+            continue
+        if parsed_dt.tzinfo is None:
+            parsed_dt = parsed_dt.replace(tzinfo=timezone.utc)
+        return parsed_dt
+    return None
 
 
 def extract_published_at_from_html(value: BeautifulSoup | str | None) -> datetime | None:
@@ -395,6 +446,55 @@ def extract_published_at_from_html(value: BeautifulSoup | str | None) -> datetim
         if parsed_dt.tzinfo is None:
             parsed_dt = parsed_dt.replace(tzinfo=timezone.utc)
         return parsed_dt
+    candidate_texts: list[str] = []
+    for attr in ("data-published", "data-publish", "data-date", "data-timestamp"):
+        for node in soup.find_all(attrs={attr: True}):
+            attr_text = node.get(attr)
+            if isinstance(attr_text, str):
+                candidate_texts.append(attr_text)
+    for node in soup.find_all(True):
+        attr_values: list[str] = []
+        for attr_name in ("class", "id", "itemprop", "role", "data-testid"):
+            raw = node.get(attr_name)
+            if isinstance(raw, list):
+                attr_values.extend(str(v) for v in raw)
+            elif raw:
+                attr_values.append(str(raw))
+        blob = " ".join(attr_values).lower()
+        if blob and any(keyword in blob for keyword in DATE_ATTR_KEYWORDS):
+            text = node.get_text(" ", strip=True)
+            if text:
+                candidate_texts.append(text)
+    # Fallback: scan the first chunk of the article text for month/day/year strings.
+    body_text = soup.get_text(" ", strip=True)
+    if body_text:
+        candidate_texts.append(body_text[:2000])
+    for text in candidate_texts:
+        parsed = _parse_textual_timestamp(text)
+        if parsed:
+            return parsed
+    return None
+
+
+def infer_published_at_from_url(url: str) -> datetime | None:
+    try:
+        path = urlparse(url).path or ""
+    except Exception:
+        return None
+    for pattern in DATE_FROM_URL_PATTERNS:
+        match = pattern.search(path)
+        if match:
+            year, month, day = match.groups()
+            try:
+                dt = datetime(
+                    int(year),
+                    int(month),
+                    int(day),
+                    tzinfo=timezone.utc,
+                )
+                return dt
+            except ValueError:
+                continue
     return None
 
 
@@ -454,6 +554,8 @@ class HtmlPageConfig:
     name: str
     url: str
     selectors: Sequence[str] | None = None
+    include_all: bool = False
+    external_only: bool = False
 
 
 @dataclass
@@ -602,6 +704,13 @@ WEB_PAGE_SOURCES: list[HtmlPageConfig] = [
         selectors=("article a", "h2 a"),
     ),
     HtmlPageConfig(name="kron4-local", url="https://www.kron4.com/news/", selectors=("article a", "h2 a")),
+    HtmlPageConfig(
+        name="deportationdata-news",
+        url="https://deportationdata.org/news.html",
+        selectors=("main a", "li a", "article a"),
+        include_all=True,
+        external_only=True,
+    ),
 ]
 
 AP_RSS_FEEDS: list[RSSFeedConfig] = [
@@ -657,15 +766,90 @@ def load_facility_catalog(path: Path = FACILITY_CATALOG_PATH) -> list[FacilityRe
     return records
 
 
-def load_domain_blacklist(path: Path = DOMAIN_BLACKLIST_PATH) -> set[str]:
+def load_domain_blacklist(path: Path = DOMAIN_BLACKLIST_PATH) -> dict[str, list[str]]:
     if not path.exists():
-        return set()
+        return {}
     try:
+        entries: dict[str, list[str]] = {}
         with path.open("r", encoding="utf-8") as handle:
-            return {line.strip().lower() for line in handle if line.strip()}
+            for line in handle:
+                slug = line.strip().lower()
+                if not slug:
+                    continue
+                netloc, _, path_suffix = slug.partition("/")
+                entries.setdefault(netloc, [])
+                if path_suffix:
+                    normalized_path = "/" + path_suffix.lstrip("/")
+                    entries[netloc].append(normalized_path)
+        return entries
     except Exception:  # noqa: BLE001
         LOGGER.warning("Failed to read domain blacklist at %s", path, exc_info=True)
-        return set()
+        return {}
+
+
+def _url_is_blacklisted(url: str, blacklist: dict[str, list[str]]) -> bool:
+    parts = urlparse(url)
+    netloc = parts.netloc.lower()
+    path = parts.path or "/"
+    entries = blacklist.get(netloc)
+    if entries is None:
+        return False
+    if not entries:
+        return True
+    for prefix in entries:
+        if path.startswith(prefix):
+            return True
+    return False
+
+
+def _netloc_is_blacklisted(netloc: str, path: str, blacklist: dict[str, list[str]]) -> bool:
+    entries = blacklist.get(netloc.lower())
+    if entries is None:
+        return False
+    if not entries:
+        return True
+    normalized_path = path or "/"
+    for prefix in entries:
+        if normalized_path.startswith(prefix):
+            return True
+    return False
+
+
+def load_failure_counts(path: Path) -> dict[str, int]:
+    if not path.exists():
+        return {}
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            return {key: int(value) for key, value in json.load(handle).items()}
+    except Exception:
+        LOGGER.warning("Failed to read failure counts from %s", path, exc_info=True)
+        return {}
+
+
+def save_failure_counts(path: Path, counts: dict[str, int]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(counts, handle, indent=2)
+    except Exception:
+        LOGGER.warning("Failed to write failure counts to %s", path, exc_info=True)
+
+
+def maybe_blacklist_domain(domain: str, counts: dict[str, int], blacklist: dict[str, list[str]]) -> None:
+    normalized = domain.lower().strip()
+    if not normalized:
+        return
+    counts[normalized] = counts.get(normalized, 0) + 1
+    if counts[normalized] >= FAILURE_THRESHOLD:
+        if normalized not in blacklist:
+            blacklist[normalized] = []
+        try:
+            with DOMAIN_BLACKLIST_PATH.open("a", encoding="utf-8") as handle:
+                handle.write(f"{normalized}\n")
+            LOGGER.warning("Auto-blacklisted domain %s after %s failures.", normalized, counts[normalized])
+        except Exception:
+            LOGGER.warning("Failed to append domain %s to blacklist file.", normalized, exc_info=True)
+
 
 
 def _build_keyword_pattern(keywords: Sequence[str]) -> Pattern[str] | None:
@@ -691,20 +875,33 @@ class RSSFeedSource(BaseNewsSource):
         feeds: Sequence[RSSFeedConfig],
         include_all: bool = False,
         timeout: int = 15,
+        failure_counts: dict[str, int] | None = None,
+        blacklist: dict[str, list[str]] | None = None,
     ) -> None:
         self.name = "rss"
         self.feeds = feeds
         self.include_all = include_all
         self.timeout = timeout
+        self.failure_counts = failure_counts or {}
+        self.blacklist = blacklist or {}
 
     def fetch(self, search_terms: Sequence[str]) -> List[NewsReport]:
         reports: List[NewsReport] = []
         search_pattern = _build_keyword_pattern(search_terms)
         for feed in self.feeds:
             matched = 0
+            netloc = urlparse(feed.url).netloc.lower()
+            if netloc and _netloc_is_blacklisted(netloc, "/", self.blacklist):
+                LOGGER.info("Skipping RSS feed %s due to blacklist entry.", feed.url)
+                continue
             parsed = feedparser.parse(feed.url)
             if parsed.bozo:
                 LOGGER.warning("RSS parse issue for %s: %s", feed.url, parsed.bozo_exception)
+                if netloc:
+                    maybe_blacklist_domain(netloc, self.failure_counts, self.blacklist)
+                continue
+            if netloc and netloc in self.failure_counts:
+                self.failure_counts[netloc] = 0
             for entry in parsed.entries:
                 raw_summary = getattr(entry, "summary", "")
                 summary = _clean_html_fragment(raw_summary)
@@ -762,12 +959,16 @@ class HtmlPageSource(BaseNewsSource):
         include_all: bool = False,
         timeout: int = 15,
         max_links: int = 50,
+        failure_counts: dict[str, int] | None = None,
+        blacklist: dict[str, list[str]] | None = None,
     ) -> None:
         self.name = "html"
         self.pages = pages
         self.include_all = include_all
         self.timeout = timeout
         self.max_links = max_links
+        self.failure_counts = failure_counts or {}
+        self.blacklist = blacklist or {}
         self._headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
@@ -780,11 +981,20 @@ class HtmlPageSource(BaseNewsSource):
         search_pattern = _build_keyword_pattern(search_terms)
         for page in self.pages:
             before_count = len(reports)
+            page_netloc = urlparse(page.url).netloc.lower()
+            should_filter = bool(search_pattern and not self.include_all and not page.include_all)
             try:
+                if page_netloc and _netloc_is_blacklisted(page_netloc, "/", self.blacklist):
+                    LOGGER.info("Skipping HTML source %s due to blacklist entry.", page.url)
+                    continue
                 resp = requests.get(page.url, headers=self._headers, timeout=self.timeout)
                 resp.raise_for_status()
+                if page_netloc and page_netloc in self.failure_counts:
+                    self.failure_counts[page_netloc] = 0
             except Exception as exc:  # noqa: BLE001
                 LOGGER.warning("Failed to fetch HTML page %s: %s", page.url, exc)
+                if page_netloc:
+                    maybe_blacklist_domain(page_netloc, self.failure_counts, self.blacklist)
                 continue
             soup = BeautifulSoup(resp.text, "html.parser")
             selectors = list(page.selectors or [])
@@ -804,11 +1014,17 @@ class HtmlPageSource(BaseNewsSource):
                 full_url = urljoin(page.url, href)
                 if full_url in seen_links:
                     continue
+                if _url_is_blacklisted(full_url, self.blacklist):
+                    continue
+                if page.external_only:
+                    target_netloc = urlparse(full_url).netloc.lower()
+                    if not target_netloc or target_netloc == page_netloc:
+                        continue
                 title = tag.get_text(strip=True)
                 if not title:
                     continue
                 text_blob = title
-                if search_pattern and not self.include_all and not search_pattern.search(text_blob):
+                if should_filter and not search_pattern.search(text_blob):
                     continue
                 seen_links.add(full_url)
                 reports.append(
@@ -1086,6 +1302,7 @@ class NewsIngestor:
         self.geocode_max_queries = geocode_max_queries
         self.facilities = load_facility_catalog()
         self.domain_blacklist = load_domain_blacklist()
+        self.domain_failure_counts = load_failure_counts(DOMAIN_FAILURES_PATH)
         self.force_refetch = False
         self.ignore_geocode_failures = False
         self.disable_geocoding = False
@@ -1103,86 +1320,100 @@ class NewsIngestor:
             )
             for record in self.facilities
         ]
+        self._attach_failure_tracking()
+        self.fetch_failure_counts: dict[str, int] = {}
+        self._fetch_stats: dict[str, int] = {"success": 0, "failures": 0, "skipped": 0}
 
     def run(self) -> Path | None:
-        LOGGER.info(
-            "Running NewsIngestor with %s sources; fetch_content=%s (limit=%s)",
-            len(self.sources),
-            self.fetch_content,
-            self.fetch_content_limit,
-        )
-        metrics = {"facility_hits": 0}
-        aggregated: list[NewsReport] = []
-        dedup_map: dict[str, NewsReport] = {}
-        source_errors: list[str] = []
-        source_counts: list[str] = []
-        for source in self.sources:
-            LOGGER.info("Fetching from %s", getattr(source, "name", source.__class__.__name__))
-            try:
-                reports = source.fetch(self.search_terms)
-            except Exception as exc:  # noqa: BLE001
-                LOGGER.exception("Error while fetching from %s: %s", source.name, exc)
-                source_errors.append(f"{source.name}: {exc}")
-                continue
-            LOGGER.info("Source %s returned %s candidate reports", source.name, len(reports))
-            source_counts.append(f"{source.name}={len(reports)}")
-            for report in reports:
-                LOGGER.debug("Candidate headline [%s]: %s", report.source, report.title)
-                if self.print_headlines:
-                    LOGGER.info("Headline [%s]: %s", report.source, report.title)
-            for report in reports:
-                if report.locations is None:
-                    report.locations = []
-                if report.city_mentions is None:
-                    report.city_mentions = []
-                if report.facility_mentions is None:
-                    report.facility_mentions = []
-                dedup_key = f"{report.source}:{report.source_id}"
-                existing = dedup_map.get(dedup_key)
-                if existing:
-                    # Prefer entry with fetched content if available.
-                    has_body = isinstance(existing.raw, dict) and existing.raw.get("fetched_content")
-                    new_has_body = isinstance(report.raw, dict) and report.raw.get("fetched_content")
-                    if not has_body and new_has_body:
+        output_path: Path | None = None
+        try:
+            LOGGER.info(
+                "Running NewsIngestor with %s sources; fetch_content=%s (limit=%s)",
+                len(self.sources),
+                self.fetch_content,
+                self.fetch_content_limit,
+            )
+            metrics = {"facility_hits": 0}
+            self.fetch_failure_counts = {}
+            self._fetch_stats = {"success": 0, "failures": 0, "skipped": 0}
+            aggregated: list[NewsReport] = []
+            dedup_map: dict[str, NewsReport] = {}
+            source_errors: list[str] = []
+            source_counts: list[str] = []
+            for source in self.sources:
+                LOGGER.info("Fetching from %s", getattr(source, "name", source.__class__.__name__))
+                try:
+                    reports = source.fetch(self.search_terms)
+                except Exception as exc:  # noqa: BLE001
+                    LOGGER.exception("Error while fetching from %s: %s", source.name, exc)
+                    source_errors.append(f"{source.name}: {exc}")
+                    continue
+                LOGGER.info("Source %s returned %s candidate reports", source.name, len(reports))
+                source_counts.append(f"{source.name}={len(reports)}")
+                for report in reports:
+                    LOGGER.debug("Candidate headline [%s]: %s", report.source, report.title)
+                    if self.print_headlines:
+                        LOGGER.info("Headline [%s]: %s", report.source, report.title)
+                for report in reports:
+                    if report.locations is None:
+                        report.locations = []
+                    if report.city_mentions is None:
+                        report.city_mentions = []
+                    if report.facility_mentions is None:
+                        report.facility_mentions = []
+                    dedup_key = f"{report.source}:{report.source_id}"
+                    existing = dedup_map.get(dedup_key)
+                    if existing:
+                        has_body = isinstance(existing.raw, dict) and existing.raw.get("fetched_content")
+                        new_has_body = isinstance(report.raw, dict) and report.raw.get("fetched_content")
+                        if not has_body and new_has_body:
+                            dedup_map[dedup_key] = report
+                    else:
                         dedup_map[dedup_key] = report
-                else:
-                    dedup_map[dedup_key] = report
-        aggregated = list(dedup_map.values())
-        LOGGER.info(
-            "Aggregated %s reports from sources (%s)", len(aggregated), ", ".join(source_counts) or "no sources"
-        )
-        if not aggregated:
-            LOGGER.warning("No reports collected from any source.")
-            if source_errors:
-                LOGGER.warning("Source errors encountered: %s", "; ".join(source_errors))
-            return None
-        filtered_reports = self._apply_relevance_filter(aggregated)
-        LOGGER.info("After filtering: %s reports", len(filtered_reports))
-        if self.fetch_content:
-            self._enrich_with_full_text(filtered_reports)
-        if filtered_reports and not self.disable_geocoding:
-            self._annotate_coordinates(filtered_reports, metrics)
-        story_index = self._load_story_index() if not self.force_refetch else {}
-        LOGGER.info("Loaded story index with %s entries", len(story_index))
-        deduped_reports = self._dedupe_with_index(filtered_reports, story_index)
-        self._init_sqlite()
-        self._upsert_sqlite(filtered_reports)
-        if not deduped_reports:
-            LOGGER.warning("No news reports collected during this run.")
-            if source_errors:
-                LOGGER.warning("Source errors encountered: %s", "; ".join(source_errors))
-            return None
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = self.output_dir / f"news_reports_{timestamp}.jsonl"
-        with output_path.open("w", encoding="utf-8") as handle:
-            for report in deduped_reports:
-                handle.write(json.dumps(report.to_serializable()) + "\n")
-        self._save_story_index(story_index)
-        LOGGER.info("Wrote %s reports to %s", len(deduped_reports), output_path)
-        self._write_run_log(deduped_reports, metrics)
-        self._close_google_news_browser()
-        return output_path
+            aggregated = list(dedup_map.values())
+            LOGGER.info(
+                "Aggregated %s reports from sources (%s)", len(aggregated), ", ".join(source_counts) or "no sources"
+            )
+            if not aggregated:
+                LOGGER.warning("No reports collected from any source.")
+                if source_errors:
+                    LOGGER.warning("Source errors encountered: %s", "; ".join(source_errors))
+                return None
+            filtered_reports = self._apply_relevance_filter(aggregated)
+            LOGGER.info("After filtering: %s reports", len(filtered_reports))
+            if self.fetch_content:
+                self._enrich_with_full_text(filtered_reports)
+                metrics["fetch_failures"] = self._fetch_stats.get("failures", 0)
+            for report in filtered_reports:
+                if report.published_at is None and report.url:
+                    inferred = infer_published_at_from_url(report.url)
+                    if inferred:
+                        report.published_at = inferred
+            if filtered_reports and not self.disable_geocoding:
+                self._annotate_coordinates(filtered_reports, metrics)
+                story_index = self._load_story_index() if not self.force_refetch else {}
+                LOGGER.info("Loaded story index with %s entries", len(story_index))
+                deduped_reports = self._dedupe_with_index(filtered_reports, story_index)
+                self._init_sqlite()
+                self._upsert_sqlite(filtered_reports)
+                if not deduped_reports:
+                    LOGGER.warning("No news reports collected during this run.")
+                    if source_errors:
+                        LOGGER.warning("Source errors encountered: %s", "; ".join(source_errors))
+                    return None
+                timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+                self.output_dir.mkdir(parents=True, exist_ok=True)
+                output_path = self.output_dir / f"news_reports_{timestamp}.jsonl"
+                with output_path.open("w", encoding="utf-8") as handle:
+                    for report in deduped_reports:
+                        handle.write(json.dumps(report.to_serializable()) + "\n")
+                self._save_story_index(story_index)
+                LOGGER.info("Wrote %s reports to %s", len(deduped_reports), output_path)
+                self._write_run_log(deduped_reports, metrics)
+                self._close_google_news_browser()
+                return output_path
+        finally:
+            save_failure_counts(DOMAIN_FAILURES_PATH, self.domain_failure_counts)
 
     def _apply_relevance_filter(self, reports: list[NewsReport]) -> list[NewsReport]:
         if not reports:
@@ -1274,13 +1505,19 @@ class NewsIngestor:
                 LOGGER.info("Geocode attempt %s: '%s'", attempts, query)
                 result = self.geocoder.lookup(query)
                 if result:
-                    source = "cache"
-                    if hasattr(self.geocoder, "stats"):
-                        stats = self.geocoder.stats
-                        # Determine last increment by comparing stats before/after? Not tracked per-call.
-                        # We infer source by presence in cache immediately; otherwise rely on order (Nominatim then Google).
-                        # For explicitness, the geocoder has already tracked stats; we log a generic success here.
-                    LOGGER.info("Geocode resolved via external service: '%s' -> %s,%s", query, result.latitude, result.longitude)
+                    source = getattr(result, "source", "unknown")
+                    if source == "cache":
+                        LOGGER.info("Geocode resolved via cache: '%s' -> %s,%s", query, result.latitude, result.longitude)
+                    elif source == "facility_catalog":
+                        LOGGER.info("Geocode resolved via facility catalog: '%s' -> %s", query, result.raw.get("name", query))
+                    else:
+                        LOGGER.info(
+                            "Geocode resolved via %s: '%s' -> %s,%s",
+                            source or "external service",
+                            query,
+                            result.latitude,
+                            result.longitude,
+                        )
                     report.latitude = result.latitude
                     report.longitude = result.longitude
                     report.geocode_query = result.query
@@ -1317,6 +1554,7 @@ class NewsIngestor:
                 continue
             LOGGER.info("Fetching full content for [%s] %s", report.source, report.title)
             content, status, error = self._fetch_article_text(report)
+            self._record_fetch_result(report.url, status, bool(content))
             if isinstance(report.raw, dict):
                 report.raw["fetch_status"] = status
                 if error:
@@ -1336,6 +1574,35 @@ class NewsIngestor:
                 set(report.facility_mentions or []) | set(extract_facility_mentions(content) or [])
             )
         LOGGER.info("Fetched full content for %s articles.", fetched)
+
+    def _record_fetch_result(self, url: str | None, status: str, has_content: bool) -> None:
+        stats = getattr(self, "_fetch_stats", None)
+        if stats is None:
+            return
+        netloc = ""
+        if url:
+            try:
+                netloc = urlparse(url).netloc.lower()
+            except Exception:
+                netloc = ""
+        if has_content:
+            stats["success"] = stats.get("success", 0) + 1
+            return
+        if status.startswith("skipped"):
+            stats["skipped"] = stats.get("skipped", 0) + 1
+            return
+        stats["failures"] = stats.get("failures", 0) + 1
+        if netloc:
+            self.fetch_failure_counts[netloc] = self.fetch_failure_counts.get(netloc, 0) + 1
+
+    def _attach_failure_tracking(self) -> None:
+        for source in self.sources:
+            if isinstance(source, RSSFeedSource):
+                source.failure_counts = self.domain_failure_counts
+                source.blacklist = self.domain_blacklist
+            elif isinstance(source, HtmlPageSource):
+                source.failure_counts = self.domain_failure_counts
+                source.blacklist = self.domain_blacklist
 
     @staticmethod
     def _strip_junk_nodes(soup: BeautifulSoup) -> None:
@@ -1458,8 +1725,9 @@ class NewsIngestor:
 
     def _fetch_article_text(self, report: NewsReport, timeout: int = 12) -> tuple[str | None, str, str | None]:
         url = report.url
-        netloc = urlparse(url).netloc.lower()
-        if any(netloc.endswith(domain) for domain in self.domain_blacklist):
+        parsed = urlparse(url)
+        netloc = parsed.netloc.lower()
+        if _netloc_is_blacklisted(netloc, parsed.path or "/", self.domain_blacklist):
             LOGGER.info("Skipping body fetch for blacklisted domain %s", netloc)
             return None, "skipped_blacklist", None
         if netloc.endswith("news.google.com") and self.resolve_google_news:
@@ -1476,19 +1744,44 @@ class NewsIngestor:
                 LOGGER.info("Failed to resolve Google News URL %s", url)
                 return None, "error_google_news_resolve", None
         try:
-            response = requests.get(
-                url,
-                timeout=timeout,
-                headers={
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "Referer": url,
-                },
-                allow_redirects=True,
-            )
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, "html.parser")
+            response_text: str | None = None
+            last_error: Exception | None = None
+            headers = {
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+                ),
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
+                "Referer": url,
+            }
+            for attempt in range(1, 3):
+                try:
+                    response = requests.get(
+                        url,
+                        timeout=(5, timeout),
+                        headers=headers,
+                        allow_redirects=True,
+                    )
+                    if response.status_code in RETRY_STATUS_CODES and attempt < 2:
+                        LOGGER.debug("Retrying fetch for %s due to status %s", url, response.status_code)
+                        time.sleep(1.5 * attempt)
+                        continue
+                    response.raise_for_status()
+                    response_text = response.text
+                    break
+                except requests.RequestException as exc:
+                    last_error = exc
+                    if attempt < 2:
+                        LOGGER.debug("Retrying fetch for %s after error: %s", url, exc)
+                        time.sleep(1.5 * attempt)
+                        continue
+                    raise
+            if response_text is None:
+                if last_error:
+                    raise last_error
+                raise RuntimeError(f"Failed to fetch {url}")
+            soup = BeautifulSoup(response_text, "html.parser")
             published_at = extract_published_at_from_html(soup)
             if published_at and not report.published_at:
                 report.published_at = published_at
@@ -1795,7 +2088,7 @@ class NewsIngestor:
     def _write_run_log(self, reports: list[NewsReport], metrics: dict[str, int]) -> None:
         log_path = self.output_dir / "run_log.csv"
         header = [
-            "# fields: timestamp_iso,new_articles,facility_hits,geocode_cache_hits,geocode_nominatim_hits,geocode_google_hits,geocode_failures",
+            "# fields: timestamp_iso,new_articles,facility_hits,geocode_cache_hits,geocode_nominatim_hits,geocode_google_hits,geocode_failures,fetch_failures",
         ]
         timestamp = datetime.now(timezone.utc).isoformat()
         geocode_stats = (
@@ -1812,6 +2105,7 @@ class NewsIngestor:
                 str(geocode_stats.get("nominatim_hits", 0)),
                 str(geocode_stats.get("google_hits", 0)),
                 str(geocode_stats.get("failures", 0)),
+                str(metrics.get("fetch_failures", 0)),
             ]
         )
         if not log_path.exists():
