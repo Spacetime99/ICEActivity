@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -14,8 +14,11 @@ import { STATIC_LOCATIONS } from "./staticLocations";
 import { FIELD_OFFICES } from "./fieldOffices";
 import { DETENTION_FACILITIES } from "./detentionFacilities";
 import type { DetentionFacility } from "./detentionFacilities";
-import { RESOURCE_SECTIONS } from "./resources";
+import { getResourceSections } from "./resources";
 import type { FieldOffice } from "./fieldOffices";
+import { DEFAULT_LANGUAGE, LANGUAGE_LABELS, TRANSLATIONS, type Language } from "./i18n";
+import { CHARTS } from "./charts";
+import { ABOUT_CONTENT, METHODOLOGY_CONTENT, getOverlayText } from "./overlays";
 
 type Triplet = {
   story_id: string;
@@ -37,19 +40,27 @@ type TripletGroup = {
   items: Triplet[];
 };
 
+type StoryGroup = {
+  storyId: string;
+  title: string;
+  url?: string | null;
+  publishedAt?: string | null;
+  items: Triplet[];
+};
+
 type TimeRangeValue = number | "all";
-type ViewMode = "map" | "list" | "resources";
+type ViewMode = "map" | "list" | "resources" | "charts";
 
 // Keep one hour under the API's 90-day upper bound to avoid validation errors on
 // deployments that still enforce a strict "< 90 days" check.
 const MAX_API_WINDOW_HOURS = 24 * 90 - 1;
 
-const TIME_RANGES: Array<{ label: string; value: TimeRangeValue }> = [
-  { label: "3d", value: 72 },
-  { label: "7d", value: 24 * 7 },
-  { label: "1mo", value: 24 * 30 },
-  { label: "3mo", value: MAX_API_WINDOW_HOURS },
-  { label: "All", value: "all" },
+const TIME_RANGES: Array<{ label: { en: string; es: string }; value: TimeRangeValue }> = [
+  { label: { en: "3d", es: "3d" }, value: 72 },
+  { label: { en: "7d", es: "7d" }, value: 24 * 7 },
+  { label: { en: "1mo", es: "1 mes" }, value: 24 * 30 },
+  { label: { en: "3mo", es: "3 meses" }, value: MAX_API_WINDOW_HOURS },
+  { label: { en: "All", es: "Todo" }, value: "all" },
 ];
 
 const formatter = new Intl.DateTimeFormat(undefined, {
@@ -66,6 +77,8 @@ const LEGEND = [
 ];
 
 const SEVERE_COLOR = "#8b0000";
+const numberFormatter = new Intl.NumberFormat(undefined);
+const FEEDBACK_URL = "https://tally.so/r/lbOAvo";
 const SEVERE_KEYWORDS = [
   "shot",
   "shooting",
@@ -115,6 +128,38 @@ function groupTriplets(data: Triplet[]): TripletGroup[] {
   );
 }
 
+function groupByStory(data: Triplet[]): StoryGroup[] {
+  const groups = new Map<string, StoryGroup>();
+  data.forEach((triplet) => {
+    const key = triplet.story_id || triplet.url || triplet.title;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.items.push(triplet);
+      if (
+        triplet.publishedAt &&
+        (!existing.publishedAt ||
+          new Date(triplet.publishedAt).getTime() >
+            new Date(existing.publishedAt).getTime())
+      ) {
+        existing.publishedAt = triplet.publishedAt;
+      }
+    } else {
+      groups.set(key, {
+        storyId: key,
+        title: triplet.title,
+        url: triplet.url,
+        publishedAt: triplet.publishedAt,
+        items: [triplet],
+      });
+    }
+  });
+  return Array.from(groups.values()).sort((a, b) => {
+    const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    return bTime - aTime;
+  });
+}
+
 function getMarkerColor(publishedAt: string): string {
   const hoursAgo =
     (Date.now() - new Date(publishedAt).getTime()) / (1000 * 60 * 60);
@@ -144,24 +189,49 @@ function isSevereTriplet(triplet: Triplet): boolean {
   return SEVERE_KEYWORDS.some((keyword) => blob.includes(keyword));
 }
 
+function formatPopulationLabel(value?: string | null): string {
+  if (!value) {
+    return "";
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return "";
+  }
+  return numberFormatter.format(parsed);
+}
+
 const MapBounds: React.FC = () => {
   const map = useMap();
   const bounds = useMemo(
     () =>
-      [
+      L.latLngBounds(
         [24.0, -125.0],
         [50.0, -66.5],
-      ] satisfies LatLngBoundsExpression,
+      ).pad(0.12) satisfies LatLngBoundsExpression,
     [],
   );
   useEffect(() => {
     map.setMaxBounds(bounds);
     map.setMinZoom(3);
+    map.options.maxBoundsViscosity = 0.6;
   }, [map, bounds]);
   return null;
 };
 
+const getInitialLanguage = (): Language => {
+  if (typeof window === "undefined") {
+    return DEFAULT_LANGUAGE;
+  }
+  const stored = window.localStorage.getItem("icemap_lang");
+  if (stored === "en" || stored === "es") {
+    return stored;
+  }
+  const browser = navigator.language?.toLowerCase() ?? "";
+  return browser.startsWith("es") ? "es" : DEFAULT_LANGUAGE;
+};
+
 const TripletsMap = () => {
+  const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [sinceHours, setSinceHours] = useState<TimeRangeValue>("all");
   const [triplets, setTriplets] = useState<Triplet[]>([]);
   const [generalTriplets, setGeneralTriplets] = useState<Triplet[]>([]);
@@ -177,6 +247,58 @@ const TripletsMap = () => {
   const [selectedFieldOffice, setSelectedFieldOffice] = useState<FieldOffice | null>(null);
   const [selectedDetentionFacility, setSelectedDetentionFacility] =
     useState<DetentionFacility | null>(null);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showMethodology, setShowMethodology] = useState(false);
+  const mapRef = useRef<L.Map | null>(null);
+  const t = TRANSLATIONS[language];
+  const formatPublishedAt = (value?: string | null) => {
+    if (!value) {
+      return t.unknownDate;
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return t.unknownDate;
+    }
+    return formatter.format(parsed);
+  };
+  const formatTripletLine = (item: Triplet) => {
+    const who = item.who?.trim();
+    const what = item.what?.trim();
+    if (who && what) {
+      return { label: `${who} ${what}`, hasWho: true, who, what };
+    }
+    if (who) {
+      return { label: who, hasWho: true, who, what: "" };
+    }
+    if (what) {
+      return { label: what, hasWho: false, who: "", what };
+    }
+    return { label: "", hasWho: false, who: "", what: "" };
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("icemap_lang", language);
+    }
+  }, [language]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const handleHash = () => {
+      if (window.location.hash === "#about") {
+        setShowAbout(true);
+        setShowMethodology(false);
+      } else if (window.location.hash === "#methodology") {
+        setShowMethodology(true);
+        setShowAbout(false);
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -289,9 +411,14 @@ const TripletsMap = () => {
         ),
     [triplets],
   );
+  const groupedTriplets = useMemo(() => groupByStory(sortedTriplets), [sortedTriplets]);
+  const groupedGeneralTriplets = useMemo(
+    () => groupByStory(generalTriplets),
+    [generalTriplets],
+  );
   const totalEvents = triplets.length + generalTriplets.length;
   const activeRangeLabel =
-    TIME_RANGES.find((range) => range.value === sinceHours)?.label ?? "custom";
+    TIME_RANGES.find((range) => range.value === sinceHours)?.label[language] ?? "custom";
 
   const facilityIcon = useMemo(
     () =>
@@ -316,8 +443,8 @@ const TripletsMap = () => {
       new L.DivIcon({
         className: "custom-marker field-office-marker",
         html: "<div>▲</div>",
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
       }),
     [],
   );
@@ -331,6 +458,7 @@ const TripletsMap = () => {
       }),
     [],
   );
+  const detentionIconCache = useMemo(() => new Map<string, L.DivIcon>(), []);
   const childCampIcon = useMemo(
     () =>
       new L.DivIcon({
@@ -341,9 +469,78 @@ const TripletsMap = () => {
       }),
     [],
   );
+  const popupProps = {
+    autoPan: true,
+    autoPanPadding: [32, 32] as L.PointExpression,
+    autoPanPaddingTopLeft: [80, 80] as L.PointExpression,
+    autoPanPaddingBottomRight: [40, 40] as L.PointExpression,
+    maxWidth: 320,
+    maxHeight: 240,
+  };
 
   const isMobile = viewport === "mobile";
   const isTablet = viewport === "tablet";
+  const getDetentionIcon = (label: string) => {
+    if (!label) {
+      return detentionCampIcon;
+    }
+    const cached = detentionIconCache.get(label);
+    if (cached) {
+      return cached;
+    }
+    const icon = new L.DivIcon({
+      className: "custom-marker camp-marker detention-marker",
+      html: `<div class="detention-marker-wrap"><div class="detention-marker-symbol">☠</div><div class="detention-marker-label">${label}</div></div>`,
+      iconSize: [40, 36],
+      iconAnchor: [20, 18],
+    });
+    detentionIconCache.set(label, icon);
+    return icon;
+  };
+  const focusMapOnMarker = (lat: number, lon: number) => {
+    if (isMobile) {
+      return;
+    }
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+    const targetZoom = Math.min(map.getZoom() + 1, 8);
+    map.flyTo([lat, lon], targetZoom, { duration: 0.6 });
+    map.panBy([0, -140], { animate: true });
+  };
+  const clearHash = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const base = window.location.pathname + window.location.search;
+    window.history.replaceState(null, "", base);
+  };
+  const openAbout = () => {
+    setShowAbout(true);
+    setShowMethodology(false);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "#about");
+    }
+  };
+  const openMethodology = () => {
+    setShowMethodology(true);
+    setShowAbout(false);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "#methodology");
+    }
+  };
+  const closeOverlays = () => {
+    setShowAbout(false);
+    setShowMethodology(false);
+    clearHash();
+  };
+  const openFeedback = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.open(FEEDBACK_URL, "_blank", "noopener");
+  };
   const selectedItems = useMemo(() => {
     if (!selectedGroup) {
       return [] as Triplet[];
@@ -382,14 +579,14 @@ const TripletsMap = () => {
     <div className="brand-card">
       <div className="brand-mark">ICE</div>
       <div>
-        <h2>Incidents Map</h2>
-        <p>Interactive overview of ICE-related events.</p>
+        <h2>{t.appName}</h2>
+        <p>{t.appTagline}</p>
       </div>
     </div>
   );
   const legendCard = (
     <div className="legend-section">
-      <h3>Recency</h3>
+      <h3>{t.keyLabel}</h3>
       <ul>
         {LEGEND.map((entry) => (
           <li key={entry.label}>
@@ -397,15 +594,16 @@ const TripletsMap = () => {
             {entry.label}
           </li>
         ))}
+        <li key="severe">
+          <span className="legend-dot" style={{ backgroundColor: SEVERE_COLOR }} />
+          {t.severeLegend}
+        </li>
       </ul>
     </div>
   );
   const layerControls = (
     <div className="info-card layer-card">
-      <p>
-        Zoom + drag to explore. Click a marker to see who/what/where and open the source
-        article.
-      </p>
+      <p>{t.zoomHint}</p>
       <div className="layer-toggle">
         <span className="layer-icon facility-marker">▲</span>
         <label>
@@ -414,7 +612,7 @@ const TripletsMap = () => {
             checked={showFacilities}
             onChange={() => setShowFacilities((prev) => !prev)}
           />{" "}
-          ICE facilities ({FACILITY_COUNT})
+          {t.facilitiesLabel} ({FACILITY_COUNT})
         </label>
       </div>
       <div className="layer-toggle">
@@ -425,7 +623,7 @@ const TripletsMap = () => {
             checked={showChildCamps}
             onChange={() => setShowChildCamps((prev) => !prev)}
           />{" "}
-          Unaccompanied children camps ({CHILD_CAMP_COUNT})
+          {t.childCampsLabel} ({CHILD_CAMP_COUNT})
         </label>
       </div>
       <div className="layer-toggle">
@@ -436,7 +634,7 @@ const TripletsMap = () => {
             checked={showDetentionFacilities}
             onChange={() => setShowDetentionFacilities((prev) => !prev)}
           />{" "}
-          ICE detention facilities ({detentionFacilities.length})
+          {t.detentionFacilitiesLabel} ({detentionFacilities.length})
         </label>
       </div>
       <div className="layer-toggle">
@@ -447,39 +645,50 @@ const TripletsMap = () => {
             checked={showFieldOffices}
             onChange={() => setShowFieldOffices((prev) => !prev)}
           />{" "}
-          Field offices ({FIELD_OFFICES.length})
+          {t.fieldOfficesShort} ({FIELD_OFFICES.length})
         </label>
       </div>
     </div>
   );
   const generalCoverageBody =
-    generalTriplets.length === 0 ? (
-      <p>No general national coverage in this time range.</p>
+    groupedGeneralTriplets.length === 0 ? (
+      <p>{t.generalCoverageEmpty}</p>
     ) : (
       <ul>
-        {generalTriplets.map((item) => (
-          <li key={item.story_id + item.who}>
+        {groupedGeneralTriplets.map((group) => (
+          <li key={group.storyId}>
             <div className="general-title">
-              {item.url ? (
-                <a href={item.url} target="_blank" rel="noreferrer">
-                  {item.title}
+              {group.url ? (
+                <a href={group.url} target="_blank" rel="noreferrer">
+                  {group.title}
                 </a>
               ) : (
-                item.title
+                group.title
               )}
             </div>
-            {(item.who || item.what) && (
-              <div className="general-summary">
-                <strong>Summary:</strong>{" "}
-                <span>
-                  {item.who && <strong>{item.who}</strong>} {item.what}
-                </span>
+            <div>{formatPublishedAt(group.publishedAt)}</div>
+            <div className="general-summary">
+              <strong>{t.summaryLabel}:</strong>
+              <div className="summary-lines">
+                {group.items
+                  .map((item) => ({ item, line: formatTripletLine(item) }))
+                  .filter(({ line }) => line.label)
+                  .map(({ item, line }) => (
+                    <div className="summary-line" key={item.story_id + item.who + item.what}>
+                      {line.hasWho ? (
+                        <>
+                          <strong>{line.who}</strong> {line.what}
+                        </>
+                      ) : (
+                        line.label
+                      )}
+                    </div>
+                  ))}
               </div>
-            )}
-            <div>{formatter.format(new Date(item.publishedAt))}</div>
-            {item.url && (
-              <a href={item.url} target="_blank" rel="noreferrer">
-                View article
+            </div>
+            {group.url && (
+              <a href={group.url} target="_blank" rel="noreferrer">
+                {t.viewArticle}
               </a>
             )}
           </li>
@@ -488,58 +697,110 @@ const TripletsMap = () => {
     );
   const generalPanel = (
     <section className="general-panel">
-      <h2>General coverage</h2>
+      <h2>{t.generalCoverage}</h2>
       {generalCoverageBody}
     </section>
   );
   const resourcesView = (
     <div className="resources-view">
-      {RESOURCE_SECTIONS.map((section) => (
+      {getResourceSections(language).map((section) => (
         <section key={section.title} className="resource-card">
           <h2>{section.title}</h2>
           <ul>
-            {section.links.map((link) => (
-              <li key={link.url}>
-                <a href={link.url} target="_blank" rel="noreferrer">
-                  {link.label}
-                </a>
-                {link.description && <p>{link.description}</p>}
-              </li>
-            ))}
+            {section.links.map((link) => {
+              const isAnchor = link.url.startsWith("#");
+              const onClick = isAnchor
+                ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+                    event.preventDefault();
+                    if (link.url === "#about") {
+                      openAbout();
+                    } else if (link.url === "#methodology") {
+                      openMethodology();
+                    }
+                  }
+                : undefined;
+              return (
+                <li key={link.url}>
+                  <a
+                    href={link.url}
+                    target={isAnchor ? undefined : "_blank"}
+                    rel={isAnchor ? undefined : "noreferrer"}
+                    onClick={onClick}
+                  >
+                    {link.label}
+                  </a>
+                  {link.description && <p>{link.description}</p>}
+                </li>
+              );
+            })}
           </ul>
+        </section>
+      ))}
+    </div>
+  );
+  const chartsView = (
+    <div className="resources-view">
+      {CHARTS.map((chart) => (
+        <section key={chart.href} className="resource-card chart-card">
+          <h2>{chart.title}</h2>
+          <a href={chart.href} target="_blank" rel="noreferrer">
+            <img src={chart.imgSrc} alt={chart.imgAlt} />
+          </a>
+          <p className="chart-credit">
+            {chart.creditText}{" "}
+            <a href={chart.creditHref} target="_blank" rel="noreferrer">
+              Statista
+            </a>
+            .
+          </p>
         </section>
       ))}
     </div>
   );
   const listView = (
     <div className="list-view">
-      <h2>Latest incidents</h2>
-      {sortedTriplets.length === 0 ? (
-        <p>No incidents in this window.</p>
+      <h2>{t.latestIncidents}</h2>
+      {groupedTriplets.length === 0 ? (
+        <p>{t.noIncidents}</p>
       ) : (
-        sortedTriplets.slice(0, 200).map((item) => (
-          <article className="list-card" key={item.story_id + item.who}>
+        groupedTriplets.slice(0, 200).map((group) => (
+          <article className="list-card" key={group.storyId}>
             <div className="list-card-meta">
-              {formatter.format(new Date(item.publishedAt))} •{" "}
-              {item.where_text || `${item.lat.toFixed(2)}, ${item.lon.toFixed(2)}`}
+              {formatPublishedAt(group.publishedAt)}
             </div>
             <h3>
-              {item.url ? (
-                <a href={item.url} target="_blank" rel="noreferrer">
-                  {item.title}
+              {group.url ? (
+                <a href={group.url} target="_blank" rel="noreferrer">
+                  {group.title}
                 </a>
               ) : (
-                item.title
+                group.title
               )}
             </h3>
-            <p>
-              <strong>{item.who}</strong> {item.what}
-            </p>
+            <div className="general-summary">
+              <strong>{t.summaryLabel}:</strong>
+              <div className="summary-lines">
+                {group.items
+                  .map((item) => ({ item, line: formatTripletLine(item) }))
+                  .filter(({ line }) => line.label)
+                  .map(({ item, line }) => (
+                    <div className="summary-line" key={item.story_id + item.who + item.what}>
+                      {line.hasWho ? (
+                        <>
+                          <strong>{line.who}</strong> {line.what}
+                        </>
+                      ) : (
+                        line.label
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
           </article>
         ))
       )}
       <div className="list-general">
-        <h3>General coverage</h3>
+        <h3>{t.generalCoverage}</h3>
         {generalCoverageBody}
       </div>
     </div>
@@ -551,21 +812,34 @@ const TripletsMap = () => {
         className={viewMode === "map" ? "active" : ""}
         onClick={() => setViewMode("map")}
       >
-        Map
+        {t.mapTab}
       </button>
       <button
         type="button"
         className={viewMode === "list" ? "active" : ""}
         onClick={() => setViewMode("list")}
       >
-        Headlines
+        {t.headlinesTab}
       </button>
       <button
         type="button"
         className={viewMode === "resources" ? "active" : ""}
         onClick={() => setViewMode("resources")}
       >
-        Resources
+        {t.resourcesTab}
+      </button>
+      <button
+        type="button"
+        className={viewMode === "charts" ? "active" : ""}
+        onClick={() => setViewMode("charts")}
+      >
+        {t.chartsTab}
+      </button>
+      <button type="button" className="ghost" onClick={openAbout}>
+        {ABOUT_CONTENT.title[language]}
+      </button>
+      <button type="button" className="ghost" onClick={openFeedback}>
+        {t.feedbackTab}
       </button>
     </div>
   );
@@ -574,34 +848,52 @@ const TripletsMap = () => {
     <div className={`map-page viewport-${viewport}`}>
       <header className="map-header">
         <div>
-          <h1>ICE Incidents Map</h1>
+          <h1>{t.appName}</h1>
           <p>
-            Showing {totalEvents} events{" "}
+            {t.headerIntro} {t.showingEvents} {totalEvents}{" "}
+            {totalEvents === 1 ? t.eventSingular : t.eventPlural}{" "}
             {sinceHours === "all"
-              ? "across all ingested data"
-              : `from the last ${activeRangeLabel}`}
-            — {triplets.length} mapped, {generalTriplets.length} general coverage
+              ? t.acrossAllData
+              : `${t.fromLast} ${activeRangeLabel}`}
+            — {triplets.length} {t.mappedLabel}, {generalTriplets.length}{" "}
+            {t.generalCoverageLabel}
           </p>
         </div>
         <div className="controls">
           {TIME_RANGES.map((range) => (
             <button
-              key={range.label}
+              key={range.label.en}
               className={range.value === sinceHours ? "active" : ""}
               onClick={() => setSinceHours(range.value)}
               type="button"
             >
-              {range.label}
+              {range.label[language]}
             </button>
           ))}
+          <div className="language-select">
+            <label htmlFor="icemap-language">{t.languageLabel}</label>
+            <select
+              id="icemap-language"
+              value={language}
+              onChange={(event) => setLanguage(event.target.value as Language)}
+            >
+              {Object.entries(LANGUAGE_LABELS).map(([code, label]) => (
+                <option key={code} value={code}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </header>
       {!isMobile && viewTabs}
       {error && <div className="banner error">{error}</div>}
-      {loading && <div className="banner">Loading…</div>}
+      {loading && <div className="banner">{t.loading}</div>}
       <div className={`map-content ${isMobile ? "mobile" : ""}`}>
         {viewMode === "resources" ? (
           <div className="resources-view-wrapper">{resourcesView}</div>
+        ) : viewMode === "charts" ? (
+          <div className="resources-view-wrapper">{chartsView}</div>
         ) : viewMode === "list" ? (
           listView
         ) : (
@@ -612,6 +904,9 @@ const TripletsMap = () => {
                 zoom={4}
                 scrollWheelZoom
                 className="leaflet-map"
+                whenCreated={(map) => {
+                  mapRef.current = map;
+                }}
               >
                 <MapBounds />
                 <TileLayer
@@ -636,16 +931,20 @@ const TripletsMap = () => {
                     new Date(b.publishedAt).getTime() -
                     new Date(a.publishedAt).getTime(),
                 );
+              const storyGroups = groupByStory(sortedItems);
+              const articleCount = storyGroups.length;
               const primary = sortedItems[0];
-              const markerHandlers = isMobile
-                ? {
-                    click() {
-                      setSelectedGroupKey(group.key);
-                      setSelectedFieldOffice(null);
-                      setSelectedDetentionFacility(null);
-                    },
+              const markerHandlers = {
+                click() {
+                  if (isMobile) {
+                    setSelectedGroupKey(group.key);
+                    setSelectedFieldOffice(null);
+                    setSelectedDetentionFacility(null);
+                    return;
                   }
-                : undefined;
+                  focusMapOnMarker(group.lat, group.lon);
+                },
+              };
               return (
                 <CircleMarker
                   key={group.key}
@@ -665,33 +964,53 @@ const TripletsMap = () => {
                         </>
                       ) : (
                         <div>
-                          <strong>{count} event{count > 1 ? "s" : ""}</strong>
+                          <strong>
+                            {count} {count === 1 ? t.eventSingular : t.eventPlural}
+                          </strong>
                         </div>
                       )}
                       {count > 1 && (
-                        <div>+ {count - 1} more nearby — click for details.</div>
+                        <div>
+                          + {count - 1} {t.moreNearby}
+                        </div>
                       )}
                     </Tooltip>
                   )}
                   {!isMobile && (
-                    <Popup>
-                      <strong>{count} event{count > 1 ? "s" : ""}</strong>
+                    <Popup {...popupProps}>
+                      <strong>
+                        {articleCount}{" "}
+                        {articleCount === 1 ? t.articleSingular : t.articlePlural}
+                      </strong>
                       <ul className="popup-event-list">
-                        {sortedItems.map((item) => (
-                          <li key={item.story_id + item.who}>
-                            <div>
-                              <strong>{item.who}</strong> {item.what}
-                            </div>
+                        {storyGroups.map((story) => (
+                          <li key={story.storyId}>
                             <div className="popup-article-title">
-                              {item.url ? (
-                                <a href={item.url} target="_blank" rel="noreferrer">
-                                  {item.title}
+                              {story.url ? (
+                                <a href={story.url} target="_blank" rel="noreferrer">
+                                  {story.title}
                                 </a>
                               ) : (
-                                item.title
+                                story.title
                               )}
                             </div>
-                            <div>{formatter.format(new Date(item.publishedAt))}</div>
+                            <div>{formatPublishedAt(story.publishedAt)}</div>
+                            <div className="summary-lines">
+                              {story.items
+                                .map((item) => ({ item, line: formatTripletLine(item) }))
+                                .filter(({ line }) => line.label)
+                                .map(({ item, line }) => (
+                                  <div className="summary-line" key={item.story_id + item.who + item.what}>
+                                    {line.hasWho ? (
+                                      <>
+                                        <strong>{line.who}</strong> {line.what}
+                                      </>
+                                    ) : (
+                                      line.label
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
                           </li>
                         ))}
                       </ul>
@@ -706,6 +1025,11 @@ const TripletsMap = () => {
                   key={`${loc.name}-facility`}
                   position={[loc.latitude, loc.longitude]}
                   icon={facilityIcon}
+                  eventHandlers={{
+                    click() {
+                      focusMapOnMarker(loc.latitude, loc.longitude);
+                    },
+                  }}
                 >
                   {!isMobile && (
                     <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
@@ -713,9 +1037,9 @@ const TripletsMap = () => {
                     </Tooltip>
                   )}
                   {!isMobile && (
-                    <Popup>
+                    <Popup {...popupProps}>
                       <strong>{loc.name}</strong>
-                      <div>ICE facility</div>
+                      <div>{t.facilitiesLabel}</div>
                       {loc.addressFull && (
                         <div className="popup-address">{loc.addressFull}</div>
                       )}
@@ -730,6 +1054,11 @@ const TripletsMap = () => {
                   key={`${loc.name}-childcamp`}
                   position={[loc.latitude, loc.longitude]}
                   icon={childCampIcon}
+                  eventHandlers={{
+                    click() {
+                      focusMapOnMarker(loc.latitude, loc.longitude);
+                    },
+                  }}
                 >
                   {!isMobile && (
                     <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
@@ -737,9 +1066,9 @@ const TripletsMap = () => {
                     </Tooltip>
                   )}
                   {!isMobile && (
-                    <Popup>
+                    <Popup {...popupProps}>
                       <strong>{loc.name}</strong>
-                      <div>Unaccompanied children site</div>
+                      <div>{t.unaccompaniedChildrenSite}</div>
                       {loc.addressFull && (
                         <div className="popup-address">{loc.addressFull}</div>
                       )}
@@ -753,18 +1082,20 @@ const TripletsMap = () => {
                 <Marker
                   key={`${facility.name}-${facility.city}-${facility.state}`}
                   position={[facility.latitude, facility.longitude]}
-                  icon={detentionCampIcon}
-                  eventHandlers={
-                    isMobile
-                      ? {
-                          click() {
-                            setSelectedDetentionFacility(facility);
-                            setSelectedGroupKey(null);
-                            setSelectedFieldOffice(null);
-                          },
-                        }
-                      : undefined
-                  }
+                  icon={getDetentionIcon(
+                    formatPopulationLabel(facility.tracAverageDailyPopulation),
+                  )}
+                  eventHandlers={{
+                    click() {
+                      if (isMobile) {
+                        setSelectedDetentionFacility(facility);
+                        setSelectedGroupKey(null);
+                        setSelectedFieldOffice(null);
+                        return;
+                      }
+                      focusMapOnMarker(facility.latitude, facility.longitude);
+                    },
+                  }}
                 >
                   {!isMobile && (
                     <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
@@ -772,16 +1103,36 @@ const TripletsMap = () => {
                     </Tooltip>
                   )}
                   {!isMobile && (
-                    <Popup>
+                    <Popup {...popupProps}>
                       <strong>{facility.name}</strong>
-                      <div>Detention facility</div>
+                      <div>{t.detentionFacilityType}</div>
                       <div className="popup-address">
                         {facility.addressFull ||
                           `${facility.city}, ${facility.state} ${facility.postalCode}`}
                       </div>
+                      {facility.tracTypeDetailed && (
+                        <div>
+                          {t.tracTypeLabel}: {facility.tracTypeDetailed}
+                        </div>
+                      )}
+                      {facility.tracAverageDailyPopulation && (
+                        <div>
+                          {t.tracAverageDailyPopulationLabel}: {facility.tracAverageDailyPopulation}
+                        </div>
+                      )}
+                      {facility.tracGuaranteedMinimum && (
+                        <div>
+                          {t.tracGuaranteedMinimumLabel}: {facility.tracGuaranteedMinimum}
+                        </div>
+                      )}
+                      {facility.tracAsOf && (
+                        <div>
+                          {t.tracAsOfLabel}: {facility.tracAsOf}
+                        </div>
+                      )}
                       {facility.detailUrl && (
                         <a href={facility.detailUrl} target="_blank" rel="noreferrer">
-                          View facility page
+                          {t.viewFacility}
                         </a>
                       )}
                     </Popup>
@@ -794,16 +1145,16 @@ const TripletsMap = () => {
                   key={`${office.name}-${office.city}-${office.state}`}
                   position={[office.latitude, office.longitude]}
                   icon={fieldOfficeIcon}
-                  eventHandlers={
-                    isMobile
-                      ? {
-                          click() {
-                            setSelectedFieldOffice(office);
-                            setSelectedGroupKey(null);
-                          },
-                        }
-                      : undefined
-                  }
+                  eventHandlers={{
+                    click() {
+                      if (isMobile) {
+                        setSelectedFieldOffice(office);
+                        setSelectedGroupKey(null);
+                        return;
+                      }
+                      focusMapOnMarker(office.latitude, office.longitude);
+                    },
+                  }}
                 >
                   {!isMobile && (
                     <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
@@ -811,9 +1162,9 @@ const TripletsMap = () => {
                     </Tooltip>
                   )}
                   {!isMobile && (
-                    <Popup>
+                    <Popup {...popupProps}>
                       <strong>{office.name}</strong>
-                      <div>Field office</div>
+                      <div>{t.fieldOfficeType}</div>
                       <div className="popup-address">
                         {office.addressFull || `${office.city}, ${office.state}`}
                       </div>
@@ -843,6 +1194,9 @@ const TripletsMap = () => {
       {isMobile && viewMode === "resources" && (
         <div className="mobile-side-panels resources-mobile">{resourcesView}</div>
       )}
+      {isMobile && viewMode === "charts" && (
+        <div className="mobile-side-panels resources-mobile">{chartsView}</div>
+      )}
       {isMobile && (
         <>
           {viewMode === "map" && (
@@ -850,7 +1204,7 @@ const TripletsMap = () => {
               {legendCard}
               {layerControls}
               <section className="general-panel mobile">
-                <h2>General coverage</h2>
+                <h2>{t.generalCoverage}</h2>
                 {generalCoverageBody}
               </section>
             </div>
@@ -861,21 +1215,34 @@ const TripletsMap = () => {
                 className={viewMode === "map" ? "active" : ""}
                 onClick={() => setViewMode("map")}
               >
-                Map
+                {t.mapTab}
               </button>
               <button
                 type="button"
                 className={viewMode === "list" ? "active" : ""}
                 onClick={() => setViewMode("list")}
               >
-                Headlines
+                {t.headlinesTab}
               </button>
               <button
                 type="button"
                 className={viewMode === "resources" ? "active" : ""}
                 onClick={() => setViewMode("resources")}
               >
-                Resources
+                {t.resourcesTabMobile ?? t.resourcesTab}
+              </button>
+              <button
+                type="button"
+                className={viewMode === "charts" ? "active" : ""}
+                onClick={() => setViewMode("charts")}
+              >
+                {t.chartsTab}
+              </button>
+              <button type="button" onClick={openAbout}>
+                {ABOUT_CONTENT.title[language]}
+              </button>
+              <button type="button" onClick={openFeedback}>
+                {t.feedbackTab}
               </button>
           </nav>
         </>
@@ -888,10 +1255,12 @@ const TripletsMap = () => {
               <div>
                 <div className="mobile-event-sheet-meta">
                   {selectedGroup
-                    ? `${selectedItems.length} event${selectedItems.length === 1 ? "" : "s"}`
+                    ? `${selectedItems.length} ${
+                        selectedItems.length === 1 ? t.eventSingular : t.eventPlural
+                      }`
                     : selectedFieldOffice
-                      ? "Field office"
-                      : "Detention facility"}
+                      ? t.fieldOfficeType
+                      : t.detentionFacilityType}
                 </div>
                 <h3>
                   {selectedGroup
@@ -903,7 +1272,7 @@ const TripletsMap = () => {
                 type="button"
                 className="sheet-close-btn"
                 onClick={clearSelection}
-                aria-label="Close details"
+                aria-label={t.closeLabel}
               >
                 ×
               </button>
@@ -913,7 +1282,7 @@ const TripletsMap = () => {
                 {selectedItems.map((item) => (
                   <li key={item.story_id + item.who}>
                     <div className="sheet-item-meta">
-                      {formatter.format(new Date(item.publishedAt))}
+                      {formatPublishedAt(item.publishedAt)}
                     </div>
                     <p className="sheet-item-text">
                       <strong>{item.who}</strong> {item.what}
@@ -938,7 +1307,7 @@ const TripletsMap = () => {
                     `${selectedFieldOffice.city}, ${selectedFieldOffice.state}`}
                 </p>
                 <p className="sheet-item-meta">
-                  Coordinates: {selectedFieldOffice.latitude.toFixed(3)}, {selectedFieldOffice.longitude.toFixed(3)}
+                  {t.coordinatesLabel}: {selectedFieldOffice.latitude.toFixed(3)}, {selectedFieldOffice.longitude.toFixed(3)}
                 </p>
               </div>
             )}
@@ -949,7 +1318,7 @@ const TripletsMap = () => {
                     `${selectedDetentionFacility.city}, ${selectedDetentionFacility.state} ${selectedDetentionFacility.postalCode}`}
                 </p>
                 <p className="sheet-item-meta">
-                  Coordinates: 
+                  {t.coordinatesLabel}: 
                   {selectedDetentionFacility.latitude !== null
                     ? selectedDetentionFacility.latitude.toFixed(3)
                     : "n/a"}
@@ -959,13 +1328,84 @@ const TripletsMap = () => {
                 </p>
                 {selectedDetentionFacility.detailUrl && (
                   <a href={selectedDetentionFacility.detailUrl} target="_blank" rel="noreferrer">
-                    Facility details
+                    {t.facilityDetails}
                   </a>
                 )}
               </div>
             )}
           </div>
         )}
+      {(showAbout || showMethodology) && (
+        <div className="modal-backdrop" onClick={closeOverlays}>
+          <div
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <h2>
+                  {showAbout
+                    ? getOverlayText(ABOUT_CONTENT.title, language)
+                    : getOverlayText(METHODOLOGY_CONTENT.title, language)}
+                </h2>
+                <p className="modal-subtitle">
+                  {showAbout
+                    ? getOverlayText(ABOUT_CONTENT.subtitle ?? { en: "", es: "" }, language)
+                    : getOverlayText(
+                        METHODOLOGY_CONTENT.subtitle ?? { en: "", es: "" },
+                        language,
+                      )}
+                </p>
+              </div>
+              <button type="button" className="modal-close" onClick={closeOverlays}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              {(showAbout ? ABOUT_CONTENT.sections : METHODOLOGY_CONTENT.sections).map(
+                (section) => (
+                  <section key={section.title.en}>
+                    <h3>{getOverlayText(section.title, language)}</h3>
+                    {section.paragraphs?.map((paragraph) => (
+                      <p key={paragraph.en}>{getOverlayText(paragraph, language)}</p>
+                    ))}
+                    {section.listItems && (
+                      <ul>
+                        {section.listItems.map((item) => (
+                          <li key={item.en}>{getOverlayText(item, language)}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {section.note && (
+                      <div className="modal-note">{getOverlayText(section.note, language)}</div>
+                    )}
+                  </section>
+                ),
+              )}
+              {showAbout && ABOUT_CONTENT.footer && (
+                <p className="modal-footer">{getOverlayText(ABOUT_CONTENT.footer, language)}</p>
+              )}
+              {showAbout && (
+                <div className="modal-actions">
+                  <button type="button" className="modal-secondary" onClick={openMethodology}>
+                    {METHODOLOGY_CONTENT.title[language]}
+                  </button>
+                  <a
+                    className="modal-secondary"
+                    href={FEEDBACK_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t.feedbackTab}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

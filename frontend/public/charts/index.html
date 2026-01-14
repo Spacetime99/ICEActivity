@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICEMap - Charts</title>
+    <meta
+      name="description"
+      content="ICEMap charts sourced from public reporting partners."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #0f172a;
+        --navy: #1e293b;
+        --olive: #647b4f;
+        --accent: #f97316;
+        --card: #ffffff;
+        --cream: #fff7ed;
+        --border: #e2e8f0;
+        --bg: #f8fafc;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 4rem;
+      }
+      .map-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: var(--cream);
+        border-bottom: 1px solid var(--border);
+        gap: 1rem;
+        flex-wrap: wrap;
+        border-radius: 1rem;
+      }
+      .brand-card {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .brand-mark {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--accent);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      .brand-card h1 {
+        font-size: 1.6rem;
+        margin: 0;
+        color: var(--navy);
+      }
+      .brand-card p {
+        margin: 0.15rem 0 0;
+        color: #475569;
+        font-size: 0.95rem;
+      }
+      .page-nav {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .nav-pill {
+        border: 1px solid #cbd5f5;
+        background: #fff;
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        font-weight: 600;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .nav-pill.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      h2 {
+        margin-top: 2rem;
+        font-size: 1.25rem;
+        color: var(--navy);
+      }
+      p {
+        line-height: 1.65;
+      }
+      .chart-card {
+        margin-top: 1.5rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.85rem;
+        padding: 1.25rem;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+      }
+      .chart-card img {
+        width: 100%;
+        height: auto;
+        max-width: 960px;
+      }
+      .chart-credit {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-top: 0.75rem;
+      }
+      footer {
+        margin-top: 3rem;
+        font-size: 0.9rem;
+        color: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="map-header">
+        <div class="brand-card">
+          <div class="brand-mark">ICE</div>
+          <div>
+            <h1>ICEMap</h1>
+            <p>ICE Incident News Map — charts and external data sources.</p>
+          </div>
+        </div>
+        <nav class="page-nav">
+          <a class="nav-pill" href="/">Map</a>
+          <a class="nav-pill" href="/about/">About</a>
+          <a class="nav-pill" href="/methodology/">Methodology</a>
+          <a class="nav-pill active" href="/charts/">Charts</a>
+        </nav>
+      </header>
+
+      <section>
+        <h2>Featured chart</h2>
+        <p>
+          These charts are embedded from external data partners. Each chart links back to
+          its source and includes the required attribution.
+        </p>
+        <div class="chart-card">
+          <a
+            href="https://www.statista.com/chart/35665/number-of-ice-detainees/"
+            title="Infographic: Number of ICE Detainees Surged 65% in 2025 | Statista"
+          >
+            <img
+              src="https://cdn.statcdn.com/Infographic/images/normal/35665.jpeg"
+              alt="Infographic: Number of ICE Detainees Surged 65% in 2025 | Statista"
+            />
+          </a>
+          <div class="chart-credit">
+            You will find more infographics at
+            <a href="https://www.statista.com/chartoftheday/">Statista</a>.
+          </div>
+        </div>
+        <div class="chart-card">
+          <a
+            href="https://www.statista.com/chart/35648/civilians-killed-wounded-shot-at-by-immigration-officers-in-the-united-states/"
+            title="Infographic: Woman Killed in Minneapolis Not the First ICE Shooting | Statista"
+          >
+            <img
+              src="https://cdn.statcdn.com/Infographic/images/normal/35648.jpeg"
+              alt="Infographic: Woman Killed in Minneapolis Not the First ICE Shooting | Statista"
+            />
+          </a>
+          <div class="chart-credit">
+            You will find more infographics at
+            <a href="https://www.statista.com/chartoftheday/">Statista</a>.
+          </div>
+        </div>
+        <div class="chart-card">
+          <a
+            href="https://www.statista.com/statistics/183489/population-of-the-us-by-ethnicity-since-2000/"
+            rel="nofollow"
+          >
+            <img
+              src="https://www.statista.com/graphic/1/183489/population-of-the-us-by-ethnicity-since-2000.jpg"
+              alt="Statistic: Resident population of the United States in July 2000 and July 2024, by race (in millions) | Statista"
+            />
+          </a>
+          <div class="chart-credit">
+            Find more statistics at
+            <a href="https://www.statista.com" rel="nofollow">Statista</a>.
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        Have another chart to include? Send the embed code or source link and we will add it.
+      </footer>
+    </main>
+  </body>
+</html>

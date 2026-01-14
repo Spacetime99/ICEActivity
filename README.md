@@ -93,9 +93,23 @@ python scripts/extract_triplets.py \
   --max-new-tokens 160 \
   --repetition-penalty 1.05
 ```
+Helpful switches:
+- `--input-file datasets/news_ingest/news_reports_20260110T030329Z.jsonl`: re-run a specific dump without touching the rest.
+- `--process-all-dumps`: walk every `news_reports_*.jsonl` (oldest → newest) so you can rebuild the entire backlog after fixing GPU memory.
+
 Outputs:
 - JSONL: `datasets/news_ingest/triplets_<timestamp>.jsonl`
 - SQLite index: `datasets/news_ingest/triplets_index.sqlite` (one row per triplet, keyed by story_id+who+what+where)
+
+To backfill historical triplets (e.g., after moving machines), first copy the archived
+`triplets_*.jsonl` files into `datasets/news_ingest`, then hydrate them into the SQLite index
+without re-running the LLM:
+```
+python scripts/extract_triplets.py \
+  --input-dir datasets/news_ingest \
+  --output-dir datasets/news_ingest \
+  --hydrate-existing
+```
 
 ## Scheduling the pipeline
 The helper script `scripts/run_ingest_and_extract.sh` chains a full ingest + triplet extraction run, activates the repo virtualenv if needed, and appends logs to `logs/ingest.log`. You can wire it up to cron or systemd:

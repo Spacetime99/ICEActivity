@@ -628,6 +628,8 @@ LOCAL_RSS_FEEDS: list[RSSFeedConfig] = [
     # (iHeart RSS endpoints redirect to HTML apps; temporarily removed.)
     # Supplemental RSS.app feed (politics stream with immigration coverage)
     RSSFeedConfig(name="rssapp-cnn-politics", url="https://rss.app/feeds/ZaG4vCohPDJWTwru.xml"),
+    # Substack (may provide partial content depending on paywall settings).
+    RSSFeedConfig(name="substack-briantylercohen", url="https://plus.briantylercohen.com/feed"),
 ]
 
 WEB_PAGE_SOURCES: list[HtmlPageConfig] = [
@@ -2260,18 +2262,25 @@ def build_default_sources(
     gdelt_max_days: int | None = 7,
     newsapi_page_size: int = 100,
     skip_newsapi: bool = False,
+    rss_feed_names: Sequence[str] | None = None,
+    rss_only: bool = False,
 ) -> List[BaseNewsSource]:
     rss_feeds = [*AP_RSS_FEEDS, *LOCAL_RSS_FEEDS, *NATIONAL_RSS_FEEDS]
+    if rss_feed_names:
+        selected = {name.strip().lower() for name in rss_feed_names if name.strip()}
+        rss_feeds = [feed for feed in rss_feeds if feed.name.lower() in selected]
     newsapi_key = os.getenv("NEWSAPI_KEY")
-    sources: List[BaseNewsSource] = [
-        RSSFeedSource(rss_feeds, include_all=include_all_rss),
+    sources: List[BaseNewsSource] = [RSSFeedSource(rss_feeds, include_all=include_all_rss)]
+    if rss_only:
+        return sources
+    sources.append(
         GdeltDocSource(
             max_records=gdelt_max_records,
             start_date=from_date,
             end_date=to_date,
             max_days=gdelt_max_days,
-        ),
-    ]
+        )
+    )
     if WEB_PAGE_SOURCES:
         sources.append(HtmlPageSource(WEB_PAGE_SOURCES, include_all=include_all_rss))
     if not skip_newsapi:
@@ -2323,6 +2332,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--include-all-rss",
         action="store_true",
         help="Disable RSS keyword filtering so every entry is fetched (useful for debugging).",
+    )
+    parser.add_argument(
+        "--rss-feed-name",
+        action="append",
+        default=None,
+        help="Limit RSS ingestion to specific feed name(s). Can be repeated.",
+    )
+    parser.add_argument(
+        "--rss-only",
+        action="store_true",
+        help="Only run RSS ingestion (skip GDELT, HTML pages, and NewsAPI).",
     )
     parser.add_argument(
         "--print-headlines",
@@ -2445,6 +2465,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             gdelt_max_days=args.gdelt_max_days,
             newsapi_page_size=args.newsapi_page_size,
             skip_newsapi=args.skip_newsapi,
+            rss_feed_names=args.rss_feed_name,
+            rss_only=args.rss_only,
         ),
         args.output_dir,
         print_headlines=args.print_headlines,

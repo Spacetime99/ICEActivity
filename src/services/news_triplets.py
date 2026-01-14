@@ -56,6 +56,34 @@ MANUAL_COORDINATES = {
     "afghanistan": (33.93911, 67.709953),
     "mexico": (23.6345, -102.5528),
 }
+MIN_ARTICLE_TEXT_LENGTH = 200
+MAX_TRIPLETS_PER_ARTICLE = 2
+
+DATE_FROM_URL_PATTERNS = [
+    re.compile(r"/(20\d{2})/(0[1-9]|1[0-2])/(0[1-9]|[12]\d|3[01])/"),
+    re.compile(r"/(20\d{2})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])/"),
+]
+
+
+def infer_published_at_from_url(url_value: str | None) -> str | None:
+    if not url_value:
+        return None
+    for pattern in DATE_FROM_URL_PATTERNS:
+        match = pattern.search(url_value)
+        if not match:
+            continue
+        year, month, day = match.groups()
+        try:
+            parsed = datetime(
+                int(year),
+                int(month),
+                int(day),
+                tzinfo=timezone.utc,
+            )
+        except ValueError:
+            continue
+        return parsed.isoformat()
+    return None
 
 NON_LOCATION_TOKENS = {
     "unknown",
@@ -69,6 +97,97 @@ NON_LOCATION_TOKENS = {
 INVALID_LOCATION_PHRASES = {
     "operation allies welcome",
     "operation lone star",
+}
+
+INCOMPLETE_ACTOR_ACTIONS = {
+    "shot",
+    "shot and killed",
+    "killed",
+    "arrested",
+    "detained",
+    "injured",
+    "assaulted",
+    "raided",
+}
+
+NEWSWORTHY_KEYWORDS = {
+    "shot",
+    "shooting",
+    "killed",
+    "dead",
+    "death",
+    "injured",
+    "assaulted",
+    "arrested",
+    "detained",
+    "raid",
+    "raided",
+    "custody",
+    "fatal",
+    "fatally",
+    "murdered",
+    "charged",
+}
+
+ROUTINE_KEYWORDS = {
+    "carrying out",
+    "conducting",
+    "enforcing",
+    "continuing",
+    "deployed",
+    "deploying",
+    "announced",
+    "said",
+    "says",
+    "reported",
+}
+
+PLURAL_WHO_SUFFIXES = (
+    "agents",
+    "officers",
+    "authorities",
+    "officials",
+    "forces",
+    "police",
+)
+
+VICTIM_ACTION_TO_ACTOR = [
+    ("was shot and killed", "shot and killed"),
+    ("was fatally shot", "shot"),
+    ("was shot", "shot"),
+    ("was killed", "killed"),
+    ("was arrested", "arrested"),
+    ("was detained", "detained"),
+    ("was injured", "injured"),
+    ("was assaulted", "assaulted"),
+]
+
+WHO_SYNONYM_PATTERNS: dict[str, list[str]] = {
+    "ice agents": [
+        "ice",
+        "ice agents",
+        "ice agent",
+        "immigration and customs enforcement",
+        "immigration and customs enforcement agents",
+        "immigration and customs enforcement agent",
+        "immigration agents",
+        "immigration agent",
+        "federal immigration agents",
+        "federal immigration agent",
+        "immigration authorities",
+        "immigration officers",
+    ],
+    "ice agent": [
+        "ice agent",
+        "immigration and customs enforcement agent",
+        "immigration agent",
+        "federal immigration agent",
+    ],
+}
+
+CANONICAL_WHO_DISPLAY = {
+    "ice agents": "ICE agents",
+    "ice agent": "ICE agent",
 }
 
 LOCATION_PREFIX_PATTERN = re.compile(
@@ -118,6 +237,8 @@ class TripletExtractor:
             '{"who": "<entity or person>", "what": "<short action>", '
             '"where": "<location or null>"}. '
             "Rules:\n"
+            "- Prioritize the most newsworthy, headline-level actions; avoid routine duties unless they are the main story.\n"
+            "- Prefer 1-3 high-signal triplets over many low-signal ones.\n"
             "- Only include facts explicitly stated; do not infer or change who did what.\n"
             "- Keep 'who' as the exact subject described "
             "(e.g., 'mother of White House Press Secretary Karoline "
@@ -132,6 +253,8 @@ class TripletExtractor:
             "- Use null only if no location is given. Never output 'unknown'.\n"
             "- Keep 'what' short and verb-focused "
             "(e.g., 'is detained by immigration authorities').\n"
+            "- 'what' must name the action and its direct object or context (e.g., 'dismissed the case', "
+            "not just 'dismissed'). Avoid single verbs without the thing being acted upon.\n"
             "- Only describe who performed an action when the article explicitly states it "
             "(e.g., \"<who> shot <person>\"). Do not guess or infer shooters or other actors.\n"
             "- When (and only when) the article clearly states both the actor and the affected person, output two triplets: "
@@ -315,6 +438,14 @@ def load_latest_news_dump(output_dir: Path) -> Path:
     return candidates[-1]
 
 
+def iter_triplet_files(output_dir: Path, rerun_all: bool = False) -> list[Path]:
+    pattern = "triplets_*.jsonl" if rerun_all else "news_reports_*.jsonl"
+    candidates = sorted(output_dir.glob(pattern))
+    if not candidates:
+        raise FileNotFoundError(f"No {pattern} files found in {output_dir}")
+    return candidates
+
+
 def read_articles(path: Path) -> list[dict]:
     articles: list[dict] = []
     with path.open("r", encoding="utf-8") as handle:
@@ -324,6 +455,42 @@ def read_articles(path: Path) -> list[dict]:
             except json.JSONDecodeError:
                 LOGGER.warning("Skipping malformed line in %s", path)
     return articles
+
+
+def read_triplets_file(path: Path) -> list[Triplet]:
+    records: list[Triplet] = []
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            try:
+                payload = json.loads(line)
+            except json.JSONDecodeError:
+                LOGGER.warning("Skipping malformed triplet line in %s", path)
+                continue
+            try:
+                records.append(
+                    Triplet(
+                        who=payload.get("who", ""),
+                        what=payload.get("what", ""),
+                        where_text=payload.get("where_text"),
+                        latitude=payload.get("lat"),
+                        longitude=payload.get("lon"),
+                        geocode_query=payload.get("geocode_query"),
+                        raw_text=payload.get("raw_text", ""),
+                        story_id=payload.get("story_id", str(uuid4())),
+                        source=payload.get("source", ""),
+                        url=payload.get("url", ""),
+                        title=payload.get("title", ""),
+                        published_at=payload.get("publishedAt"),
+                        extracted_at=payload.get("extracted_at")
+                        or payload.get("extractedAt")
+                        or datetime.now(timezone.utc).isoformat(),
+                        run_id=payload.get("run_id") or payload.get("runId") or "legacy",
+                        geocode_status=payload.get("geocode_status"),
+                    )
+                )
+            except Exception:  # noqa: BLE001
+                LOGGER.warning("Skipping malformed triplet payload from %s", path, exc_info=True)
+    return records
 
 
 def _strip_html_fragment(value: Optional[str]) -> str:
@@ -375,6 +542,196 @@ def _normalize_location_label(value: str | None) -> str:
     return current
 
 
+def _normalize_who_label(value: str | None) -> str | None:
+    if not value:
+        return value
+    normalized = value.strip()
+    if not normalized:
+        return value
+    lower = normalized.lower()
+    for canonical, aliases in WHO_SYNONYM_PATTERNS.items():
+        if lower == canonical or lower in aliases:
+            return CANONICAL_WHO_DISPLAY.get(canonical, canonical)
+    return normalized
+
+
+def _is_incomplete_actor_action(value: str | None) -> bool:
+    if not value:
+        return False
+    normalized = value.strip().lower().rstrip(".!?,;:")
+    return normalized in INCOMPLETE_ACTOR_ACTIONS
+
+
+def _infer_actor_action_from_victim(what: str | None) -> str | None:
+    if not what:
+        return None
+    lower = what.lower()
+    for phrase, actor_action in VICTIM_ACTION_TO_ACTOR:
+        if phrase in lower:
+            return actor_action
+    return None
+
+
+def _rewrite_incomplete_actor_triplets(triplets: list[dict[str, str]]) -> list[dict[str, str]]:
+    victim_candidates: list[tuple[str, str]] = []
+    actor_candidates: list[str] = []
+    for item in triplets:
+        who_value = (item.get("who") or "").strip()
+        action = _infer_actor_action_from_victim(item.get("what"))
+        if who_value and action:
+            victim_candidates.append((who_value, action))
+        if who_value and _is_incomplete_actor_action(item.get("what")):
+            actor_candidates.append(who_value)
+    if not victim_candidates:
+        return triplets
+    victims = {victim for victim, _ in victim_candidates}
+    actions = {action for _, action in victim_candidates}
+    if len(victims) != 1 or len(actions) != 1:
+        return triplets
+    victim = next(iter(victims))
+    action = next(iter(actions))
+    actor = None
+    unique_actors = {actor_value for actor_value in actor_candidates if actor_value}
+    if len(unique_actors) == 1:
+        actor = next(iter(unique_actors))
+    for item in triplets:
+        if _is_incomplete_actor_action(item.get("what")):
+            item["what"] = f"{action} {victim}"
+        if actor:
+            current = item.get("what") or ""
+            current_lower = current.lower()
+            if _infer_actor_action_from_victim(current) and " by " not in current_lower:
+                item["what"] = f"{current} by {actor}"
+    return triplets
+
+
+def _drop_inverted_triplets(triplets: list[dict[str, str]]) -> list[dict[str, str]]:
+    victim_candidates: list[tuple[str, str]] = []
+    for item in triplets:
+        who_value = (item.get("who") or "").strip()
+        action = _infer_actor_action_from_victim(item.get("what"))
+        if who_value and action:
+            victim_candidates.append((who_value, action))
+    if not victim_candidates:
+        return triplets
+    victims = {victim for victim, _ in victim_candidates}
+    actions = {action for _, action in victim_candidates}
+    if len(victims) != 1 or len(actions) != 1:
+        return triplets
+    victim = next(iter(victims)).lower()
+    filtered: list[dict[str, str]] = []
+    for item in triplets:
+        who_lower = (item.get("who") or "").lower()
+        what_lower = (item.get("what") or "").lower()
+        if victim and victim in what_lower:
+            if "killed an ice" in what_lower or "shot an ice" in what_lower:
+                continue
+        if who_lower.startswith("ice") and "was killed by" in what_lower and victim in what_lower:
+            continue
+        filtered.append(item)
+    return filtered
+
+
+def _apply_plural_verb_agreement(who: str | None, what: str | None) -> str | None:
+    if not who or not what:
+        return what
+    who_lower = who.lower()
+    if not any(who_lower.endswith(suffix) for suffix in PLURAL_WHO_SUFFIXES):
+        return what
+    if what.startswith("was "):
+        return f"were {what[4:]}"
+    if what.startswith("is "):
+        return f"are {what[3:]}"
+    return what
+
+
+def _score_triplet(item: dict[str, str]) -> int:
+    who_value = (item.get("who") or "").lower()
+    what_value = (item.get("what") or "").lower()
+    text = f"{who_value} {what_value}".strip()
+    score = 0
+    if who_value:
+        score += 1
+    for keyword in NEWSWORTHY_KEYWORDS:
+        if keyword in text:
+            score += 3
+    for keyword in ROUTINE_KEYWORDS:
+        if keyword in text:
+            score -= 2
+    return score
+
+
+def _rank_triplets(triplets: list[dict[str, str]]) -> list[dict[str, str]]:
+    scored = [(index, _score_triplet(item), item) for index, item in enumerate(triplets)]
+    scored.sort(key=lambda entry: (entry[1], -entry[0]), reverse=True)
+    return [item for _, _, item in scored]
+
+
+def _dedupe_triplets(triplets: list[dict[str, str]]) -> list[dict[str, str]]:
+    seen: set[tuple[str, str, str]] = set()
+    deduped: list[dict[str, str]] = []
+    for item in triplets:
+        who = (item.get("who") or "").strip().lower()
+        what = (item.get("what") or "").strip().lower()
+        where = (item.get("where") or "").strip().lower()
+        key = (who, what, where)
+        if not who and not what:
+            continue
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+    return deduped
+
+
+def _article_indicates_ice_killed_victim(article_lower: str, victim_lower: str) -> bool:
+    if not victim_lower or victim_lower not in article_lower:
+        return False
+    phrases = (
+        "killed by an ice",
+        "killed by a u.s. immigration and customs enforcement",
+        "killed by immigration and customs enforcement",
+        "shot by an ice",
+        "shot and killed by an ice",
+        "fatally shot by an ice",
+        "ice agent shot",
+        "ice officer shot",
+    )
+    return any(phrase in article_lower for phrase in phrases)
+
+
+def _coerce_where_value(value: object) -> Optional[str]:
+    """Best-effort conversion of model `where` output into a string label."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return value
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                return item
+        return None
+    return str(value)
+
+
+def _who_matches_article(who_value: str, article_lower: str) -> bool:
+    who_lower = who_value.strip().lower()
+    if not who_lower:
+        return True
+    if who_lower in article_lower:
+        return True
+    synonyms = WHO_SYNONYM_PATTERNS.get(who_lower)
+    if synonyms:
+        for synonym in synonyms:
+            syn_lower = synonym.lower()
+            if syn_lower and syn_lower in article_lower:
+                return True
+        if who_lower.startswith("ice"):
+            if "immigration" in article_lower and "agent" in article_lower:
+                return True
+    return False
+
+
 def _coordinates_within_bounds(lat: Optional[float], lon: Optional[float]) -> bool:
     if lat is None or lon is None:
         return False
@@ -417,7 +774,7 @@ def geocode_triplets(records: list[Triplet], geocoder: NominatimGeocoder) -> Non
         record.geocode_status = status
 
 
-def sanitize_triplet(record: Triplet) -> Optional[Triplet]:
+def sanitize_triplet(record: Triplet, article_text: str | None = None) -> Optional[Triplet]:
     def _drop(reason: str) -> Optional[Triplet]:
         LOGGER.info(
             "Skipping triplet for story_id=%s who=%s reason=%s",
@@ -427,15 +784,36 @@ def sanitize_triplet(record: Triplet) -> Optional[Triplet]:
         )
         return None
 
-    who_lower = record.who.lower()
+    record.who = _normalize_who_label(record.who) or record.who
+    record.what = _apply_plural_verb_agreement(record.who, record.what) or record.what
+    if article_text and record.who:
+        article_lower = article_text.lower()
+        if not _who_matches_article(record.who, article_lower):
+            return _drop("who not found in article text")
+    if record.who and _is_incomplete_actor_action(record.what):
+        return _drop("actor action missing direct object")
+    if article_text and record.who and record.what:
+        who_lower = record.who.lower()
+        what_lower = record.what.lower()
+        article_lower = article_text.lower()
+        if _article_indicates_ice_killed_victim(article_lower, who_lower):
+            if "killed an ice" in what_lower or "shot an ice" in what_lower:
+                return _drop("victim inversion (ice killed victim)")
+        if who_lower.startswith("ice") and "was killed by" in what_lower:
+            victim_lower = what_lower.split("was killed by", 1)[-1].strip()
+            if victim_lower and _article_indicates_ice_killed_victim(article_lower, victim_lower):
+                return _drop("actor inversion (ice killed victim)")
+
+    who_lower = record.who.lower() if record.who else ""
     what_lower = record.what.lower()
     if "andrew wolfe" in who_lower and "died" in what_lower:
         record.what = "remains hospitalized in critical condition"
     if "tricia mclaughlin" in who_lower and "third world" in what_lower:
         record.what = "announced a halt to processing immigration requests relating to Afghan nationals"
-    if not record.where_text:
+    coerced_where = _coerce_where_value(record.where_text)
+    if not coerced_where:
         return _drop("missing location in model output")
-    normalized_where = _normalize_location_label(record.where_text)
+    normalized_where = _normalize_location_label(coerced_where)
     if not normalized_where:
         return _drop(f"location label empty after normalization ('{record.where_text}')")
     wt_lower = normalized_where.lower()
@@ -478,8 +856,9 @@ def extract_triplets_from_dump(
                 continue
             seen_story_keys.add(story_key)
         article_text = combine_article_text(article)
-        if not article_text:
+        if not article_text or len(article_text) < MIN_ARTICLE_TEXT_LENGTH:
             continue
+        article["content_blob"] = article_text
         articles_processed += 1
         location_hints: list[str] = []
         for key in ("city_mentions", "facility_mentions", "locations"):
@@ -491,12 +870,20 @@ def extract_triplets_from_dump(
             if isinstance(value, str):
                 location_hints.append(value)
         model_triplets = extractor.extract(article_text, location_hints=location_hints)
+        model_triplets = _rewrite_incomplete_actor_triplets(model_triplets)
+        model_triplets = _drop_inverted_triplets(model_triplets)
+        model_triplets = _dedupe_triplets(model_triplets)
+        model_triplets = _rank_triplets(model_triplets)[:MAX_TRIPLETS_PER_ARTICLE]
         story_id = article.get("url") or article.get("source_id") or "unknown"
         source = article.get("source") or "unknown"
         url = article.get("url") or ""
         title = article.get("title") or ""
         published_at = article.get("published_at")
+        if not published_at:
+            published_at = infer_published_at_from_url(url)
         extracted_at = datetime.now(timezone.utc).isoformat()
+        if not published_at:
+            published_at = extracted_at
         for item in model_triplets:
             who = (item.get("who") or "").strip()
             what = (item.get("what") or "").strip()
@@ -521,7 +908,10 @@ def extract_triplets_from_dump(
                 extracted_at=extracted_at,
                 run_id=run_id,
             )
-            sanitized = sanitize_triplet(record)
+            sanitized = sanitize_triplet(
+                record,
+                article_text=article.get("content_blob", "") or article_text,
+            )
             if sanitized:
                 extracted_records.append(sanitized)
 
@@ -565,6 +955,26 @@ def extract_triplets_from_dump(
     return extracted_path
 
 
+def load_triplets_into_index(
+    triplet_file: Path,
+    output_dir: Path,
+) -> None:
+    LOGGER.info("Loading triplets from %s", triplet_file)
+    records = read_triplets_file(triplet_file)
+    if not records:
+        LOGGER.warning("No triplets found in %s; skipping.", triplet_file)
+        return
+    index = TripletIndex(output_dir / "triplets_index.sqlite")
+    index.upsert(records)
+    index.record_run(
+        run_id=f"hydrate-{triplet_file.stem}",
+        started_at=datetime.now(timezone.utc),
+        finished_at=datetime.now(timezone.utc),
+        articles_processed=len(records),
+        triplets_extracted=len(records),
+    )
+
+
 def build_geocoder(output_dir: Path, google_key: Optional[str]) -> NominatimGeocoder:
     cache_path = output_dir / "geocache.sqlite"
     user_agent = "codex-triplet-extractor/0.1"
@@ -584,10 +994,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Directory containing news_reports_*.jsonl files.",
     )
     parser.add_argument(
+        "--input-file",
+        type=Path,
+        default=None,
+        help="Process a specific news_reports_*.jsonl file instead of the latest dump.",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("datasets/news_ingest"),
         help="Directory to write triplets JSONL and SQLite index.",
+    )
+    parser.add_argument(
+        "--process-all-dumps",
+        action="store_true",
+        help="Iterate over every news_reports_*.jsonl in --input-dir (oldest first).",
     )
     parser.add_argument(
         "--model-id",
@@ -624,6 +1045,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Process only the first N articles (for debugging).",
     )
     parser.add_argument(
+        "--hydrate-existing",
+        action="store_true",
+        help="Replay all triplets_*.jsonl files into the SQLite index (skip extraction).",
+    )
+    parser.add_argument(
         "--log-level",
         default="INFO",
         help="Python logging level.",
@@ -635,6 +1061,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         format="%(asctime)s %(levelname)s %(message)s",
     )
 
+    if args.input_file and args.process_all_dumps:
+        parser.error("--input-file and --process-all-dumps are mutually exclusive")
+    if args.input_file and not args.input_file.exists():
+        parser.error(f"Specified --input-file does not exist: {args.input_file}")
+
     # Handle hf_transfer flag to avoid crashes if the package is missing.
     if os.environ.get("HF_HUB_ENABLE_HF_TRANSFER") == "1":
         try:
@@ -642,9 +1073,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         except ModuleNotFoundError:
             os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "0"
 
-    dump_path = load_latest_news_dump(args.input_dir)
-    LOGGER.info("Using news dump: %s", dump_path)
     geocoder = build_geocoder(args.output_dir, os.getenv("GOOGLE_ACC_KEY"))
+    if args.hydrate_existing:
+        triplet_files = iter_triplet_files(args.input_dir, rerun_all=True)
+        LOGGER.info("Hydrating %s existing triplet files into SQLite index.", len(triplet_files))
+        for triplet_file in triplet_files:
+            load_triplets_into_index(triplet_file, args.output_dir)
+        LOGGER.info("Hydration completed.")
+        return 0
+
+    if args.process_all_dumps:
+        dump_paths = sorted(args.input_dir.glob("news_reports_*.jsonl"))
+        if not dump_paths:
+            parser.error(f"No news_reports_*.jsonl files found in {args.input_dir}")
+    elif args.input_file:
+        dump_paths = [args.input_file]
+    else:
+        dump_paths = [load_latest_news_dump(args.input_dir)]
+
     extractor = TripletExtractor(
         model_id=args.model_id,
         temperature=args.temperature,
@@ -652,14 +1098,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         max_new_tokens=args.max_new_tokens,
         stop_text=args.stop_text,
     )
-    output_path = extract_triplets_from_dump(
-        dump_path=dump_path,
-        output_dir=args.output_dir,
-        geocoder=geocoder,
-        extractor=extractor,
-        limit=args.limit,
-    )
-    LOGGER.info("Wrote triplets to %s", output_path)
+
+    for idx, dump_path in enumerate(dump_paths, start=1):
+        LOGGER.info(
+            "Processing dump %s (%s of %s)",
+            dump_path,
+            idx,
+            len(dump_paths),
+        )
+        output_path = extract_triplets_from_dump(
+            dump_path=dump_path,
+            output_dir=args.output_dir,
+            geocoder=geocoder,
+            extractor=extractor,
+            limit=args.limit,
+        )
+        LOGGER.info("Wrote triplets to %s", output_path)
     return 0
 
 

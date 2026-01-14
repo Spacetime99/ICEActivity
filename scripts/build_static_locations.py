@@ -92,6 +92,10 @@ def build_detention_facilities() -> int:
                 "detailUrl": sanitize(row.get("detail_url")),
                 "latitude": parse_float(row.get("latitude")),
                 "longitude": parse_float(row.get("longitude")),
+                "tracTypeDetailed": sanitize(row.get("trac_type_detailed")),
+                "tracGuaranteedMinimum": sanitize(row.get("trac_guaranteed_minimum")),
+                "tracAverageDailyPopulation": sanitize(row.get("trac_average_daily_population")),
+                "tracAsOf": sanitize(row.get("trac_as_of")),
             }
         )
     output.sort(key=lambda r: (r["state"], r["city"], r["name"]))
@@ -108,6 +112,10 @@ def build_detention_facilities() -> int:
   detailUrl: string;
   latitude: number | null;
   longitude: number | null;
+  tracTypeDetailed: string;
+  tracGuaranteedMinimum: string;
+  tracAverageDailyPopulation: string;
+  tracAsOf: string;
 };"""
     write_ts(DETENTION_TS, header, "DETENTION_FACILITIES", output)
     return len(output)

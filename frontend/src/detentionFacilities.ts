@@ -11,6 +11,10 @@ export type DetentionFacility = {
   detailUrl: string;
   latitude: number | null;
   longitude: number | null;
+  tracTypeDetailed: string;
+  tracGuaranteedMinimum: string;
+  tracAverageDailyPopulation: string;
+  tracAsOf: string;
 };
 
 export const DETENTION_FACILITIES = [
@@ -26,7 +30,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/naval-station-guantanamo-bay",
     "latitude": 38.7945952,
-    "longitude": -106.5348379
+    "longitude": -106.5348379,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Anchorage Correctional Complex",
@@ -40,7 +48,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1400 E Fourth Ave Anchorage, AK 99501 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/anchorage-correctional-complex",
     "latitude": 61.2185041,
-    "longitude": -149.8573539
+    "longitude": -149.8573539,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "3",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Eloy Detention Center",
@@ -54,7 +66,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1705 E Hanna Road Eloy, AZ 85131 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/eloy-detention-center",
     "latitude": 32.8176183,
-    "longitude": -111.5200907
+    "longitude": -111.5200907,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Central Arizona Florence Correctional Center",
@@ -68,7 +84,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1100 Bowling Road Florence, AZ 85132 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/florence-correctional-center",
     "latitude": 33.0433427,
-    "longitude": -111.3720644
+    "longitude": -111.3720644,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Florence Service Processing Center",
@@ -82,7 +102,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3250 N. Pinal Parkway Florence, AZ 85132 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/florence-spc",
     "latitude": 33.0639503,
-    "longitude": -111.3794387
+    "longitude": -111.3794387,
+    "tracTypeDetailed": "SPC",
+    "tracGuaranteedMinimum": "392",
+    "tracAverageDailyPopulation": "321",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "San Luis Regional Detention Center",
@@ -96,7 +120,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "406 North Avenue D San Luis, AZ 85349 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/san-luis-regional-detention-center",
     "latitude": 32.4828449,
-    "longitude": -114.6835588
+    "longitude": -114.6835588,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "100",
+    "tracAverageDailyPopulation": "367",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Adelanto ICE Processing Center",
@@ -110,7 +138,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "Adelanto East 10400 Rancho Road | Adelanto West 10250 Rancho Road Adelanto, CA 92301 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/adelanto-ice-processing-center",
     "latitude": 34.5591013,
-    "longitude": -117.4414952
+    "longitude": -117.4414952,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "640",
+    "tracAverageDailyPopulation": "1786",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Desert View Annex",
@@ -124,7 +156,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "10450 Rancho Road Adelanto, CA 92301 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/desert-view-annex",
     "latitude": 34.5588215,
-    "longitude": -117.4372847
+    "longitude": -117.4372847,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "480",
+    "tracAverageDailyPopulation": "415",
+    "tracAsOf": "11/10/2025"
   },
   {
     "name": "Mesa Verde ICE Processing Center",
@@ -138,7 +174,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "425 Golden State Avenue Bakersfield, CA 93301 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/mesa-verde-ice-processing-facility",
     "latitude": 35.3799739,
-    "longitude": -119.0064452
+    "longitude": -119.0064452,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "320",
+    "tracAverageDailyPopulation": "371",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Imperial Regional Detention Facility",
@@ -152,7 +192,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1572 Gateway Road Calexico, CA 92231 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/imperial-regional-detention-facility",
     "latitude": 32.6901156,
-    "longitude": -115.3975363
+    "longitude": -115.3975363,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "640",
+    "tracAverageDailyPopulation": "642",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "California City Detention Facility",
@@ -166,7 +210,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "22844 Virginia Boulevard California City, CA 93505 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/california-city-detention-facility",
     "latitude": 35.1517183,
-    "longitude": -117.858652
+    "longitude": -117.858652,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Golden State Annex",
@@ -180,7 +228,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "611 Frontage Road McFarland, CA 93250 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/golden-state-annex",
     "latitude": 35.6697644,
-    "longitude": -119.2278172
+    "longitude": -119.2278172,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "560",
+    "tracAverageDailyPopulation": "621",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Otay Mesa Detention Center",
@@ -194,7 +246,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "7488 Calzada de la Fuente San Diego, CA 92154 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/otay-mesa-detention-center",
     "latitude": 32.5750242,
-    "longitude": -116.9147637
+    "longitude": -116.9147637,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "750",
+    "tracAverageDailyPopulation": "1475",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Denver Contract Detention Facility (Aurora)",
@@ -208,7 +264,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3130 North Oakland Street Aurora, CO 80010 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/aurora-contract-detention-facility",
     "latitude": 39.76134709999999,
-    "longitude": -104.8490165
+    "longitude": -104.8490165,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Baker County Detention Center",
@@ -222,7 +282,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1 Sheriff's Office Drive MacClenny, FL 32063 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/baker-county-facility",
     "latitude": 30.29596799999999,
-    "longitude": -82.1217298
+    "longitude": -82.1217298,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "FDC Miami",
@@ -236,7 +300,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "33 NE 4th Street Miami, FL 33132 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/fdc-miami",
     "latitude": 25.7785364,
-    "longitude": -80.1932264
+    "longitude": -80.1932264,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Krome North Service Processing Center",
@@ -250,7 +318,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "18201 SW 12th Street Miami, FL 33194 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/krome-north-service-processing-center",
     "latitude": 25.7543477,
-    "longitude": -80.4891143
+    "longitude": -80.4891143,
+    "tracTypeDetailed": "SPC",
+    "tracGuaranteedMinimum": "450",
+    "tracAverageDailyPopulation": "843",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Glades County Detention Center",
@@ -264,7 +336,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1297 East SR 78 Moore Haven, FL 33471 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/glades-county-detention-center",
     "latitude": 26.8386472,
-    "longitude": -81.1239104
+    "longitude": -81.1239104,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "500",
+    "tracAverageDailyPopulation": "466",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Broward Transitional Center",
@@ -278,7 +354,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3900 N. Powerline Road Pompano Beach, FL 33073 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/broward-transitional-center",
     "latitude": 26.2777097,
-    "longitude": -80.1521559
+    "longitude": -80.1521559,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "700",
+    "tracAverageDailyPopulation": "668",
+    "tracAsOf": "11/10/2025"
   },
   {
     "name": "FCI Atlanta",
@@ -292,7 +372,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "601 McDonough Blvd SE Atlanta, GA 30315 United States",
     "detailUrl": "https://www.ice.gov/detention-facilities/fci-atlanta",
     "latitude": 33.7116427,
-    "longitude": -84.3686625
+    "longitude": -84.3686625,
+    "tracTypeDetailed": "BOP",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "114",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Folkston D Ray ICE Processing Center",
@@ -306,7 +390,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3262 Hwy 252E Folkston, GA 31537 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/folkston-d-ray-ice-processing-center",
     "latitude": 30.8305102,
-    "longitude": -82.0098375
+    "longitude": -82.0098375,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Folkston ICE Processing Center (Annex)",
@@ -320,7 +408,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3424 Hwy 252 E Folkston, GA 31537 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/folkston-ice-processing-center-annex",
     "latitude": 30.8749079,
-    "longitude": -81.9806924
+    "longitude": -81.9806924,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Folkston ICE Processing Center (Main)",
@@ -334,7 +426,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3026 Hwy 252 East Folkston, GA 31537 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/folkston-ice-processing-center-main",
     "latitude": 30.8763257,
-    "longitude": -81.97801609999999
+    "longitude": -81.97801609999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Stewart Detention Center",
@@ -348,7 +444,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "146 CCA Road Lumpkin, GA 31815 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/stewart-detention-center",
     "latitude": 32.0365622,
-    "longitude": -84.7713749
+    "longitude": -84.7713749,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "1600",
+    "tracAverageDailyPopulation": "2044",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Guam Department of Corrections, Hagatna Detention Facility",
@@ -362,7 +462,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "203 Aspinall Avenue Hagatna, GU 96910 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/guam-department-corrections-hagatna-detention-facility",
     "latitude": 13.474307,
-    "longitude": 144.7505229
+    "longitude": 144.7505229,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Federal Detention Center, Honolulu (FDC Honolulu)",
@@ -376,7 +480,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "351 Elliott Street Honolulu, HI 96819 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/federal-detention-center-honolulu-fdc-honolulu",
     "latitude": 21.3338725,
-    "longitude": -157.9279267
+    "longitude": -157.9279267,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Pottawattamie County Jail",
@@ -390,7 +498,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1400 Big Lake Road Council Bluffs, IA 51501 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/pottawattamie-county-jail",
     "latitude": 41.2842697,
-    "longitude": -95.8653913
+    "longitude": -95.8653913,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "34",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Polk County Jail",
@@ -404,7 +516,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1985 NE 51st Place Des Moines, IA 50313 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/polk-county-jail",
     "latitude": 41.6534852,
-    "longitude": -93.587758
+    "longitude": -93.587758,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "50",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Elmore County Detention Center (Elmore County Jail)",
@@ -418,7 +534,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "2255 East 8th North Mountain Home, ID 83647 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/elmore-county-detention-center-elmore-county-jail",
     "latitude": 43.1368404,
-    "longitude": -115.6731309
+    "longitude": -115.6731309,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Clay County Jail",
@@ -432,7 +552,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "611 East Jackson Street Brazil, IN 47834 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/clay-county-jail",
     "latitude": 39.5237009,
-    "longitude": -87.1190405
+    "longitude": -87.1190405,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "41",
+    "tracAsOf": "05/13/2024"
   },
   {
     "name": "Miami Correctional Facility (MCF)",
@@ -446,7 +570,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3038 West 850S Bunker Hill, IN 46914 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/miami-correctional-facility-mcf",
     "latitude": 40.644835,
-    "longitude": -86.13349339999999
+    "longitude": -86.13349339999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Clinton County Sheriff's Office",
@@ -460,7 +588,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "301 E Walnut Street Frankfort, IN 46041 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/clinton-county-so",
     "latitude": 40.2792086,
-    "longitude": -86.50877799999999
+    "longitude": -86.50877799999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Clark County Jail",
@@ -474,7 +606,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "501 E Court Avenue Jeffersonville, IN 47130 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/clark-county-jail",
     "latitude": 38.277738,
-    "longitude": -85.73775429999999
+    "longitude": -85.73775429999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Chase County Jail",
@@ -488,7 +624,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "301 South Walnut Cottonwood Falls, KS 66845 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/chase-county-jail",
     "latitude": 38.3678625,
-    "longitude": -96.5386875
+    "longitude": -96.5386875,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "112",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "FCI Leavenworth",
@@ -502,7 +642,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1300 Metropolitan Leavenworth, KS 66048 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/fci-leavenworth",
     "latitude": 39.3299481,
-    "longitude": -94.93634980000002
+    "longitude": -94.93634980000002,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Boone County Jail",
@@ -516,7 +660,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3020 Conrad Lane Burlington, KY 41005 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/boone-county-jail",
     "latitude": 39.0365031,
-    "longitude": -84.7283616
+    "longitude": -84.7283616,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "195",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Kenton County Detention Center",
@@ -530,7 +678,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3000 Decker Crane Lane Covington, KY 41017 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/kenton-county-detention-center",
     "latitude": 39.0024275,
-    "longitude": -84.53061249999999
+    "longitude": -84.53061249999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Christian County Jail",
@@ -544,7 +696,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "410 West 7th Street Hopkinsville, KY 42240 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/christian-county-jail",
     "latitude": 36.8682675,
-    "longitude": -87.490437
+    "longitude": -87.490437,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "89",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Oldham County Detention Center",
@@ -558,7 +714,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3405 West Highway 146 LaGrange, KY 40031 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/oldham-county-detention-center",
     "latitude": 38.38929359999999,
-    "longitude": -85.4237673
+    "longitude": -85.4237673,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "125",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Grayson County Detention Center",
@@ -572,7 +732,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "320 Shaw Station Road Leachfield, KY 42754 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/grayson-county-detention-center",
     "latitude": 37.4890253,
-    "longitude": -86.27049819999999
+    "longitude": -86.27049819999999,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "0",
+    "tracAsOf": "01/07/2021"
   },
   {
     "name": "Hopkins County Jail",
@@ -586,7 +750,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "2250 Laffoon Trl Madisonville, KY 42431 United States",
     "detailUrl": "https://www.ice.gov/detention-facilities/hopkins-county",
     "latitude": 37.3377164,
-    "longitude": -87.54017809999999
+    "longitude": -87.54017809999999,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "166",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Campbell County Detention Center",
@@ -600,7 +768,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "601 Central Avenue Newport, KY 41071 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/campbell-county-detention-center",
     "latitude": 39.08908419999999,
-    "longitude": -84.4963222
+    "longitude": -84.4963222,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Daviess County Detention Center",
@@ -614,7 +786,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3337 Highway 144 Owensboro, KY 42303 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/daviess-county-detention-center",
     "latitude": 37.7871208,
-    "longitude": -87.0702975
+    "longitude": -87.0702975,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Louisiana ICE Processing Center",
@@ -628,7 +804,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "17544 Tunica Trace Angola, LA 70712 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/louisiana-ice-processing-center",
     "latitude": 30.9406745,
-    "longitude": -91.5683806
+    "longitude": -91.5683806,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "South Louisiana ICE Processing Center",
@@ -642,7 +822,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3843 Stagg Ave Basile, LA 70515 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/south-louisiana-ice-processing-center",
     "latitude": 30.4870681,
-    "longitude": -92.581813
+    "longitude": -92.581813,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "700",
+    "tracAverageDailyPopulation": "994",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "River Correctional Center",
@@ -656,7 +840,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "26362 Highway 15 Ferriday, LA 71334 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/river-correctional-center",
     "latitude": 31.5971028,
-    "longitude": -91.5580974
+    "longitude": -91.5580974,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "361",
+    "tracAverageDailyPopulation": "602",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Central Louisiana ICE Processing Center",
@@ -670,7 +858,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "830 Pine Hill Road Jena, LA 71342 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/central-louisiana-ipc",
     "latitude": 31.7089427,
-    "longitude": -92.1505809
+    "longitude": -92.1505809,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Jackson Parish Correctional Center",
@@ -684,7 +876,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "287 Industrial Drive Jonesboro, LA 71251 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/jackson-parish-correctional-center",
     "latitude": 32.215231,
-    "longitude": -92.7158968
+    "longitude": -92.7158968,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "500",
+    "tracAverageDailyPopulation": "1205",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Richwood Correctional Center",
@@ -698,7 +894,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "180 Pine Bayou Circle Monroe, LA 71202 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/richwood-correctional-center",
     "latitude": 32.4568901,
-    "longitude": -92.0784706
+    "longitude": -92.0784706,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "677",
+    "tracAverageDailyPopulation": "1101",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Allen Parish Public Safety Complex",
@@ -712,7 +912,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "7340 Highway 26 W Oberlin, LA 70655 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/allen-parish-public-safety-complex",
     "latitude": 30.624485,
-    "longitude": -92.783878
+    "longitude": -92.783878,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "170",
+    "tracAverageDailyPopulation": "145",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Pine Prairie ICE Processing Center",
@@ -726,7 +930,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1133 Hampton Dupre Road Pine Prairie, LA 70576 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/pine-prairie-ice-processing-center",
     "latitude": 30.7886095,
-    "longitude": -92.42351459999999
+    "longitude": -92.42351459999999,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "909",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Winn Correctional Center",
@@ -740,7 +948,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "560 Gum Springs Road Winnfield, LA 71483 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/winn-correctional-center",
     "latitude": 31.8389273,
-    "longitude": -92.7903075
+    "longitude": -92.7903075,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "946",
+    "tracAverageDailyPopulation": "1534",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Plymouth County Correctional Facility",
@@ -754,7 +966,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "26 Long Pond Road Plymouth, MA 02360 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/plymouth-county-correctional-facility",
     "latitude": 41.9313647,
-    "longitude": -70.6510495
+    "longitude": -70.6510495,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "509",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Cumberland County Jail",
@@ -768,7 +984,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "50 County Way Portland, ME 04102 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/cumberland-county-jail",
     "latitude": 43.6513147,
-    "longitude": -70.28180789999999
+    "longitude": -70.28180789999999,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "62",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "North Lake Processing Center",
@@ -782,7 +1002,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1805 W 32nd Street Baldwin, MI 49304 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/north-lake-processing-center",
     "latitude": 43.9284879,
-    "longitude": -85.83946130000001
+    "longitude": -85.83946130000001,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Calhoun County Correctional Center",
@@ -796,7 +1020,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "185 E. Michigan Street Battle Creek, MI 49014 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/calhoun-county-correctional-center",
     "latitude": 42.3166565,
-    "longitude": -85.1757947
+    "longitude": -85.1757947,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "75",
+    "tracAverageDailyPopulation": "156",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Monroe County Jail",
@@ -810,7 +1038,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "7000 East Dunbar Road Monroe, MI 48161 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/monroe-county-jail",
     "latitude": 41.89553069999999,
-    "longitude": -83.39339439999999
+    "longitude": -83.39339439999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "St. Clair County Jail",
@@ -824,7 +1056,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1170 Michigan Road Port Huron, MI 48060 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/st-clair-county-jail",
     "latitude": 42.94231130000001,
-    "longitude": -82.47947909999999
+    "longitude": -82.47947909999999,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "42",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Chippewa County Correctional Facility",
@@ -838,7 +1074,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "325 Court Street Sault Ste. Marie, MI 49783 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/chippewa-county-correctional-facility",
     "latitude": 46.4973719,
-    "longitude": -84.3455596
+    "longitude": -84.3455596,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Freeborn County Jail Services",
@@ -852,7 +1092,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "411 S. Broadway Avenue Albert Lea, MN 56007 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/freeborn-county-jail-services",
     "latitude": 43.6459816,
-    "longitude": -93.3681003
+    "longitude": -93.3681003,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Sherburne County Jail Services",
@@ -866,7 +1110,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "13880 Business Center Drive NW Elk River, MN 55330 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/sherburne-county-jail-services",
     "latitude": 45.304588,
-    "longitude": -93.61912060000002
+    "longitude": -93.61912060000002,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Kandiyohi County Jail",
@@ -880,7 +1128,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "2201 23rd St. NE Willmar, MN 56201 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/kandiyohi-county-jail",
     "latitude": 45.1457492,
-    "longitude": -95.0139765
+    "longitude": -95.0139765,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "110",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Ozark County Jail",
@@ -894,7 +1146,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1818 County Road 806 Gainesville, MO 65655 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/ozark-county-jail",
     "latitude": 36.6032101,
-    "longitude": -92.4596506
+    "longitude": -92.4596506,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Phelps County Jail",
@@ -908,7 +1164,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "500 W. 2nd Street Rolla, MO 65401 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/phelps-county-jail-0",
     "latitude": 37.9457141,
-    "longitude": -91.77505339999999
+    "longitude": -91.77505339999999,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "1",
+    "tracAsOf": "03/31/2025"
   },
   {
     "name": "Greene County Jail",
@@ -922,7 +1182,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1199 N Haseltine Road Springfield, MO 65802 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/greene-county-jail",
     "latitude": 37.224653,
-    "longitude": -93.38618
+    "longitude": -93.38618,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "273",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Ste. Genevieve County Detention Center",
@@ -936,7 +1200,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "5 Basler Drive Ste. Genevieve, MO 63670 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/ste-genevieve-county-detention-center",
     "latitude": 37.9653281,
-    "longitude": -90.0557269
+    "longitude": -90.0557269,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "CNMI Department of Corrections",
@@ -950,7 +1218,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "Vincente Taman Building Susupe, Saipan, MP 96950 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/cnmi-department-corrections",
     "latitude": 15.1567839,
-    "longitude": 145.7028775
+    "longitude": 145.7028775,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Adams County Correctional Center",
@@ -964,7 +1236,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "20 Hobo Forks Road Natchez, MS 39120 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/adams-county-detention-center",
     "latitude": 31.5574938,
-    "longitude": -91.2217027
+    "longitude": -91.2217027,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "1436",
+    "tracAverageDailyPopulation": "2224",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Alamance County Detention Center",
@@ -978,7 +1254,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "109 South Maple Street Graham, NC 27253 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/alamance-county-detention-center",
     "latitude": 36.0683261,
-    "longitude": -79.40356709999999
+    "longitude": -79.40356709999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Grand Forks County Correctional Center",
@@ -992,7 +1272,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1701 North Washington Grand Forks, ND 58203 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/grand-forks-county-correctional-center",
     "latitude": 47.935621,
-    "longitude": -97.0576258
+    "longitude": -97.0576258,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Phelps County Jail",
@@ -1006,7 +1290,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "715 5th Avenue Holdrege, NE 68949 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/phelps-county-jail",
     "latitude": 40.4395445,
-    "longitude": -99.3703646
+    "longitude": -99.3703646,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "29",
+    "tracAsOf": "03/31/2025"
   },
   {
     "name": "McCook Detention Center",
@@ -1020,7 +1308,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "2309 US-83 N McCook, NE 69001 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/mccook-detention-center",
     "latitude": 40.2279917,
-    "longitude": -100.6487162
+    "longitude": -100.6487162,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "5",
+    "tracAsOf": "11/10/2025"
   },
   {
     "name": "Federal Correctional Institution - Berlin, NH",
@@ -1034,7 +1326,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1 Success Loop Rd Berlin, NH 03570 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/federal-correctional-institution-berlin-nh",
     "latitude": 44.5213005,
-    "longitude": -71.1360472
+    "longitude": -71.1360472,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Strafford County Corrections",
@@ -1048,7 +1344,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "266 County Farm Road Dover, NH 03820 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/strafford-county-corrections",
     "latitude": 43.218151,
-    "longitude": -70.9400658
+    "longitude": -70.9400658,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "142",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Elizabeth Contract Detention Facility",
@@ -1062,7 +1362,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "625 Evans Street Elizabeth, NJ 07201 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/elizabeth-contract-detention-facility",
     "latitude": 40.6660324,
-    "longitude": -74.1898667
+    "longitude": -74.1898667,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "285",
+    "tracAverageDailyPopulation": "293",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Delaney Hall Detention Facility",
@@ -1076,7 +1380,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "451 Doremus Avenue Newark, NJ 07105 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/delaney-hall-detention-facility",
     "latitude": 40.7181313,
-    "longitude": -74.12849729999999
+    "longitude": -74.12849729999999,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "700",
+    "tracAverageDailyPopulation": "855",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Otero County Processing Center",
@@ -1090,7 +1398,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "26 McGregor Range Road Chaparral, NM 88081 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/otero-county-processing-center",
     "latitude": 32.0768294,
-    "longitude": -106.2549005
+    "longitude": -106.2549005,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "500",
+    "tracAverageDailyPopulation": "846",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Torrance County Detention Facility",
@@ -1104,7 +1416,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "209 County Road A049 Estancia, NM 87016 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/torrance-county-detention-facility",
     "latitude": 34.7672813,
-    "longitude": -106.0185814
+    "longitude": -106.0185814,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "505",
+    "tracAverageDailyPopulation": "346",
+    "tracAsOf": "10/10/2023"
   },
   {
     "name": "Cibola County Correctional Center",
@@ -1118,7 +1434,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "2000 Cibola Loop Milan, NM 87021 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/cibola-county-correctional-center",
     "latitude": 35.1799003,
-    "longitude": -107.907208
+    "longitude": -107.907208,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "217",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Henderson Detention Center",
@@ -1132,7 +1452,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "18 E. Basic Road Henderson, NV 89015 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/henderson-detention-center",
     "latitude": 36.0309509,
-    "longitude": -114.9787348
+    "longitude": -114.9787348,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "69",
+    "tracAsOf": "09/30/2023"
   },
   {
     "name": "Nevada Southern Detention Center",
@@ -1146,7 +1470,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "2190 E Mesquite Avenue Pahrump, NV 89048 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/nevada-southern-detention-center",
     "latitude": 36.252992,
-    "longitude": -115.975308
+    "longitude": -115.975308,
+    "tracTypeDetailed": "USMS CDF",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "460",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Washoe County Jail",
@@ -1160,7 +1488,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "911 E Parr Blvd Reno, NV 89512 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/washoe-county-jail",
     "latitude": 39.573637,
-    "longitude": -119.8109942
+    "longitude": -119.8109942,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "12",
+    "tracAsOf": "05/13/2024"
   },
   {
     "name": "Buffalo (Batavia) Service Processing Center",
@@ -1174,7 +1506,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "4250 Federal Drive Batavia, NY 14020 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/buffalo-batavia-service-processing-center",
     "latitude": 43.0201451,
-    "longitude": -78.2023932
+    "longitude": -78.2023932,
+    "tracTypeDetailed": "SPC",
+    "tracGuaranteedMinimum": "400",
+    "tracAverageDailyPopulation": "359",
+    "tracAsOf": "09/30/2023"
   },
   {
     "name": "Broome County Correctional Facility",
@@ -1188,7 +1524,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "155 Lt. VanWinkle Drive Binghamton, NY 13905 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/broome-county-correctional-facility",
     "latitude": 42.1323993,
-    "longitude": -75.9167679
+    "longitude": -75.9167679,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "MDC Brooklyn",
@@ -1202,7 +1542,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "80 29th Street Brooklyn, NY 11232 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/mdc-brooklyn",
     "latitude": 40.6599299,
-    "longitude": -74.0037546
+    "longitude": -74.0037546,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Orange County Jail",
@@ -1216,7 +1560,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "110 Wells Farm Road Goshen, NY 10924 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/orange-county-jail",
     "latitude": 41.4049515,
-    "longitude": -74.35929720000001
+    "longitude": -74.35929720000001,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "68",
+    "tracAsOf": "08/19/2024"
   },
   {
     "name": "Clinton County Jail",
@@ -1230,7 +1578,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "25 McCarthy Drive Plattsburgh, NY 12901 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/clinton-county-jail",
     "latitude": 44.72054319999999,
-    "longitude": -73.4670063
+    "longitude": -73.4670063,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "3",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Geauga County Safety Center",
@@ -1244,7 +1596,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "12450 Merritt Road Chardon, OH 44024 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/geauga-county-safety-center",
     "latitude": 41.5046752,
-    "longitude": -81.1915623
+    "longitude": -81.1915623,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Butler County Sheriff’s Office",
@@ -1258,7 +1614,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "705 Hanover Street Hamilton, OH 45011 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/butler-county-sheriffs-office",
     "latitude": 39.3875859,
-    "longitude": -84.5557427
+    "longitude": -84.5557427,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Corrections Center of Northwest Ohio (CCNO)",
@@ -1272,7 +1632,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "03151 Co. Rd. 24.2 Stryker, OH 43557 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/corrections-center-northwest-ohio-ccno",
     "latitude": 41.4852471,
-    "longitude": -84.4598111
+    "longitude": -84.4598111,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Seneca County Jail",
@@ -1286,7 +1650,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3040 South State Route 100 Tiffin, OH 44883 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/seneca-county-jail",
     "latitude": 41.0793527,
-    "longitude": -83.1538747
+    "longitude": -83.1538747,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "62",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Mahoning County Justice Center",
@@ -1300,7 +1668,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "110 Fifth Avenue Youngstown, OH 44503 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/mahoning-county-justice-center",
     "latitude": 41.1042306,
-    "longitude": -80.6549256
+    "longitude": -80.6549256,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Northeast Ohio Correctional Center",
@@ -1314,7 +1686,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "2240 Hubbard Road Youngstown, OH 44505 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/northeast-ohio-correctional-center",
     "latitude": 41.13167869999999,
-    "longitude": -80.63199780000001
+    "longitude": -80.63199780000001,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "220",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Cimarron Correctional Facility",
@@ -1328,7 +1704,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3200 S. Kings Hwy Cushing, OK 74023 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/cimarron-correctional-facility",
     "latitude": 35.9434371,
-    "longitude": -96.7821932
+    "longitude": -96.7821932,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Kay County Detention Center",
@@ -1342,7 +1722,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1101 West Dry Road Newkirk, OK 74647 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/kay-county-detention-center",
     "latitude": 36.8678591,
-    "longitude": -97.0691621
+    "longitude": -97.0691621,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Pike County Correctional Facility",
@@ -1356,7 +1740,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "175 Pike County Blvd. Lords Valley, PA 18428 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/pike-county-correctional-facility",
     "latitude": 41.3890147,
-    "longitude": -75.0713413
+    "longitude": -75.0713413,
+    "tracTypeDetailed": "IGSA",
+    "tracGuaranteedMinimum": "100",
+    "tracAverageDailyPopulation": "123",
+    "tracAsOf": "05/13/2024"
   },
   {
     "name": "Clinton County Correctional Facility",
@@ -1370,7 +1758,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "58 Pine Mountain Road McElhattan, PA 17748 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/clinton-county-correctional-facility",
     "latitude": 41.1508791,
-    "longitude": -77.3499399
+    "longitude": -77.3499399,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "89",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "FDC Philadelphia",
@@ -1384,7 +1776,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "700 Arch Street Philadelphia, PA 19106 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/fdc-philadelphia",
     "latitude": 39.9526835,
-    "longitude": -75.1521168
+    "longitude": -75.1521168,
+    "tracTypeDetailed": "BOP",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "94",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Moshannon Valley Processing Center",
@@ -1398,7 +1794,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "555 GEO Drive Philipsburg, PA 16866 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/moshannon-valley-processing-center",
     "latitude": 40.9221524,
-    "longitude": -78.2405572
+    "longitude": -78.2405572,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "800",
+    "tracAverageDailyPopulation": "1600",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Wyatt Detention Facility",
@@ -1412,7 +1812,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "950 High Street Central Falls, RI 02863 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/wyatt-detention-facility",
     "latitude": 41.8924645,
-    "longitude": -71.38395899999999
+    "longitude": -71.38395899999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Pennington County Jail",
@@ -1426,7 +1830,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "307 Saint Joseph St Rapid City, SD 57701 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/pennington-county-jail",
     "latitude": 44.07868029999999,
-    "longitude": -103.221535
+    "longitude": -103.221535,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "West Tennessee Detention Facility",
@@ -1440,7 +1848,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "6299 Finde Naifeh Drive Mason, TN 38049 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/west-tennessee-detention-facility",
     "latitude": 35.4074582,
-    "longitude": -89.5486122
+    "longitude": -89.5486122,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Prairieland Detention Facility",
@@ -1454,7 +1866,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1209 Sunflower Lane Alvarado, TX 76009 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/prairieland-detention-facility",
     "latitude": 32.4214133,
-    "longitude": -97.19582779999999
+    "longitude": -97.19582779999999,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "525",
+    "tracAverageDailyPopulation": "571",
+    "tracAsOf": "05/13/2024"
   },
   {
     "name": "Bluebonnet Detention Facility",
@@ -1468,7 +1884,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "400 2nd Street Anson, TX 79501 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/bluebonnet-detention-facility",
     "latitude": 32.7676451,
-    "longitude": -99.8880841
+    "longitude": -99.8880841,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "750",
+    "tracAverageDailyPopulation": "1027",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Joe Corley Processing Center",
@@ -1482,7 +1902,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "500 Hilbig Road Conroe, TX 77301 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/joe-corley-processing-center",
     "latitude": 30.3357896,
-    "longitude": -95.4480609
+    "longitude": -95.4480609,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Montgomery Processing Center",
@@ -1496,7 +1920,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "806 Hilbig Road Conroe, TX 77301 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/montgomery-processing-center",
     "latitude": 30.336088,
-    "longitude": -95.44250459999999
+    "longitude": -95.44250459999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Dilley Immigration Processing Center",
@@ -1510,7 +1938,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "300 El Rancho Way Dilley, TX 78017 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/dilley-immigration-processing-center",
     "latitude": 28.6578745,
-    "longitude": -99.2003862
+    "longitude": -99.2003862,
+    "tracTypeDetailed": "FAMILY",
+    "tracGuaranteedMinimum": "2400",
+    "tracAverageDailyPopulation": "552",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Eden Detention Center",
@@ -1524,7 +1956,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "704 E Broadway Street Eden, TX 76837 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/eden-detention-center",
     "latitude": 31.2168095,
-    "longitude": -99.8337901
+    "longitude": -99.8337901,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "207",
+    "tracAsOf": "01/22/2024"
   },
   {
     "name": "ERO El Paso Camp East Montana",
@@ -1538,7 +1974,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "6920 Digital Road El Paso, TX 79936 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/camp-east-montana",
     "latitude": 31.811927,
-    "longitude": -106.2981181
+    "longitude": -106.2981181,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "2774",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "El Paso Service Processing Center",
@@ -1552,7 +1992,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "8915 Montana Avenue El Paso, TX 79925 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/el-paso-service-processing-center",
     "latitude": 31.7942381,
-    "longitude": -106.3676273
+    "longitude": -106.3676273,
+    "tracTypeDetailed": "SPC",
+    "tracGuaranteedMinimum": "450",
+    "tracAverageDailyPopulation": "817",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "La Salle County Regional Detention Center",
@@ -1566,7 +2010,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "832 East Texas HWY 44 Encinal, TX 78019 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/la-salle-county-regional-detention-center",
     "latitude": 28.0455037,
-    "longitude": -99.3362626
+    "longitude": -99.3362626,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "287",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Limestone County Detention Center",
@@ -1580,7 +2028,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "910 North Tyus Street Groesbeck, TX 76642 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/limestone-county-detention-center",
     "latitude": 31.5268364,
-    "longitude": -96.51481919999999
+    "longitude": -96.51481919999999,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "243",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Rolling Plains Detention Center",
@@ -1594,7 +2046,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "118 County Road 206 Haskell, TX 79521 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/rolling-plains-detention-center",
     "latitude": 33.1771862,
-    "longitude": -99.7217295
+    "longitude": -99.7217295,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "12",
+    "tracAsOf": "08/14/2022"
   },
   {
     "name": "Houston Contract Detention Facility",
@@ -1608,7 +2064,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "15850 Export Plaza Drive Houston, TX 77032 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/houston-contract-detention-facility",
     "latitude": 29.9497807,
-    "longitude": -95.31226939999999
+    "longitude": -95.31226939999999,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "750",
+    "tracAverageDailyPopulation": "881",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Karnes County Immigration Processing Center",
@@ -1622,7 +2082,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "409 FM 1144 Karnes City, TX 78118 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/karnes-county-ipc",
     "latitude": 28.8849772,
-    "longitude": -97.9008355
+    "longitude": -97.9008355,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "928",
+    "tracAverageDailyPopulation": "1185",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "East Hidalgo Detention Center",
@@ -1636,7 +2100,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1300 E Hwy 107 La Villa, TX 78562 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/east-hidalgo-detention-center",
     "latitude": 26.2963533,
-    "longitude": -97.9178948
+    "longitude": -97.9178948,
+    "tracTypeDetailed": "USMS IGA",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "3",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "CoreCivic Laredo Processing Center",
@@ -1650,7 +2118,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "4702 East Saunders Laredo, TX 78401 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/laredo-detention-center",
     "latitude": 27.5292214,
-    "longitude": -99.44793399999999
+    "longitude": -99.44793399999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "CoreCivic Webb County Detention Center",
@@ -1664,7 +2136,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "9998 S. Highway 83 Laredo, TX 78046 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/webb-county-detention-center",
     "latitude": 27.3698802,
-    "longitude": -99.49025619999999
+    "longitude": -99.49025619999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Rio Grande Processing Center",
@@ -1678,7 +2154,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1001 San Rio Blvd Laredo, TX 78046 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/rio-grande-detention-center",
     "latitude": 27.377685,
-    "longitude": -99.4901498
+    "longitude": -99.4901498,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "IAH Polk Adult Detention Facility",
@@ -1692,7 +2172,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "3400 FM 350 South Livingston, TX 77351 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/iah-polk-adult-detention-facility",
     "latitude": 30.6980352,
-    "longitude": -95.0062201
+    "longitude": -95.0062201,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Port Isabel Service Processing Center",
@@ -1706,7 +2190,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "27991 Buena Vista Blvd. Los Fresnos, TX 78566 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/port-isabel-service-processing-center",
     "latitude": 26.1569011,
-    "longitude": -97.35055609999999
+    "longitude": -97.35055609999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "South Texas ICE Processing Center",
@@ -1720,7 +2208,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "566 Veterans Drive Pearsall, TX 78061 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/south-texas-ice-processing-center",
     "latitude": 28.8973835,
-    "longitude": -99.1187908
+    "longitude": -99.1187908,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "1350",
+    "tracAverageDailyPopulation": "1732",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "El Valle Detention Facility",
@@ -1734,7 +2226,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1800 Industrial Drive Raymondville, TX 78580 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/el-valle-detention-facility",
     "latitude": 26.470298,
-    "longitude": -97.7586475
+    "longitude": -97.7586475,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "600",
+    "tracAverageDailyPopulation": "910",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Coastal Bend Detention Center",
@@ -1748,7 +2244,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "4909 Farm to Market Road Robstown, TX 78380 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/coastal-bend-detention-center",
     "latitude": 27.7903032,
-    "longitude": -97.6688843
+    "longitude": -97.6688843,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "T. Don Hutto Detention Center",
@@ -1762,7 +2262,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1001 Welch Street Taylor, TX 76574 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/t-don-hutto-detention-center",
     "latitude": 30.5655231,
-    "longitude": -97.4198336
+    "longitude": -97.4198336,
+    "tracTypeDetailed": "CDF",
+    "tracGuaranteedMinimum": "461",
+    "tracAverageDailyPopulation": "444",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Caroline Detention Facility",
@@ -1776,7 +2280,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "11093 SW Lewis Memorial Dr Bowling Green, VA 22427 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/caroline-detention-facility",
     "latitude": 38.1116967,
-    "longitude": -77.26721069999999
+    "longitude": -77.26721069999999,
+    "tracTypeDetailed": "DIGSA",
+    "tracGuaranteedMinimum": "224",
+    "tracAverageDailyPopulation": "346",
+    "tracAsOf": "11/28/2025"
   },
   {
     "name": "Abyon | Farmville Detention Center",
@@ -1790,7 +2298,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "508 Waterworks Road Farmville, VA 23901 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/farmville-detention-center",
     "latitude": 37.32044399999999,
-    "longitude": -78.44087569999999
+    "longitude": -78.44087569999999,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Northwest ICE Processing Center (NWIPC)",
@@ -1804,7 +2316,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1623 E J Street, Suite 2 Tacoma, WA 98421-1615 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/northwest-ice-processing-center-nwipc",
     "latitude": 47.24986029999999,
-    "longitude": -122.4218964
+    "longitude": -122.4218964,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Dodge Detention Facility",
@@ -1818,7 +2334,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "216 W. Center Street Juneau, WI 53039 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/dodge-detention-facility",
     "latitude": 43.4073522,
-    "longitude": -88.706355
+    "longitude": -88.706355,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Natrona County Detention Center",
@@ -1832,7 +2352,11 @@ export const DETENTION_FACILITIES = [
     "addressFull": "1100 Bruce Lane Casper, WY 82601 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/natrona-county-detention-center",
     "latitude": 42.8626014,
-    "longitude": -106.3455262
+    "longitude": -106.3455262,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   },
   {
     "name": "Sweetwater County Detention Center",
@@ -1846,6 +2370,10 @@ export const DETENTION_FACILITIES = [
     "addressFull": "50140 US Highway 191 South Rock Springs, WY 82901 United States",
     "detailUrl": "https://www.ice.gov/detain/detention-facilities/sweetwater-county-detention-center",
     "latitude": 41.5386685,
-    "longitude": -109.302023
+    "longitude": -109.302023,
+    "tracTypeDetailed": "",
+    "tracGuaranteedMinimum": "",
+    "tracAverageDailyPopulation": "",
+    "tracAsOf": ""
   }
 ] as const;

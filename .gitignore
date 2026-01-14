@@ -6,3 +6,5 @@ __pycache__/
 datasets/
 news_ingest/
 *.log
+frontend/node_modules/
+frontend/dist/

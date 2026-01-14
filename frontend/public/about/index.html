@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICEMap - About</title>
+    <meta
+      name="description"
+      content="About ICEMap (ICE Incident News Map), how it is maintained, and what the data represents."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #0f172a;
+        --navy: #1e293b;
+        --olive: #647b4f;
+        --accent: #f97316;
+        --card: #ffffff;
+        --cream: #fff7ed;
+        --border: #e2e8f0;
+        --bg: #f8fafc;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 4rem;
+      }
+      .map-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: var(--cream);
+        border-bottom: 1px solid var(--border);
+        gap: 1rem;
+        flex-wrap: wrap;
+        border-radius: 1rem;
+      }
+      .brand-card {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .brand-mark {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--accent);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      .brand-card h1 {
+        font-size: 1.6rem;
+        margin: 0;
+        color: var(--navy);
+      }
+      .brand-card p {
+        margin: 0.15rem 0 0;
+        color: #475569;
+        font-size: 0.95rem;
+      }
+      .page-nav {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .nav-pill {
+        border: 1px solid #cbd5f5;
+        background: #fff;
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        font-weight: 600;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .nav-pill.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      .lang-select {
+        border: 1px solid #cbd5f5;
+        border-radius: 999px;
+        padding: 0.35rem 0.6rem;
+        background: #fff;
+        font-weight: 600;
+      }
+      h2 {
+        margin-top: 2rem;
+        font-size: 1.25rem;
+        color: var(--navy);
+      }
+      p {
+        line-height: 1.65;
+      }
+      ul {
+        padding-left: 1.25rem;
+      }
+      .note {
+        background: var(--cream);
+        border: 1px solid #fed7aa;
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        border-left: 4px solid var(--olive);
+      }
+      footer {
+        margin-top: 3rem;
+        font-size: 0.9rem;
+        color: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="map-header">
+        <div class="brand-card">
+          <div class="brand-mark">ICE</div>
+          <div>
+            <h1>ICEMap</h1>
+            <p>ICE Incident News Map — about the project and its goals.</p>
+          </div>
+        </div>
+        <nav class="page-nav">
+          <a class="nav-pill" href="/">Map</a>
+          <a class="nav-pill active" href="/about/">About</a>
+          <a class="nav-pill" href="/methodology/">Methodology</a>
+          <a class="nav-pill" href="/charts/">Charts</a>
+          <select
+            class="lang-select"
+            aria-label="Language"
+            onchange="window.location.href = this.value;"
+          >
+            <option value="/about/" selected>English</option>
+            <option value="/es/about/">Español</option>
+          </select>
+        </nav>
+      </header>
+
+      <section>
+        <h2>Purpose</h2>
+        <p>
+          ICEMap (ICE Incident News Map) aggregates publicly reported coverage of
+          immigration enforcement activity so communities, advocates, and researchers can
+          quickly understand where incidents are being reported and how coverage changes over time.
+        </p>
+      </section>
+
+      <section>
+        <h2>What the map shows</h2>
+        <ul>
+          <li>Short summaries of news reports and public updates.</li>
+          <li>Approximate locations derived from place names in the report text.</li>
+          <li>Time filters that let you focus on recent coverage.</li>
+        </ul>
+      </section>
+
+      <section class="note">
+        <p>
+          We do not publish addresses of individuals or private residences, and we do not
+          encourage harassment or interference with any person. The map is an information
+          resource built from publicly available reporting.
+        </p>
+      </section>
+
+      <section>
+        <h2>Sources</h2>
+        <p>
+          Summaries are drawn from publisher-provided descriptions (for example RSS feed
+          summaries) and converted into brief text entries that link back to the original
+          reporting.
+        </p>
+      </section>
+
+      <footer>
+        Questions or corrections? Provide a contact method on your main site and link
+        it here.
+      </footer>
+    </main>
+    <script>
+      localStorage.setItem("icemap_lang", "en");
+    </script>
+  </body>
+</html>
