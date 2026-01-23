@@ -54,6 +54,33 @@ DEFAULT_SEARCH_TERMS = [
     "national guard",
     "asylum",
     "refugee",
+    "ice protest",
+    "anti-ice protest",
+    "immigration protest",
+    "immigrant protest",
+    "migrant protest",
+    "detention protest",
+    "deportation protest",
+    "ice march",
+    "immigration march",
+    "immigrant rights rally",
+    "anti-ice rally",
+    "protest",
+    "march",
+    "rally",
+    "demonstration",
+    "strike",
+    "walkout",
+    "picket",
+    "sit-in",
+    "vigil",
+    "boycott",
+    "blockade",
+    "occupation",
+    "riot",
+    "civil unrest",
+    "uprising",
+    "revolution",
 ]
 
 DEFAULT_RELEVANCE_KEYWORDS = [
@@ -66,6 +93,8 @@ DEFAULT_RELEVANCE_KEYWORDS = [
     "detention center",
     "immigration raid",
     "immigration court",
+    "immigrant",
+    "migrant",
     "visa",
     "green card",
     "national guard",
@@ -74,6 +103,39 @@ DEFAULT_RELEVANCE_KEYWORDS = [
 ]
 
 CASE_SENSITIVE_KEYWORDS = frozenset({"ICE"})
+PROTEST_KEYWORD_PATTERNS = [
+    re.compile(r"\bprotest(?:s|ers|ing)?\b", re.IGNORECASE),
+    re.compile(r"\bmarch(?:es|ers|ing)?\b", re.IGNORECASE),
+    re.compile(r"\brally(?:ies|ied|ing)?\b", re.IGNORECASE),
+    re.compile(r"\bdemonstration(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\bdemonstrator(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\bdemonstrat(?:e|ed|ing)\b", re.IGNORECASE),
+    re.compile(r"\bstrike(?:s|ing)?\b", re.IGNORECASE),
+    re.compile(r"\bwalkout(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\bpicket(?:s|ed|ing)?\b", re.IGNORECASE),
+    re.compile(r"\bsit[- ]in(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\bvigil(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\bboycott(?:s|ed|ing)?\b", re.IGNORECASE),
+    re.compile(r"\bblockade(?:s|d|ing)?\b", re.IGNORECASE),
+    re.compile(r"\boccup(?:y|ies|ied|ying)\b", re.IGNORECASE),
+    re.compile(r"\boccupation\b", re.IGNORECASE),
+    re.compile(r"\briot(?:s|ing)?\b", re.IGNORECASE),
+    re.compile(r"\bcivil unrest\b", re.IGNORECASE),
+    re.compile(r"\bunrest\b", re.IGNORECASE),
+    re.compile(r"\buprising(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\brevolution(?:s|ary)?\b", re.IGNORECASE),
+]
+PROTEST_CONTEXT_PATTERNS = [
+    re.compile(r"\bice\b", re.IGNORECASE),
+    re.compile(r"\bimmigration\b", re.IGNORECASE),
+    re.compile(r"\bimmigrant(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\bmigrant(?:s)?\b", re.IGNORECASE),
+    re.compile(r"\bborder patrol\b", re.IGNORECASE),
+    re.compile(r"\bdeport(?:ation|ed|ations)?\b", re.IGNORECASE),
+    re.compile(r"\bdetention\b", re.IGNORECASE),
+    re.compile(r"\basylum\b", re.IGNORECASE),
+    re.compile(r"\brefugee(?:s)?\b", re.IGNORECASE),
+]
 GENERIC_FACILITY_PREFIXES = {
     "ice office",
     "detention center",
@@ -1458,6 +1520,9 @@ class NewsIngestor:
                 hits.append(keyword)
         if len(hits) >= self.min_keyword_matches:
             LOGGER.debug("Report '%s' matched keywords %s", report.title, hits)
+            return True
+        if any(pattern.search(blob) for pattern in PROTEST_KEYWORD_PATTERNS):
+            LOGGER.debug("Report '%s' matched protest keyword filter.", report.title)
             return True
         LOGGER.debug(
             "Report '%s' dropped due to insufficient keyword matches (%s)",

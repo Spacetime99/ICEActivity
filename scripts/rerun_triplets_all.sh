@@ -18,9 +18,16 @@ if [[ ${#dumps[@]} -eq 0 ]]; then
   exit 0
 fi
 
+total=${#dumps[@]}
+index=0
 for dump in "${dumps[@]}"; do
+  index=$((index + 1))
+  if (( index % 5 == 0 || index == 1 || index == total )); then
+    percent=$((index * 100 / total))
+    echo "Progress: ${index}/${total} (${percent}%)"
+  fi
   echo "Re-extracting triplets from ${dump}..."
-  python scripts/extract_triplets.py \
+  python3 scripts/extract_triplets.py \
     --input-file "${dump}" \
     --output-dir datasets/news_ingest \
     --model-id microsoft/Phi-3-mini-128k-instruct \

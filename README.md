@@ -149,26 +149,25 @@ The helper script `scripts/run_ingest_and_extract.sh` chains a full ingest + tri
    ```
 The script recreates the SQLite caches and JSONL outputs automatically if they’re missing, so new environments can just schedule the timer and let the pipeline bootstrap itself.
 
-## Triplet API & Map Frontend
+## Static Triplet Slices & Map Frontend
 
-### FastAPI backend
-The FastAPI service lives in `src/api/main.py` and reads directly from `datasets/news_ingest/triplets_index.sqlite`. It exposes:
+### Static JSON slices (no API)
+The map now reads from static JSON slices so it can be deployed as a fully static site.
+Slices live under `frontend/public/data` and are generated from the triplets SQLite index:
 
-- `GET /health` → `{"status":"ok"}`
-- `GET /api/triplets?since_hours=24&bbox=west,south,east,north` → JSON array of triplets (lat/lon required, ordered by `published_at` desc, max 2000 rows).
+- `triplets_3d.json`
+- `triplets_7d.json`
+- `triplets_1mo.json`
+- `triplets_3mo.json`
+- `triplets_all.json`
 
-Run it locally with:
+Regenerate them with:
 ```bash
-source .venv/bin/activate
-uvicorn src.api.main:app --reload --host 127.0.0.1 --port 5000
-# or use the helper script (honors $PORT/$HOST):
-./scripts/run_icemap_api.sh
+python scripts/export_triplets_static.py
 ```
 
-Example request (last 6 hours, no bounding box):
-```bash
-curl "http://localhost:5000/api/triplets?since_hours=6"
-```
+By default the frontend fetches from `/data` (resolved via `VITE_STATIC_DATA_BASE_URL`,
+falling back to `<origin>/<base>/data`).
 
 ### React + Leaflet frontend
 A lightweight Vite/React map client lives under `frontend/`.
@@ -181,9 +180,10 @@ npm run dev        # http://localhost:3000 for local work
 npm run build      # outputs to frontend/dist (served at /ice)
 ```
 
-The frontend fetches map data from the FastAPI base URL (`VITE_API_BASE_URL`, defaults to `http://localhost:5000`). You can override it via:
+The frontend fetches map data from the static data base URL (`VITE_STATIC_DATA_BASE_URL`).
+You can override it via:
 ```bash
-VITE_API_BASE_URL=https://api.example.com npm run dev
+VITE_STATIC_DATA_BASE_URL=https://cdn.example.com/data npm run dev
 ```
 
 The UI provides 6h/24h/3d/7d filters, groups triplets by rounded coordinates, colors markers by recency, and links back to the source articles.

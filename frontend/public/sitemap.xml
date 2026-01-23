@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://your-domain.example/</loc>
+    <loc>https://icemap.org/ice/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://your-domain.example/about/</loc>
+    <loc>https://icemap.org/ice/about/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://your-domain.example/methodology/</loc>
+    <loc>https://icemap.org/ice/methodology/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://your-domain.example/charts/</loc>
+    <loc>https://icemap.org/ice/charts/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://your-domain.example/es/about/</loc>
+    <loc>https://icemap.org/ice/es/about/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://your-domain.example/es/methodology/</loc>
+    <loc>https://icemap.org/ice/es/methodology/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

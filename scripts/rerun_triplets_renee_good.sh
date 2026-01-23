@@ -25,7 +25,7 @@ fi
 
 for dump in "${dumps[@]}"; do
   echo "Re-extracting triplets from ${dump}..."
-  python scripts/extract_triplets.py \
+  python3 scripts/extract_triplets.py \
     --input-file "${dump}" \
     --output-dir datasets/news_ingest \
     --model-id microsoft/Phi-3-mini-128k-instruct \

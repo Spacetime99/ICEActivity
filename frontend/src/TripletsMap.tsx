@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from "react-leaflet";
 import L, { LatLngBoundsExpression } from "leaflet";
-import { API_BASE_URL } from "./config";
+import { STATIC_DATA_BASE_URL } from "./config";
 import { STATIC_LOCATIONS } from "./staticLocations";
 import { FIELD_OFFICES } from "./fieldOffices";
 import { DETENTION_FACILITIES } from "./detentionFacilities";
@@ -31,6 +31,7 @@ type Triplet = {
   url?: string | null;
   publishedAt: string;
   source?: string | null;
+  eventTypes?: string[];
 };
 
 type TripletGroup = {
@@ -50,23 +51,38 @@ type StoryGroup = {
 
 type TimeRangeValue = number | "all";
 type ViewMode = "map" | "list" | "resources" | "charts";
+type EventFilter = "all" | "protest" | "severe";
 
 // Keep one hour under the API's 90-day upper bound to avoid validation errors on
 // deployments that still enforce a strict "< 90 days" check.
 const MAX_API_WINDOW_HOURS = 24 * 90 - 1;
 
-const TIME_RANGES: Array<{ label: { en: string; es: string }; value: TimeRangeValue }> = [
-  { label: { en: "3d", es: "3d" }, value: 72 },
-  { label: { en: "7d", es: "7d" }, value: 24 * 7 },
-  { label: { en: "1mo", es: "1 mes" }, value: 24 * 30 },
-  { label: { en: "3mo", es: "3 meses" }, value: MAX_API_WINDOW_HOURS },
-  { label: { en: "All", es: "Todo" }, value: "all" },
+const TIME_RANGES: Array<{
+  label: { en: string; es: string };
+  summary: { en: string; es: string };
+  value: TimeRangeValue;
+}> = [
+  { label: { en: "3d", es: "3d" }, summary: { en: "in the last 3 days", es: "en los últimos 3 días" }, value: 72 },
+  { label: { en: "7d", es: "7d" }, summary: { en: "in the last 7 days", es: "en los últimos 7 días" }, value: 24 * 7 },
+  { label: { en: "1mo", es: "1 mes" }, summary: { en: "in the last month", es: "en el último mes" }, value: 24 * 30 },
+  { label: { en: "3mo", es: "3 meses" }, summary: { en: "in the last 3 months", es: "en los últimos 3 meses" }, value: MAX_API_WINDOW_HOURS },
+  { label: { en: "All", es: "Todo" }, summary: { en: "all dates", es: "todas las fechas" }, value: "all" },
+];
+
+const EVENT_FILTERS: Array<{
+  labelKey: "filterAll" | "filterProtest" | "filterSevere";
+  value: EventFilter;
+}> = [
+  { labelKey: "filterAll", value: "all" },
+  { labelKey: "filterProtest", value: "protest" },
+  { labelKey: "filterSevere", value: "severe" },
 ];
 
 const formatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "short",
   timeStyle: "short",
 });
+const dayFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
 const LEGEND = [
   { label: "< 6h", color: "#ff4d4f" },
@@ -77,6 +93,8 @@ const LEGEND = [
 ];
 
 const SEVERE_COLOR = "#8b0000";
+const PROTEST_COLOR = "#2f9e44";
+const UNREST_COLOR = "#6f2dbd";
 const numberFormatter = new Intl.NumberFormat(undefined);
 const FEEDBACK_URL = "https://tally.so/r/lbOAvo";
 const SEVERE_KEYWORDS = [
@@ -96,6 +114,46 @@ const SEVERE_KEYWORDS = [
   "violence",
   "wound",
 ];
+const PROTEST_TYPES = new Set([
+  "protest",
+  "march",
+  "rally",
+  "demonstration",
+  "strike",
+  "walkout",
+  "picket",
+  "sit_in",
+  "vigil",
+  "boycott",
+  "blockade",
+  "occupation",
+  "riot",
+  "civil_unrest",
+  "uprising",
+  "revolution",
+]);
+const UNREST_TYPES = new Set([
+  "riot",
+  "civil_unrest",
+  "blockade",
+  "uprising",
+  "revolution",
+]);
+
+function matchesEventFilter(triplet: Triplet, filter: EventFilter): boolean {
+  if (filter === "all") {
+    return true;
+  }
+  const types = triplet.eventTypes ?? [];
+  const hasProtest = types.some((type) => PROTEST_TYPES.has(type));
+  if (filter === "protest") {
+    return hasProtest;
+  }
+  if (filter === "severe") {
+    return isSevereTriplet(triplet);
+  }
+  return true;
+}
 
 const GENERAL_LOCATION_TOLERANCE = 0.1;
 const GENERAL_COORDINATES = { lat: 39.7837304, lon: -100.445882 };
@@ -106,6 +164,11 @@ const FACILITY_LOCATIONS = STATIC_LOCATIONS.filter((loc) => loc.type === "facili
 const CHILD_CAMP_LOCATIONS = STATIC_LOCATIONS.filter((loc) => loc.type === "child_camp");
 const FACILITY_COUNT = FACILITY_LOCATIONS.length;
 const CHILD_CAMP_COUNT = CHILD_CAMP_LOCATIONS.length;
+
+const SOURCE_LOGO_EXTS = [".png", ".svg", ".ico"];
+const SOURCE_LOGO_BASE = import.meta.env.BASE_URL ?? "/";
+const DEFAULT_TOPIC = "Immigration";
+const DEFAULT_IMPACT = "Enforcement";
 
 function groupTriplets(data: Triplet[]): TripletGroup[] {
   const groups = new Map<string, TripletGroup>();
@@ -135,6 +198,12 @@ function groupByStory(data: Triplet[]): StoryGroup[] {
     const existing = groups.get(key);
     if (existing) {
       existing.items.push(triplet);
+      if (!existing.title && triplet.title) {
+        existing.title = triplet.title;
+      }
+      if (!existing.url && triplet.url) {
+        existing.url = triplet.url;
+      }
       if (
         triplet.publishedAt &&
         (!existing.publishedAt ||
@@ -189,6 +258,16 @@ function isSevereTriplet(triplet: Triplet): boolean {
   return SEVERE_KEYWORDS.some((keyword) => blob.includes(keyword));
 }
 
+function isUnrestTriplet(triplet: Triplet): boolean {
+  const types = triplet.eventTypes ?? [];
+  return types.some((type) => UNREST_TYPES.has(type));
+}
+
+function isProtestTriplet(triplet: Triplet): boolean {
+  const types = triplet.eventTypes ?? [];
+  return types.some((type) => PROTEST_TYPES.has(type) && !UNREST_TYPES.has(type));
+}
+
 function formatPopulationLabel(value?: string | null): string {
   if (!value) {
     return "";
@@ -199,6 +278,201 @@ function formatPopulationLabel(value?: string | null): string {
   }
   return numberFormatter.format(parsed);
 }
+
+const SOURCE_STOP_WORDS = new Set([
+  "the",
+  "and",
+  "of",
+  "in",
+  "at",
+  "for",
+  "on",
+  "by",
+  "to",
+  "from",
+]);
+
+const formatSourceLabel = (source?: string | null): string | null => {
+  if (!source) {
+    return null;
+  }
+  let label = source.trim();
+  if (!label) {
+    return null;
+  }
+  const looksLikeHostname =
+    !label.includes(" ") && label.includes(".") && !label.includes(":");
+  if (looksLikeHostname) {
+    label = label.replace(/^www\./, "");
+    return label;
+  }
+  if (label.includes("://")) {
+    try {
+      const parsed = new URL(label);
+      label = parsed.hostname;
+    } catch {
+      return null;
+    }
+  } else if (label.includes(":")) {
+    label = label.split(":").pop() ?? label;
+  }
+  label = label.replace(/^(html|rss|rssapp|newsapi)[_-]+/i, "");
+  label = label.replace(/^www\./, "");
+  label = label.replace(/[_-]+/g, " ");
+  const words = label.split(/\s+/).filter(Boolean);
+  if (!words.length) {
+    return null;
+  }
+  return words
+    .map((word, index) => {
+      const cleaned = word.replace(/[^\w]/g, "");
+      if (!cleaned) {
+        return word;
+      }
+      const lower = cleaned.toLowerCase();
+      if (index > 0 && SOURCE_STOP_WORDS.has(lower)) {
+        return lower;
+      }
+      if (/^[a-z]+$/.test(cleaned) && cleaned.length <= 3) {
+        return cleaned.toUpperCase();
+      }
+      return cleaned[0].toUpperCase() + cleaned.slice(1).toLowerCase();
+    })
+    .join(" ");
+};
+
+const getLocationLabel = (items: Triplet[]): string | null => {
+  for (const item of items) {
+    const label = item.where_text?.trim();
+    if (!label) {
+      continue;
+    }
+    const lower = label.toLowerCase();
+    if (
+      lower.includes("no specific location") ||
+      lower.includes("not specified") ||
+      lower.includes("not provided") ||
+      lower.includes("unspecified")
+    ) {
+      continue;
+    }
+    return label;
+  }
+  return null;
+};
+
+const getTopicLabel = (items: Triplet[]): string => {
+  const blob = items
+    .map((item) => `${item.title} ${item.what}`)
+    .join(" ")
+    .toLowerCase();
+  if (/(court|judge|lawsuit|appeal|ruling|injunction)/.test(blob)) {
+    return "Courts";
+  }
+  if (/(politic|election|campaign|congress|senate|house|governor|mayor|president)/.test(blob)) {
+    return "Politics";
+  }
+  return DEFAULT_TOPIC;
+};
+
+const getImpactLabel = (items: Triplet[]): string => {
+  const blob = items
+    .map((item) => `${item.title} ${item.what}`)
+    .join(" ")
+    .toLowerCase();
+  if (/(raid|raided)/.test(blob)) {
+    return "Raid";
+  }
+  if (/(arrest|arrested|detain|detained|apprehend|custody)/.test(blob)) {
+    return "Arrests";
+  }
+  if (/(deport|deported|deportation|removed|removal)/.test(blob)) {
+    return "Deportations";
+  }
+  if (/(lawsuit|suit|complaint|litigation)/.test(blob)) {
+    return "Lawsuit";
+  }
+  if (/(policy|ban|rule|order|directive|regulation)/.test(blob)) {
+    return "Policy";
+  }
+  return DEFAULT_IMPACT;
+};
+
+const slugifySource = (source?: string | null): string | null => {
+  if (!source) {
+    return null;
+  }
+  const cleaned = source.trim().toLowerCase();
+  if (!cleaned) {
+    return null;
+  }
+  return cleaned.replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || null;
+};
+
+const SourceLogo: React.FC<{
+  primaryKey?: string | null;
+  fallbackKey?: string | null;
+  alt: string;
+}> = ({ primaryKey, fallbackKey, alt }) => {
+  const keys = [primaryKey, fallbackKey].filter(Boolean) as string[];
+  const candidates = keys.flatMap((key) => {
+    const slug = slugifySource(key);
+    if (!slug) {
+      return [];
+    }
+    return SOURCE_LOGO_EXTS.map(
+      (ext) => `${SOURCE_LOGO_BASE}source-logos/${slug}${ext}`,
+    );
+  });
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const src = candidates[candidateIndex];
+  const fallbackLetter = alt.trim().charAt(0).toUpperCase() || "?";
+  const checkTransparency = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    if (!img.naturalWidth || !img.naturalHeight) {
+      setCandidateIndex((prev) => prev + 1);
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+    ctx.drawImage(img, 0, 0);
+    try {
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let transparent = 0;
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] < 16) {
+          transparent += 1;
+        }
+      }
+      if (transparent / (data.length / 4) > 0.98) {
+        setCandidateIndex((prev) => prev + 1);
+      }
+    } catch {
+      // Ignore cross-origin or canvas errors; keep the loaded image.
+    }
+  };
+  if (!src) {
+    return (
+      <span className="source-logo fallback" aria-hidden="true">
+        {fallbackLetter}
+      </span>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="source-logo"
+      onError={() => setCandidateIndex((prev) => prev + 1)}
+      onLoad={checkTransparency}
+    />
+  );
+};
 
 const MapBounds: React.FC = () => {
   const map = useMap();
@@ -233,13 +507,14 @@ const getInitialLanguage = (): Language => {
 const TripletsMap = () => {
   const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [sinceHours, setSinceHours] = useState<TimeRangeValue>("all");
+  const [eventFilter, setEventFilter] = useState<EventFilter>("all");
   const [triplets, setTriplets] = useState<Triplet[]>([]);
   const [generalTriplets, setGeneralTriplets] = useState<Triplet[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFacilities, setShowFacilities] = useState(true);
   const [showChildCamps, setShowChildCamps] = useState(true);
-  const [showFieldOffices, setShowFieldOffices] = useState(true);
+  const [showFieldOffices, setShowFieldOffices] = useState(false);
   const [showDetentionFacilities, setShowDetentionFacilities] = useState(false);
   const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [viewMode, setViewMode] = useState<ViewMode>("map");
@@ -261,19 +536,62 @@ const TripletsMap = () => {
     }
     return formatter.format(parsed);
   };
-  const formatTripletLine = (item: Triplet) => {
-    const who = item.who?.trim();
-    const what = item.what?.trim();
-    if (who && what) {
-      return { label: `${who} ${what}`, hasWho: true, who, what };
+  const formatPublishedDay = (value?: string | null) => {
+    if (!value) {
+      return t.unknownDate;
     }
-    if (who) {
-      return { label: who, hasWho: true, who, what: "" };
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return t.unknownDate;
     }
-    if (what) {
-      return { label: what, hasWho: false, who: "", what };
+    return dayFormatter.format(parsed);
+  };
+  const getSourceLabels = (items: Triplet[]) => {
+    const labels: Array<{
+      label: string;
+      logoKey: string | null;
+      fallbackKey: string | null;
+    }> = [];
+    const seen = new Set<string>();
+    items.forEach((item) => {
+      const source = item.source?.trim() ?? "";
+      const url = item.url?.trim() ?? "";
+      let hostname = "";
+      if (url) {
+        try {
+          hostname = new URL(url).hostname.replace(/^www\./, "");
+        } catch {
+          hostname = "";
+        }
+      }
+      const key = (hostname || source).toLowerCase();
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      const label = formatSourceLabel(hostname || source) ?? t.unknownSource;
+      labels.push({
+        label,
+        logoKey: hostname || null,
+        fallbackKey: source || null,
+      });
+    });
+    return labels.length
+      ? labels
+      : [{ label: t.unknownSource, logoKey: null, fallbackKey: null }];
+  };
+
+  const getItemSourceLabel = (item: Triplet): string => {
+    const url = item.url?.trim() ?? "";
+    let hostname = "";
+    if (url) {
+      try {
+        hostname = new URL(url).hostname.replace(/^www\./, "");
+      } catch {
+        hostname = "";
+      }
     }
-    return { label: "", hasWho: false, who: "", what: "" };
+    return formatSourceLabel(hostname || item.source) ?? t.unknownSource;
   };
 
   useEffect(() => {
@@ -306,39 +624,29 @@ const TripletsMap = () => {
       setLoading(true);
       setError(null);
       try {
-        const params = new URLSearchParams();
-        if (sinceHours === "all") {
-          params.set("since_hours", "0");
-        } else {
-          params.set("since_hours", String(sinceHours));
-        }
-        const query = params.toString();
-        const response = await fetch(
-          `${API_BASE_URL}/api/triplets${query ? `?${query}` : ""}`,
-          { signal: controller.signal },
-        );
+        const rangeKey =
+          sinceHours === "all"
+            ? "all"
+            : sinceHours <= 72
+              ? "3d"
+              : sinceHours <= 24 * 7
+                ? "7d"
+                : sinceHours <= 24 * 30
+                  ? "1mo"
+                  : "3mo";
+        const response = await fetch(`${STATIC_DATA_BASE_URL}/triplets_${rangeKey}.json`, {
+          signal: controller.signal,
+        });
         const payload = await response.text();
         if (!response.ok) {
-          let details: string | undefined;
-          try {
-            const errorJson = JSON.parse(payload);
-            details =
-              typeof errorJson?.detail === "string"
-                ? errorJson.detail
-                : JSON.stringify(errorJson);
-          } catch {
-            details = payload;
-          }
-          throw new Error(
-            `API request failed with status ${response.status}${
-              details ? ` — ${details}` : ""
-            }`,
-          );
+          throw new Error(`Static data request failed (${response.status})`);
         }
         const json = JSON.parse(payload) as Triplet[];
         const partitioned = json.reduce(
           (acc, item) => {
             const whereLower = item.where_text?.toLowerCase() ?? "";
+            const hasCoords =
+              Number.isFinite(item.lat) && Number.isFinite(item.lon);
             const matchesGeneralText =
               whereLower.includes("united states") ||
               whereLower.includes("washington, dc") ||
@@ -352,7 +660,8 @@ const TripletsMap = () => {
             const nearDc =
               Math.abs(item.lat - DC_COORDINATES.lat) < DC_LOCATION_TOLERANCE &&
               Math.abs(item.lon - DC_COORDINATES.lon) < DC_LOCATION_TOLERANCE;
-            const isGeneral = matchesGeneralText || nearGeneralCenter || nearDc;
+            const isGeneral =
+              !hasCoords || matchesGeneralText || nearGeneralCenter || nearDc;
             if (isGeneral) {
               acc.general.push(item);
             } else {
@@ -395,7 +704,15 @@ const TripletsMap = () => {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  const groups = useMemo(() => groupTriplets(triplets), [triplets]);
+  const filteredTriplets = useMemo(
+    () => triplets.filter((triplet) => matchesEventFilter(triplet, eventFilter)),
+    [triplets, eventFilter],
+  );
+  const filteredGeneralTriplets = useMemo(
+    () => generalTriplets.filter((triplet) => matchesEventFilter(triplet, eventFilter)),
+    [generalTriplets, eventFilter],
+  );
+  const groups = useMemo(() => groupTriplets(filteredTriplets), [filteredTriplets]);
   const selectedGroup = useMemo(() => {
     if (!selectedGroupKey) {
       return null;
@@ -404,21 +721,55 @@ const TripletsMap = () => {
   }, [groups, selectedGroupKey]);
   const sortedTriplets = useMemo(
     () =>
-      triplets
+      filteredTriplets
         .slice()
         .sort(
           (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
         ),
-    [triplets],
+    [filteredTriplets],
   );
   const groupedTriplets = useMemo(() => groupByStory(sortedTriplets), [sortedTriplets]);
   const groupedGeneralTriplets = useMemo(
-    () => groupByStory(generalTriplets),
-    [generalTriplets],
+    () => groupByStory(filteredGeneralTriplets),
+    [filteredGeneralTriplets],
   );
-  const totalEvents = triplets.length + generalTriplets.length;
-  const activeRangeLabel =
-    TIME_RANGES.find((range) => range.value === sinceHours)?.label[language] ?? "custom";
+  const groupedTripletsByDay = useMemo(() => {
+    const items = groupedTriplets.slice(0, 200);
+    const dayGroups: Array<{ label: string; items: StoryGroup[] }> = [];
+    let currentLabel = "";
+    items.forEach((item) => {
+      const label = formatPublishedDay(item.publishedAt);
+      if (label !== currentLabel) {
+        currentLabel = label;
+        dayGroups.push({ label, items: [] });
+      }
+      dayGroups[dayGroups.length - 1].items.push(item);
+    });
+    return dayGroups;
+  }, [groupedTriplets, language]);
+  const groupedGeneralTripletsByDay = useMemo(() => {
+    const dayGroups: Array<{ label: string; items: StoryGroup[] }> = [];
+    let currentLabel = "";
+    groupedGeneralTriplets.forEach((item) => {
+      const label = formatPublishedDay(item.publishedAt);
+      if (label !== currentLabel) {
+        currentLabel = label;
+        dayGroups.push({ label, items: [] });
+      }
+      dayGroups[dayGroups.length - 1].items.push(item);
+    });
+    return dayGroups;
+  }, [groupedGeneralTriplets, language]);
+  const totalEvents = filteredTriplets.length + filteredGeneralTriplets.length;
+  const activeRangeSummary =
+    TIME_RANGES.find((range) => range.value === sinceHours)?.summary[language] ??
+    TIME_RANGES[TIME_RANGES.length - 1].summary[language];
+  const activeFilterSummary =
+    eventFilter === "protest"
+      ? t.filterSummaryProtest
+      : eventFilter === "severe"
+        ? t.filterSummarySevere
+        : t.filterSummaryAll;
 
   const facilityIcon = useMemo(
     () =>
@@ -577,8 +928,12 @@ const TripletsMap = () => {
   }, [selectedGroupKey, selectedGroup]);
   const brandCard = (
     <div className="brand-card">
-      <div className="brand-mark">ICE</div>
-      <div>
+      <img
+        className="brand-icon"
+        src={`${import.meta.env.BASE_URL}icon.svg`}
+        alt="ICEMap"
+      />
+      <div className="brand-text">
         <h2>{t.appName}</h2>
         <p>{t.appTagline}</p>
       </div>
@@ -594,6 +949,14 @@ const TripletsMap = () => {
             {entry.label}
           </li>
         ))}
+        <li key="protest">
+          <span className="legend-dot" style={{ backgroundColor: PROTEST_COLOR }} />
+          {t.protestLegend}
+        </li>
+        <li key="unrest">
+          <span className="legend-dot" style={{ backgroundColor: UNREST_COLOR }} />
+          {t.unrestLegend}
+        </li>
         <li key="severe">
           <span className="legend-dot" style={{ backgroundColor: SEVERE_COLOR }} />
           {t.severeLegend}
@@ -651,49 +1014,58 @@ const TripletsMap = () => {
     </div>
   );
   const generalCoverageBody =
-    groupedGeneralTriplets.length === 0 ? (
+    groupedGeneralTripletsByDay.length === 0 ? (
       <p>{t.generalCoverageEmpty}</p>
     ) : (
-      <ul>
-        {groupedGeneralTriplets.map((group) => (
-          <li key={group.storyId}>
-            <div className="general-title">
-              {group.url ? (
-                <a href={group.url} target="_blank" rel="noreferrer">
-                  {group.title}
-                </a>
-              ) : (
-                group.title
-              )}
-            </div>
-            <div>{formatPublishedAt(group.publishedAt)}</div>
-            <div className="general-summary">
-              <strong>{t.summaryLabel}:</strong>
-              <div className="summary-lines">
-                {group.items
-                  .map((item) => ({ item, line: formatTripletLine(item) }))
-                  .filter(({ line }) => line.label)
-                  .map(({ item, line }) => (
-                    <div className="summary-line" key={item.story_id + item.who + item.what}>
-                      {line.hasWho ? (
-                        <>
-                          <strong>{line.who}</strong> {line.what}
-                        </>
-                      ) : (
-                        line.label
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
-            {group.url && (
-              <a href={group.url} target="_blank" rel="noreferrer">
-                {t.viewArticle}
-              </a>
-            )}
-          </li>
+      <div className="general-coverage-list">
+        {groupedGeneralTripletsByDay.map((dayGroup) => (
+          <section className="day-group" key={`general-${dayGroup.label}`}>
+            <div className="day-group-label">{dayGroup.label}</div>
+            {dayGroup.items.map((group) => (
+              <article className="list-card" key={group.storyId}>
+                <div className="list-card-meta">
+                  {t.reportedLabel} {formatPublishedAt(group.publishedAt)}
+                </div>
+                <h3>
+                  {group.url ? (
+                    <a href={group.url} target="_blank" rel="noreferrer">
+                      {group.title}
+                    </a>
+                  ) : (
+                    group.title
+                  )}
+                </h3>
+                <div className="headline-meta">
+                  <span className="headline-chip">{getTopicLabel(group.items)}</span>
+                  {getLocationLabel(group.items) && (
+                    <span className="headline-chip">{getLocationLabel(group.items)}</span>
+                  )}
+                  <span className="headline-chip">{getImpactLabel(group.items)}</span>
+                </div>
+                <div className="general-summary">
+                  <div className="summary-lines">
+                    {getSourceLabels(group.items).map(({ logoKey, fallbackKey, label }) => (
+                      <div className="summary-line source-line" key={label}>
+                        <SourceLogo
+                          primaryKey={logoKey}
+                          fallbackKey={fallbackKey}
+                          alt={label}
+                        />
+                        <span>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {group.url && (
+                  <a href={group.url} target="_blank" rel="noreferrer">
+                    {t.viewArticle}
+                  </a>
+                )}
+              </article>
+            ))}
+          </section>
         ))}
-      </ul>
+      </div>
     );
   const generalPanel = (
     <section className="general-panel">
@@ -760,43 +1132,46 @@ const TripletsMap = () => {
   const listView = (
     <div className="list-view">
       <h2>{t.latestIncidents}</h2>
-      {groupedTriplets.length === 0 ? (
+      {groupedTripletsByDay.length === 0 ? (
         <p>{t.noIncidents}</p>
       ) : (
-        groupedTriplets.slice(0, 200).map((group) => (
-          <article className="list-card" key={group.storyId}>
-            <div className="list-card-meta">
-              {formatPublishedAt(group.publishedAt)}
-            </div>
-            <h3>
-              {group.url ? (
-                <a href={group.url} target="_blank" rel="noreferrer">
-                  {group.title}
-                </a>
-              ) : (
-                group.title
-              )}
-            </h3>
-            <div className="general-summary">
-              <strong>{t.summaryLabel}:</strong>
-              <div className="summary-lines">
-                {group.items
-                  .map((item) => ({ item, line: formatTripletLine(item) }))
-                  .filter(({ line }) => line.label)
-                  .map(({ item, line }) => (
-                    <div className="summary-line" key={item.story_id + item.who + item.what}>
-                      {line.hasWho ? (
-                        <>
-                          <strong>{line.who}</strong> {line.what}
-                        </>
-                      ) : (
-                        line.label
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </article>
+        groupedTripletsByDay.map((dayGroup) => (
+          <section className="day-group" key={dayGroup.label}>
+            <div className="day-group-label">{dayGroup.label}</div>
+            {dayGroup.items.map((group) => (
+              <article className="list-card" key={group.storyId}>
+                <div className="list-card-meta">
+                  {t.reportedLabel} {formatPublishedAt(group.publishedAt)}
+                </div>
+                <h3>
+                  {group.url ? (
+                    <a href={group.url} target="_blank" rel="noreferrer">
+                      {group.title}
+                    </a>
+                  ) : (
+                    group.title
+                  )}
+                </h3>
+                <div className="headline-meta">
+                  <span className="headline-chip">{getTopicLabel(group.items)}</span>
+                  {getLocationLabel(group.items) && (
+                    <span className="headline-chip">{getLocationLabel(group.items)}</span>
+                  )}
+                  <span className="headline-chip">{getImpactLabel(group.items)}</span>
+                </div>
+                <div className="general-summary">
+                  <div className="summary-lines">
+                    {getSourceLabels(group.items).map(({ logoKey, fallbackKey, label }) => (
+                      <div className="summary-line source-line" key={label}>
+                        <SourceLogo primaryKey={logoKey} fallbackKey={fallbackKey} alt={label} />
+                        <span>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </section>
         ))
       )}
       <div className="list-general">
@@ -847,29 +1222,61 @@ const TripletsMap = () => {
   return (
     <div className={`map-page viewport-${viewport}`}>
       <header className="map-header">
-        <div>
-          <h1>{t.appName}</h1>
-          <p>
-            {t.headerIntro} {t.showingEvents} {totalEvents}{" "}
-            {totalEvents === 1 ? t.eventSingular : t.eventPlural}{" "}
-            {sinceHours === "all"
-              ? t.acrossAllData
-              : `${t.fromLast} ${activeRangeLabel}`}
-            — {triplets.length} {t.mappedLabel}, {generalTriplets.length}{" "}
-            {t.generalCoverageLabel}
-          </p>
+        <div className="header-title">
+          <img
+            className="app-icon"
+            src={`${import.meta.env.BASE_URL}icon.svg`}
+            alt="ICEMap"
+          />
+          <div className="header-text">
+            <h1>
+              {t.appName}{" "}
+              <span className="header-subtitle">
+                <span className="header-intro">{t.headerIntro}</span>
+                <span className="header-divider" aria-hidden="true">
+                  —
+                </span>
+                <span className="header-counts">
+                  {totalEvents} {t.eventsLabel}, {filteredTriplets.length}{" "}
+                  {t.mappedLabel}, {filteredGeneralTriplets.length}{" "}
+                  {t.generalCountLabel}
+                </span>
+                <span className="header-divider header-divider-filters" aria-hidden="true">
+                  —
+                </span>
+                <span className="header-filters">
+                  {activeFilterSummary} — {activeRangeSummary}
+                </span>
+              </span>
+            </h1>
+          </div>
         </div>
         <div className="controls">
-          {TIME_RANGES.map((range) => (
-            <button
-              key={range.label.en}
-              className={range.value === sinceHours ? "active" : ""}
-              onClick={() => setSinceHours(range.value)}
-              type="button"
-            >
-              {range.label[language]}
-            </button>
-          ))}
+          <div className="time-controls">
+            {TIME_RANGES.map((range) => (
+              <button
+                key={range.label.en}
+                className={range.value === sinceHours ? "active" : ""}
+                onClick={() => setSinceHours(range.value)}
+                type="button"
+              >
+                {range.label[language]}
+              </button>
+            ))}
+          </div>
+          <div className="filter-controls">
+            <span className="filter-label">{t.filterLabel}</span>
+            {EVENT_FILTERS.map((filter) => (
+              <button
+                key={filter.value}
+                className={filter.value === eventFilter ? "active" : ""}
+                onClick={() => setEventFilter(filter.value)}
+                type="button"
+              >
+                {t[filter.labelKey]}
+              </button>
+            ))}
+          </div>
           <div className="language-select">
             <label htmlFor="icemap-language">{t.languageLabel}</label>
             <select
@@ -915,15 +1322,17 @@ const TripletsMap = () => {
                 />
             {groups.map((group) => {
               const count = group.items.length;
-              const radius = Math.min(16, 8 + Math.log2(count || 1) * 3);
+              const radius = Math.min(22, 11 + Math.log2(count || 1) * 4);
               const severe = group.items.some(isSevereTriplet);
+              const unrest = group.items.some(isUnrestTriplet);
+              const protest = group.items.some(isProtestTriplet);
               const color = severe
                 ? SEVERE_COLOR
-                : getMarkerColor(group.items[0].publishedAt);
-              const participantList = group.items
-                .map((item) => item.who)
-                .filter(Boolean)
-                .slice(0, 5);
+                : unrest
+                  ? UNREST_COLOR
+                  : protest
+                    ? PROTEST_COLOR
+                    : getMarkerColor(group.items[0].publishedAt);
               const sortedItems = group.items
                 .slice()
                 .sort(
@@ -958,7 +1367,9 @@ const TripletsMap = () => {
                       {primary ? (
                         <>
                           <div>
-                            <strong>{primary.who}</strong> {primary.what}
+                            <strong>
+                              {formatSourceLabel(primary.source) ?? t.unknownSource}
+                            </strong>
                           </div>
                           <div className="tooltip-title">{primary.title}</div>
                         </>
@@ -994,22 +1405,20 @@ const TripletsMap = () => {
                                 story.title
                               )}
                             </div>
-                            <div>{formatPublishedAt(story.publishedAt)}</div>
+                            <div>
+                              {t.reportedLabel} {formatPublishedAt(story.publishedAt)}
+                            </div>
                             <div className="summary-lines">
-                              {story.items
-                                .map((item) => ({ item, line: formatTripletLine(item) }))
-                                .filter(({ line }) => line.label)
-                                .map(({ item, line }) => (
-                                  <div className="summary-line" key={item.story_id + item.who + item.what}>
-                                    {line.hasWho ? (
-                                      <>
-                                        <strong>{line.who}</strong> {line.what}
-                                      </>
-                                    ) : (
-                                      line.label
-                                    )}
-                                  </div>
-                                ))}
+                              {getSourceLabels(story.items).map(({ logoKey, fallbackKey, label }) => (
+                                <div className="summary-line source-line" key={label}>
+                                  <SourceLogo
+                                    primaryKey={logoKey}
+                                    fallbackKey={fallbackKey}
+                                    alt={label}
+                                  />
+                                  <span>{label}</span>
+                                </div>
+                              ))}
                             </div>
                           </li>
                         ))}
@@ -1282,10 +1691,10 @@ const TripletsMap = () => {
                 {selectedItems.map((item) => (
                   <li key={item.story_id + item.who}>
                     <div className="sheet-item-meta">
-                      {formatPublishedAt(item.publishedAt)}
+                      {t.reportedLabel} {formatPublishedAt(item.publishedAt)}
                     </div>
                     <p className="sheet-item-text">
-                      <strong>{item.who}</strong> {item.what}
+                      {getItemSourceLabel(item)}
                     </p>
                     <p className="sheet-item-title">
                       {item.url ? (

@@ -2,7 +2,7 @@
 Helper script to regenerate the frontend static datasets from the CSV sources.
 Usage:
     source .venv/bin/activate
-    python scripts/build_static_locations.py
+    python3 scripts/build_static_locations.py
 """
 
 from __future__ import annotations

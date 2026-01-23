@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Source Icon Audit</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Georgia", "Times New Roman", serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      body {
+        margin: 0;
+        padding: 2rem;
+      }
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.8rem;
+      }
+      .summary {
+        font-size: 0.95rem;
+        color: #475569;
+      }
+      .filter {
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .filter input {
+        border: 1px solid #cbd5f5;
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.95rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+      }
+      th {
+        background: #fff7ed;
+        font-weight: 700;
+      }
+      tr[data-status="missing"] {
+        background: #fef2f2;
+      }
+      .logo-cell {
+        width: 48px;
+      }
+      .logo {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .source-title {
+        font-weight: 700;
+      }
+      .source-meta {
+        font-size: 0.85rem;
+        color: #64748b;
+      }
+      .source-files {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+      }
+      .status {
+        font-weight: 700;
+        color: #334155;
+      }
+      .status.missing {
+        color: #b91c1c;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Source Icon Audit</h1>
+      <div class="summary" id="summary">Loading sources...</div>
+      <label class="filter">
+        Filter
+        <input id="filterInput" type="text" placeholder="Filter sources..." />
+      </label>
+    </header>
+    <table>
+      <thead>
+        <tr>
+          <th>Icon</th>
+          <th>Source</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <script>
+      const ICON_EXTS = [".png", ".svg", ".ico"];
+      const baseUrl = new URL(".", window.location.href);
+      const dataUrl = new URL("data/triplets_all.json", baseUrl);
+      const logoBase = new URL("source-logos/", baseUrl);
+      const summary = document.getElementById("summary");
+      const rows = document.getElementById("rows");
+      const filterInput = document.getElementById("filterInput");
+
+      const slugify = (value) => {
+        if (!value) return null;
+        const cleaned = value.trim().toLowerCase();
+        if (!cleaned) return null;
+        return cleaned.replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || null;
+      };
+
+      const formatLabel = (value) => {
+        if (!value) return "";
+        return value.replace(/^www\./, "");
+      };
+
+      const loadIcon = (candidates, logoEl, rowEl, statusEl) => {
+        let idx = 0;
+        let done = false;
+        const img = document.createElement("img");
+        const tryNext = () => {
+          if (done) return;
+          if (idx >= candidates.length) {
+            done = true;
+            rowEl.dataset.status = "missing";
+            statusEl.textContent = "missing";
+            statusEl.classList.add("missing");
+            return;
+          }
+          img.src = candidates[idx++];
+        };
+        img.addEventListener("load", () => {
+          if (done) return;
+          done = true;
+          logoEl.textContent = "";
+          logoEl.appendChild(img);
+          rowEl.dataset.status = "ok";
+          statusEl.textContent = "ok";
+        });
+        img.addEventListener("error", tryNext);
+        tryNext();
+      };
+
+      const updateSummary = (total, ok, missing, visible) => {
+        summary.textContent = `Hosts: ${total} | ok: ${ok} | missing: ${missing} | visible: ${visible}`;
+      };
+
+      const applyFilter = () => {
+        const needle = filterInput.value.trim().toLowerCase();
+        const allRows = Array.from(rows.children);
+        let visible = 0;
+        allRows.forEach((row) => {
+          const hay = row.dataset.haystack || "";
+          const show = !needle || hay.includes(needle);
+          row.style.display = show ? "" : "none";
+          if (show) visible += 1;
+        });
+        return visible;
+      };
+
+      fetch(dataUrl.toString())
+        .then((resp) => resp.json())
+        .then((items) => {
+          const hostMap = new Map();
+          items.forEach((item) => {
+            const source = (item.source || "").trim();
+            const url = (item.url || "").trim();
+            if (!source) return;
+            let hostname = "";
+            if (url) {
+              try {
+                hostname = new URL(url).hostname.replace(/^www\./, "");
+              } catch {
+                hostname = "";
+              }
+            }
+            const key = hostname || source;
+            if (!key) return;
+            if (!hostMap.has(key)) {
+              hostMap.set(key, { host: hostname, sources: new Map(), count: 0 });
+            }
+            const entry = hostMap.get(key);
+            entry.count += 1;
+            if (source) {
+              entry.sources.set(source, (entry.sources.get(source) || 0) + 1);
+            }
+          });
+
+          const entries = Array.from(hostMap.values())
+            .map((entry) => {
+              let primarySource = "";
+              let primaryCount = 0;
+              entry.sources.forEach((count, source) => {
+                if (count > primaryCount) {
+                  primaryCount = count;
+                  primarySource = source;
+                }
+              });
+              return {
+                source: primarySource,
+                host: entry.host,
+                count: entry.count,
+              };
+            })
+            .sort((a, b) => b.count - a.count);
+
+          let okCount = 0;
+          let missingCount = 0;
+          const total = entries.length;
+
+          entries.forEach((entry) => {
+            const row = document.createElement("tr");
+            row.dataset.status = "pending";
+            row.dataset.haystack = `${entry.source} ${entry.host}`.toLowerCase();
+
+            const logoCell = document.createElement("td");
+            logoCell.className = "logo-cell";
+            const logo = document.createElement("div");
+            logo.className = "logo";
+            logo.textContent = entry.source.trim().charAt(0).toUpperCase() || "?";
+            logoCell.appendChild(logo);
+
+            const sourceCell = document.createElement("td");
+            const sourceTitle = document.createElement("div");
+            sourceTitle.className = "source-title";
+            sourceTitle.textContent = formatLabel(entry.host || entry.source);
+            const sourceMeta = document.createElement("div");
+            sourceMeta.className = "source-meta";
+            sourceMeta.textContent = `source: ${entry.source}` + (entry.host ? ` | host: ${entry.host}` : "");
+            const sourceFiles = document.createElement("div");
+            sourceFiles.className = "source-files";
+
+            const keys = [entry.host, entry.source].filter(Boolean);
+            const candidates = [];
+            keys.forEach((key) => {
+              const slug = slugify(key);
+              if (!slug) return;
+              ICON_EXTS.forEach((ext) => {
+                candidates.push(new URL(`${slug}${ext}`, logoBase).toString());
+              });
+            });
+            sourceFiles.textContent = candidates.join(" ");
+
+            sourceCell.appendChild(sourceTitle);
+            sourceCell.appendChild(sourceMeta);
+            sourceCell.appendChild(sourceFiles);
+
+            const statusCell = document.createElement("td");
+            const status = document.createElement("span");
+            status.className = "status";
+            status.textContent = "loading";
+            statusCell.appendChild(status);
+
+            row.appendChild(logoCell);
+            row.appendChild(sourceCell);
+            row.appendChild(statusCell);
+            rows.appendChild(row);
+
+            loadIcon(candidates, logo, row, status);
+
+            const observer = new MutationObserver(() => {
+              if (row.dataset.status === "ok") {
+                okCount += 1;
+                observer.disconnect();
+              } else if (row.dataset.status === "missing") {
+                missingCount += 1;
+                observer.disconnect();
+              }
+              const visible = applyFilter();
+              updateSummary(total, okCount, missingCount, visible);
+            });
+            observer.observe(row, { attributes: true, attributeFilter: ["data-status"] });
+          });
+
+          updateSummary(total, okCount, missingCount, total);
+        })
+        .catch((err) => {
+          summary.textContent = `Failed to load triplets_all.json: ${err}`;
+        });
+
+      filterInput.addEventListener("input", () => {
+        const total = rows.children.length;
+        const visible = applyFilter();
+        const okCount = rows.querySelectorAll('tr[data-status="ok"]').length;
+        const missingCount = rows.querySelectorAll('tr[data-status="missing"]').length;
+        updateSummary(total, okCount, missingCount, visible);
+      });
+    </script>
+  </body>
+</html>

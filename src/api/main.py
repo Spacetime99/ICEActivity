@@ -5,6 +5,7 @@ FastAPI app exposing triplet data from the existing SQLite index.
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import json
 import logging
 import sqlite3
 from pathlib import Path
@@ -48,6 +49,7 @@ class TripletOut(BaseModel):
     url: Optional[str] = None
     publishedAt: Optional[str] = None
     source: Optional[str] = None
+    eventTypes: list[str] = Field(default_factory=list)
 
 
 app = FastAPI(title="ICE Triplets API", version="0.1.0")
@@ -78,7 +80,7 @@ def _query_triplets(
 ) -> Iterable[sqlite3.Row]:
     sql = """
         SELECT story_id, title, who, what, where_text,
-               latitude, longitude, url, published_at, source
+               latitude, longitude, url, published_at, source, event_types
         FROM triplets
         WHERE latitude IS NOT NULL
           AND longitude IS NOT NULL
@@ -138,6 +140,7 @@ def get_triplets(
             url=row["url"],
             publishedAt=row["published_at"],
             source=row["source"],
+            eventTypes=json.loads(row["event_types"]) if row["event_types"] else [],
         )
         for row in rows
     ]

@@ -1,9 +1,9 @@
 """Quick extractor test for Phi-3 Mini Instruct.
 
 Usage:
-  python scripts/phi_test.py --prompt "ICE arrested 5 people in Dallas on Monday."
-  python scripts/phi_test.py --load-in-4bit
-  python scripts/phi_test.py --temperature 0.1 --stop-text "### Problem"
+  python3 scripts/phi_test.py --prompt "ICE arrested 5 people in Dallas on Monday."
+  python3 scripts/phi_test.py --load-in-4bit
+  python3 scripts/phi_test.py --temperature 0.1 --stop-text "### Problem"
 """
 
 from __future__ import annotations

@@ -9,4 +9,4 @@ if [[ -f .venv/bin/activate ]]; then
   source .venv/bin/activate
 fi
 
-python scripts/test_triplet_article.py "https://slashdot.org/firehose.pl?op=view&amp;id=180555658"
+python3 scripts/test_triplet_article.py "https://slashdot.org/firehose.pl?op=view&amp;id=180555658"

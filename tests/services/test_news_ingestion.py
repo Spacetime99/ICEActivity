@@ -41,3 +41,14 @@ def test_lowercase_keywords_remain_case_insensitive(tmp_path: Path) -> None:
 
     assert ingestor._is_relevant(make_report("Immigration court backlog grows"))
     assert ingestor._is_relevant(make_report("IMMIGRATION COURT BACKLOG GROWS"))
+
+
+def test_protest_context_keywords_surface_immigration_protests(tmp_path: Path) -> None:
+    ingestor = make_ingestor(tmp_path, ["immigration"])
+
+    assert ingestor._is_relevant(
+        make_report("Protesters march against ICE raids in Chicago"),
+    )
+    assert ingestor._is_relevant(
+        make_report("Residents march over housing policy in city hall"),
+    )

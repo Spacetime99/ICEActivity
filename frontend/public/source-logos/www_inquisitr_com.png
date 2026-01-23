@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en-US" prefix="og: https://ogp.me/ns#">
+<head><meta charset="UTF-8" /><script>if(navigator.userAgent.match(/MSIE|Internet Explorer/i)||navigator.userAgent.match(/Trident\/7\..*?rv:11/i)){var href=document.location.href;if(!href.match(/[?&]nowprocket/)){if(href.indexOf("?")==-1){if(href.indexOf("#")==-1){document.location.href=href+"?nowprocket=1"}else{document.location.href=href.replace("#","?nowprocket=1#")}}else{if(href.indexOf("#")==-1){document.location.href=href+"&nowprocket=1"}else{document.location.href=href.replace("#","&nowprocket=1#")}}}}</script><script>(()=>{class RocketLazyLoadScripts{constructor(){this.v="2.0.3",this.userEvents=["keydown","keyup","mousedown","mouseup","mousemove","mouseover","mouseenter","mouseout","mouseleave","touchmove","touchstart","touchend","touchcancel","wheel","click","dblclick","input","visibilitychange"],this.attributeEvents=["onblur","onclick","oncontextmenu","ondblclick","onfocus","onmousedown","onmouseenter","onmouseleave","onmousemove","onmouseout","onmouseover","onmouseup","onmousewheel","onscroll","onsubmit"]}async t(){this.i(),this.o(),/iP(ad|hone)/.test(navigator.userAgent)&&this.h(),this.u(),this.l(this),this.m(),this.k(this),this.p(this),this._(),await Promise.all([this.R(),this.L()]),this.lastBreath=Date.now(),this.S(this),this.P(),this.D(),this.O(),this.M(),await this.C(this.delayedScripts.normal),await this.C(this.delayedScripts.defer),await this.C(this.delayedScripts.async),this.F("domReady"),await this.T(),await this.j(),await this.I(),this.F("windowLoad"),await this.A(),window.dispatchEvent(new Event("rocket-allScriptsLoaded")),this.everythingLoaded=!0,this.lastTouchEnd&&await new Promise((t=>setTimeout(t,500-Date.now()+this.lastTouchEnd))),this.H(),this.F("all"),this.U(),this.W()}i(){this.CSPIssue=sessionStorage.getItem("rocketCSPIssue"),document.addEventListener("securitypolicyviolation",(t=>{this.CSPIssue||"script-src-elem"!==t.violatedDirective||"data"!==t.blockedURI||(this.CSPIssue=!0,sessionStorage.setItem("rocketCSPIssue",!0))}),{isRocket:!0})}o(){window.addEventListener("pageshow",(t=>{this.persisted=t.persisted,this.realWindowLoadedFired=!0}),{isRocket:!0}),window.addEventListener("pagehide",(()=>{this.onFirstUserAction=null}),{isRocket:!0})}h(){let t;function e(e){t=e}window.addEventListener("touchstart",e,{isRocket:!0}),window.addEventListener("touchend",(function i(o){Math.abs(o.changedTouches[0].pageX-t.changedTouches[0].pageX)<10&&Math.abs(o.changedTouches[0].pageY-t.changedTouches[0].pageY)<10&&o.timeStamp-t.timeStamp<200&&(o.target.dispatchEvent(new PointerEvent("click",{target:o.target,bubbles:!0,cancelable:!0,detail:1})),event.preventDefault(),window.removeEventListener("touchstart",e,{isRocket:!0}),window.removeEventListener("touchend",i,{isRocket:!0}))}),{isRocket:!0})}q(t){this.userActionTriggered||("mousemove"!==t.type||this.firstMousemoveIgnored?"keyup"===t.type||"mouseover"===t.type||"mouseout"===t.type||(this.userActionTriggered=!0,this.onFirstUserAction&&this.onFirstUserAction()):this.firstMousemoveIgnored=!0),"click"===t.type&&t.preventDefault(),this.savedUserEvents.length>0&&(t.stopPropagation(),t.stopImmediatePropagation()),"touchstart"===this.lastEvent&&"touchend"===t.type&&(this.lastTouchEnd=Date.now()),"click"===t.type&&(this.lastTouchEnd=0),this.lastEvent=t.type,this.savedUserEvents.push(t)}u(){this.savedUserEvents=[],this.userEventHandler=this.q.bind(this),this.userEvents.forEach((t=>window.addEventListener(t,this.userEventHandler,{passive:!1,isRocket:!0})))}U(){this.userEvents.forEach((t=>window.removeEventListener(t,this.userEventHandler,{passive:!1,isRocket:!0}))),this.savedUserEvents.forEach((t=>{t.target.dispatchEvent(new window[t.constructor.name](t.type,t))}))}m(){this.eventsMutationObserver=new MutationObserver((t=>{const e="return false";for(const i of t){if("attributes"===i.type){const t=i.target.getAttribute(i.attributeName);t&&t!==e&&(i.target.setAttribute("data-rocket-"+i.attributeName,t),i.target["rocket"+i.attributeName]=new Function("event",t),i.target.setAttribute(i.attributeName,e))}"childList"===i.type&&i.addedNodes.forEach((t=>{if(t.nodeType===Node.ELEMENT_NODE)for(const i of t.attributes)this.attributeEvents.includes(i.name)&&i.value&&""!==i.value&&(t.setAttribute("data-rocket-"+i.name,i.value),t["rocket"+i.name]=new Function("event",i.value),t.setAttribute(i.name,e))}))}})),this.eventsMutationObserver.observe(document,{subtree:!0,childList:!0,attributeFilter:this.attributeEvents})}H(){this.eventsMutationObserver.disconnect(),this.attributeEvents.forEach((t=>{document.querySelectorAll("[data-rocket-"+t+"]").forEach((e=>{e.setAttribute(t,e.getAttribute("data-rocket-"+t)),e.removeAttribute("data-rocket-"+t)}))}))}k(t){Object.defineProperty(HTMLElement.prototype,"onclick",{get(){return this.rocketonclick||null},set(e){this.rocketonclick=e,this.setAttribute(t.everythingLoaded?"onclick":"data-rocket-onclick","this.rocketonclick(event)")}})}S(t){function e(e,i){let o=e[i];e[i]=null,Object.defineProperty(e,i,{get:()=>o,set(s){t.everythingLoaded?o=s:e["rocket"+i]=o=s}})}e(document,"onreadystatechange"),e(window,"onload"),e(window,"onpageshow");try{Object.defineProperty(document,"readyState",{get:()=>t.rocketReadyState,set(e){t.rocketReadyState=e},configurable:!0}),document.readyState="loading"}catch(t){console.log("WPRocket DJE readyState conflict, bypassing")}}l(t){this.originalAddEventListener=EventTarget.prototype.addEventListener,this.originalRemoveEventListener=EventTarget.prototype.removeEventListener,this.savedEventListeners=[],EventTarget.prototype.addEventListener=function(e,i,o){o&&o.isRocket||!t.B(e,this)&&!t.userEvents.includes(e)||t.B(e,this)&&!t.userActionTriggered||e.startsWith("rocket-")||t.everythingLoaded?t.originalAddEventListener.call(this,e,i,o):t.savedEventListeners.push({target:this,remove:!1,type:e,func:i,options:o})},EventTarget.prototype.removeEventListener=function(e,i,o){o&&o.isRocket||!t.B(e,this)&&!t.userEvents.includes(e)||t.B(e,this)&&!t.userActionTriggered||e.startsWith("rocket-")||t.everythingLoaded?t.originalRemoveEventListener.call(this,e,i,o):t.savedEventListeners.push({target:this,remove:!0,type:e,func:i,options:o})}}F(t){"all"===t&&(EventTarget.prototype.addEventListener=this.originalAddEventListener,EventTarget.prototype.removeEventListener=this.originalRemoveEventListener),this.savedEventListeners=this.savedEventListeners.filter((e=>{let i=e.type,o=e.target||window;return"domReady"===t&&"DOMContentLoaded"!==i&&"readystatechange"!==i||("windowLoad"===t&&"load"!==i&&"readystatechange"!==i&&"pageshow"!==i||(this.B(i,o)&&(i="rocket-"+i),e.remove?o.removeEventListener(i,e.func,e.options):o.addEventListener(i,e.func,e.options),!1))}))}p(t){let e;function i(e){return t.everythingLoaded?e:e.split(" ").map((t=>"load"===t||t.startsWith("load.")?"rocket-jquery-load":t)).join(" ")}function o(o){function s(e){const s=o.fn[e];o.fn[e]=o.fn.init.prototype[e]=function(){return this[0]===window&&t.userActionTriggered&&("string"==typeof arguments[0]||arguments[0]instanceof String?arguments[0]=i(arguments[0]):"object"==typeof arguments[0]&&Object.keys(arguments[0]).forEach((t=>{const e=arguments[0][t];delete arguments[0][t],arguments[0][i(t)]=e}))),s.apply(this,arguments),this}}if(o&&o.fn&&!t.allJQueries.includes(o)){const e={DOMContentLoaded:[],"rocket-DOMContentLoaded":[]};for(const t in e)document.addEventListener(t,(()=>{e[t].forEach((t=>t()))}),{isRocket:!0});o.fn.ready=o.fn.init.prototype.ready=function(i){function s(){parseInt(o.fn.jquery)>2?setTimeout((()=>i.bind(document)(o))):i.bind(document)(o)}return t.realDomReadyFired?!t.userActionTriggered||t.fauxDomReadyFired?s():e["rocket-DOMContentLoaded"].push(s):e.DOMContentLoaded.push(s),o([])},s("on"),s("one"),s("off"),t.allJQueries.push(o)}e=o}t.allJQueries=[],o(window.jQuery),Object.defineProperty(window,"jQuery",{get:()=>e,set(t){o(t)}})}P(){const t=new Map;document.write=document.writeln=function(e){const i=document.currentScript,o=document.createRange(),s=i.parentElement;let n=t.get(i);void 0===n&&(n=i.nextSibling,t.set(i,n));const c=document.createDocumentFragment();o.setStart(c,0),c.appendChild(o.createContextualFragment(e)),s.insertBefore(c,n)}}async R(){return new Promise((t=>{this.userActionTriggered?t():this.onFirstUserAction=t}))}async L(){return new Promise((t=>{document.addEventListener("DOMContentLoaded",(()=>{this.realDomReadyFired=!0,t()}),{isRocket:!0})}))}async I(){return this.realWindowLoadedFired?Promise.resolve():new Promise((t=>{window.addEventListener("load",t,{isRocket:!0})}))}M(){this.pendingScripts=[];this.scriptsMutationObserver=new MutationObserver((t=>{for(const e of t)e.addedNodes.forEach((t=>{"SCRIPT"!==t.tagName||t.noModule||t.isWPRocket||this.pendingScripts.push({script:t,promise:new Promise((e=>{const i=()=>{const i=this.pendingScripts.findIndex((e=>e.script===t));i>=0&&this.pendingScripts.splice(i,1),e()};t.addEventListener("load",i,{isRocket:!0}),t.addEventListener("error",i,{isRocket:!0}),setTimeout(i,1e3)}))})}))})),this.scriptsMutationObserver.observe(document,{childList:!0,subtree:!0})}async j(){await this.J(),this.pendingScripts.length?(await this.pendingScripts[0].promise,await this.j()):this.scriptsMutationObserver.disconnect()}D(){this.delayedScripts={normal:[],async:[],defer:[]},document.querySelectorAll("script[type$=rocketlazyloadscript]").forEach((t=>{t.hasAttribute("data-rocket-src")?t.hasAttribute("async")&&!1!==t.async?this.delayedScripts.async.push(t):t.hasAttribute("defer")&&!1!==t.defer||"module"===t.getAttribute("data-rocket-type")?this.delayedScripts.defer.push(t):this.delayedScripts.normal.push(t):this.delayedScripts.normal.push(t)}))}async _(){await this.L();let t=[];document.querySelectorAll("script[type$=rocketlazyloadscript][data-rocket-src]").forEach((e=>{let i=e.getAttribute("data-rocket-src");if(i&&!i.startsWith("data:")){i.startsWith("//")&&(i=location.protocol+i);try{const o=new URL(i).origin;o!==location.origin&&t.push({src:o,crossOrigin:e.crossOrigin||"module"===e.getAttribute("data-rocket-type")})}catch(t){}}})),t=[...new Map(t.map((t=>[JSON.stringify(t),t]))).values()],this.N(t,"preconnect")}async $(t){if(await this.G(),!0!==t.noModule||!("noModule"in HTMLScriptElement.prototype))return new Promise((e=>{let i;function o(){(i||t).setAttribute("data-rocket-status","executed"),e()}try{if(navigator.userAgent.includes("Firefox/")||""===navigator.vendor||this.CSPIssue)i=document.createElement("script"),[...t.attributes].forEach((t=>{let e=t.nodeName;"type"!==e&&("data-rocket-type"===e&&(e="type"),"data-rocket-src"===e&&(e="src"),i.setAttribute(e,t.nodeValue))})),t.text&&(i.text=t.text),t.nonce&&(i.nonce=t.nonce),i.hasAttribute("src")?(i.addEventListener("load",o,{isRocket:!0}),i.addEventListener("error",(()=>{i.setAttribute("data-rocket-status","failed-network"),e()}),{isRocket:!0}),setTimeout((()=>{i.isConnected||e()}),1)):(i.text=t.text,o()),i.isWPRocket=!0,t.parentNode.replaceChild(i,t);else{const i=t.getAttribute("data-rocket-type"),s=t.getAttribute("data-rocket-src");i?(t.type=i,t.removeAttribute("data-rocket-type")):t.removeAttribute("type"),t.addEventListener("load",o,{isRocket:!0}),t.addEventListener("error",(i=>{this.CSPIssue&&i.target.src.startsWith("data:")?(console.log("WPRocket: CSP fallback activated"),t.removeAttribute("src"),this.$(t).then(e)):(t.setAttribute("data-rocket-status","failed-network"),e())}),{isRocket:!0}),s?(t.fetchPriority="high",t.removeAttribute("data-rocket-src"),t.src=s):t.src="data:text/javascript;base64,"+window.btoa(unescape(encodeURIComponent(t.text)))}}catch(i){t.setAttribute("data-rocket-status","failed-transform"),e()}}));t.setAttribute("data-rocket-status","skipped")}async C(t){const e=t.shift();return e?(e.isConnected&&await this.$(e),this.C(t)):Promise.resolve()}O(){this.N([...this.delayedScripts.normal,...this.delayedScripts.defer,...this.delayedScripts.async],"preload")}N(t,e){this.trash=this.trash||[];let i=!0;var o=document.createDocumentFragment();t.forEach((t=>{const s=t.getAttribute&&t.getAttribute("data-rocket-src")||t.src;if(s&&!s.startsWith("data:")){const n=document.createElement("link");n.href=s,n.rel=e,"preconnect"!==e&&(n.as="script",n.fetchPriority=i?"high":"low"),t.getAttribute&&"module"===t.getAttribute("data-rocket-type")&&(n.crossOrigin=!0),t.crossOrigin&&(n.crossOrigin=t.crossOrigin),t.integrity&&(n.integrity=t.integrity),t.nonce&&(n.nonce=t.nonce),o.appendChild(n),this.trash.push(n),i=!1}})),document.head.appendChild(o)}W(){this.trash.forEach((t=>t.remove()))}async T(){try{document.readyState="interactive"}catch(t){}this.fauxDomReadyFired=!0;try{await this.G(),document.dispatchEvent(new Event("rocket-readystatechange")),await this.G(),document.rocketonreadystatechange&&document.rocketonreadystatechange(),await this.G(),document.dispatchEvent(new Event("rocket-DOMContentLoaded")),await this.G(),window.dispatchEvent(new Event("rocket-DOMContentLoaded"))}catch(t){console.error(t)}}async A(){try{document.readyState="complete"}catch(t){}try{await this.G(),document.dispatchEvent(new Event("rocket-readystatechange")),await this.G(),document.rocketonreadystatechange&&document.rocketonreadystatechange(),await this.G(),window.dispatchEvent(new Event("rocket-load")),await this.G(),window.rocketonload&&window.rocketonload(),await this.G(),this.allJQueries.forEach((t=>t(window).trigger("rocket-jquery-load"))),await this.G();const t=new Event("rocket-pageshow");t.persisted=this.persisted,window.dispatchEvent(t),await this.G(),window.rocketonpageshow&&window.rocketonpageshow({persisted:this.persisted})}catch(t){console.error(t)}}async G(){Date.now()-this.lastBreath>45&&(await this.J(),this.lastBreath=Date.now())}async J(){return document.hidden?new Promise((t=>setTimeout(t))):new Promise((t=>requestAnimationFrame(t)))}B(t,e){return e===document&&"readystatechange"===t||(e===document&&"DOMContentLoaded"===t||(e===window&&"DOMContentLoaded"===t||(e===window&&"load"===t||e===window&&"pageshow"===t)))}static run(){(new RocketLazyLoadScripts).t()}}RocketLazyLoadScripts.run()})();</script>
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="profile" href="https://gmpg.org/xfn/11" />
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><noscript></noscript><link rel="apple-touch-icon" href="https://www.inquisitr.com/wp-content/uploads/2024/12/apple-touch-icon.png"/>
+					<meta name="msapplication-TileColor" content="#ffffff">
+			<meta name="msapplication-TileImage" content="https://www.inquisitr.com/wp-content/uploads/2024/12/web-app-manifest-192x192-1.png"/>
+		
+<!-- Search Engine Optimization by Rank Math PRO - https://rankmath.com/ -->
+<title>technology - Inquisitr News</title><link rel="preload" data-rocket-preload as="style" href="https://fonts.googleapis.com/css?family=Oxygen%3A400%2C700%7CEncode%20Sans%20Condensed%3A400%2C500%2C600%2C700%2C800%7CRoboto%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CRoboto%20Slab%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic&#038;display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oxygen%3A400%2C700%7CEncode%20Sans%20Condensed%3A400%2C500%2C600%2C700%2C800%7CRoboto%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CRoboto%20Slab%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic&#038;display=swap" media="print" onload="this.media='all'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oxygen%3A400%2C700%7CEncode%20Sans%20Condensed%3A400%2C500%2C600%2C700%2C800%7CRoboto%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CRoboto%20Slab%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic&#038;display=swap" /></noscript>
+<meta name="robots" content="follow, noindex"/>
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="technology - Inquisitr News" />
+<meta property="og:url" content="https://www.inquisitr.com/profile/technology" />
+<meta property="og:site_name" content="Inquisitr News" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="technology - Inquisitr News" />
+<meta name="twitter:site" content="@theinquisitr" />
+<meta name="twitter:label1" content="Posts" />
+<meta name="twitter:data1" content="222" />
+<script type="application/ld+json" class="rank-math-schema-pro">{"@context":"https://schema.org","@graph":[{"@type":"NewsMediaOrganization","@id":"https://www.inquisitr.com/#organization","name":"Inquisitr News","url":"https://www.inquisitr.com/","sameAs":["https://twitter.com/theinquisitr"],"email":"ops@inquisitr.com","logo":{"@type":"ImageObject","@id":"https://www.inquisitr.com/#logo","url":"https://www.inquisitr.com/wp-content/uploads/2025/10/inquisitr-logo-1.png","contentUrl":"https://www.inquisitr.com/wp-content/uploads/2025/10/inquisitr-logo-1.png","caption":"Inquisitr News","inLanguage":"en-US","width":"492","height":"142"},"description":"The Inquisitr offers a constantly updated mix of the latest stories to hit the web, covering a diverse spectrum of current news events\u2026."},{"@type":"WebSite","@id":"https://www.inquisitr.com/#website","url":"https://www.inquisitr.com","name":"Inquisitr News","publisher":{"@id":"https://www.inquisitr.com/#organization"},"inLanguage":"en-US"},{"@type":"CollectionPage","@id":"https://www.inquisitr.com/profile/technology#webpage","url":"https://www.inquisitr.com/profile/technology","name":"technology - Inquisitr News","isPartOf":{"@id":"https://www.inquisitr.com/#website"},"inLanguage":"en-US"}]}</script>
+<!-- /Rank Math WordPress SEO plugin -->
+
+<link rel='dns-prefetch' href='//scripts.pubnation.com' />
+<link rel='dns-prefetch' href='//accounts.google.com' />
+<link href='https://fonts.gstatic.com' crossorigin rel='preconnect' />
+<link rel="alternate" type="application/rss+xml" title="Inquisitr News &raquo; Feed" href="https://www.inquisitr.com/feed" />
+<link rel="alternate" type="application/rss+xml" title="Inquisitr News &raquo; Comments Feed" href="https://www.inquisitr.com/comments/feed" />
+<link rel="alternate" type="application/rss+xml" title="Inquisitr News &raquo; technology Tag Feed" href="https://www.inquisitr.com/profile/technology/feed" />
+<script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "legalName": "Inquisitr News",
+    "url": "https://www.inquisitr.com/",
+    "logo": "https://www.inquisitr.com/wp-content/uploads/2024/12/inquisitr-logo.png",
+    "sameAs": [
+        "https://www.facebook.com/theinquisitr",
+        "https://x.com/theinquisitr",
+        "https://www.youtube.com/@Inquisitr",
+        "https://news.google.com/publications/CAAqBwgKML3a-wowv8_oAg",
+        "https://pinterest.com/inquisitr/",
+        "https://linkedin.com/company/inquisitr-ltd-",
+        "https://flipboard.com/@inquisitr",
+        "https://www.inquisitr.com/feed"
+    ]
+}</script>
+<style id='wp-img-auto-sizes-contain-inline-css'>
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<style id='wp-emoji-styles-inline-css'>
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+/*# sourceURL=wp-emoji-styles-inline-css */
+</style>
+<link rel='stylesheet' id='wp-block-library-css' href='https://www.inquisitr.com/wp-includes/css/dist/block-library/style.min.css?ver=6.9' media='all' />
+<style id='global-styles-inline-css'>
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+
+<style id='classic-theme-styles-inline-css'>
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+<link rel='stylesheet' id='wp-components-css' href='https://www.inquisitr.com/wp-includes/css/dist/components/style.min.css?ver=6.9' media='all' />
+<link rel='stylesheet' id='wp-preferences-css' href='https://www.inquisitr.com/wp-includes/css/dist/preferences/style.min.css?ver=6.9' media='all' />
+<link rel='stylesheet' id='wp-block-editor-css' href='https://www.inquisitr.com/wp-includes/css/dist/block-editor/style.min.css?ver=6.9' media='all' />
+<link rel='stylesheet' id='popup-maker-block-library-style-css' href='https://www.inquisitr.com/wp-content/plugins/popup-maker/dist/packages/block-library-style.css?ver=dbea705cfafe089d65f1' media='all' />
+<link rel='stylesheet' id='foxiz-elements-css' href='https://www.inquisitr.com/wp-content/plugins/foxiz-core/lib/foxiz-elements/public/style.css?ver=2.0' media='all' />
+<link rel='stylesheet' id='parent-style-css' href='https://www.inquisitr.com/wp-content/themes/foxiz/style.css?ver=6.9' media='all' />
+<link rel='stylesheet' id='custom-style-css' href='https://www.inquisitr.com/wp-content/themes/foxiz-child/assets/css/custom-style.css?ver=6.9' media='all' />
+<link rel='stylesheet' id='popup-maker-site-css' href='https://www.inquisitr.com/wp-content/plugins/popup-maker/dist/assets/site.css?ver=1.21.5' media='all' />
+<style id='popup-maker-site-inline-css'>
+/* Popup Google Fonts */
+@import url('//fonts.googleapis.com/css?family=Montserrat:100');
+
+/* Popup Theme 1226472: Light Box */
+.pum-theme-1226472, .pum-theme-lightbox { background-color: rgba( 0, 0, 0, 0.60 ) } 
+.pum-theme-1226472 .pum-container, .pum-theme-lightbox .pum-container { padding: 18px; border-radius: 9px; border: 15px solid #c1c1c1; box-shadow: 0px 0px 30px 0px rgba( 2, 2, 2, 1.00 ); background-color: rgba( 255, 255, 255, 1.00 ) } 
+.pum-theme-1226472 .pum-title, .pum-theme-lightbox .pum-title { color: #000000; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: inherit; font-weight: 100; font-size: 32px; line-height: 36px } 
+.pum-theme-1226472 .pum-content, .pum-theme-lightbox .pum-content { color: #000000; font-family: inherit; font-weight: 100 } 
+.pum-theme-1226472 .pum-content + .pum-close, .pum-theme-lightbox .pum-content + .pum-close { position: absolute; height: 26px; width: 26px; left: auto; right: -13px; bottom: auto; top: -13px; padding: 0px; color: #ffffff; font-family: Arial; font-weight: 100; font-size: 24px; line-height: 24px; border: 2px solid #ffffff; border-radius: 26px; box-shadow: 0px 0px 15px 1px rgba( 2, 2, 2, 0.75 ); text-shadow: 0px 0px 0px rgba( 0, 0, 0, 0.23 ); background-color: rgba( 0, 0, 0, 1.00 ) } 
+
+/* Popup Theme 1226471: Default Theme */
+.pum-theme-1226471, .pum-theme-default-theme { background-color: rgba( 255, 255, 255, 1.00 ) } 
+.pum-theme-1226471 .pum-container, .pum-theme-default-theme .pum-container { padding: 18px; border-radius: 0px; border: 1px none #000000; box-shadow: 1px 1px 3px 0px rgba( 2, 2, 2, 0.23 ); background-color: rgba( 249, 249, 249, 1.00 ) } 
+.pum-theme-1226471 .pum-title, .pum-theme-default-theme .pum-title { color: #000000; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: inherit; font-weight: 400; font-size: 32px; font-style: normal; line-height: 36px } 
+.pum-theme-1226471 .pum-content, .pum-theme-default-theme .pum-content { color: #8c8c8c; font-family: inherit; font-weight: 400; font-style: inherit } 
+.pum-theme-1226471 .pum-content + .pum-close, .pum-theme-default-theme .pum-content + .pum-close { position: absolute; height: auto; width: auto; left: auto; right: 0px; bottom: auto; top: 0px; padding: 8px; color: #ffffff; font-family: inherit; font-weight: 400; font-size: 12px; font-style: inherit; line-height: 36px; border: 1px none #ffffff; border-radius: 0px; box-shadow: 1px 1px 3px 0px rgba( 2, 2, 2, 0.23 ); text-shadow: 0px 0px 0px rgba( 0, 0, 0, 0.23 ); background-color: rgba( 0, 183, 205, 1.00 ) } 
+
+/* Popup Theme 1226473: Enterprise Blue */
+.pum-theme-1226473, .pum-theme-enterprise-blue { background-color: rgba( 0, 0, 0, 0.70 ) } 
+.pum-theme-1226473 .pum-container, .pum-theme-enterprise-blue .pum-container { padding: 28px; border-radius: 5px; border: 1px none #000000; box-shadow: 0px 10px 25px 4px rgba( 2, 2, 2, 0.50 ); background-color: rgba( 255, 255, 255, 1.00 ) } 
+.pum-theme-1226473 .pum-title, .pum-theme-enterprise-blue .pum-title { color: #315b7c; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: inherit; font-weight: 100; font-size: 34px; line-height: 36px } 
+.pum-theme-1226473 .pum-content, .pum-theme-enterprise-blue .pum-content { color: #2d2d2d; font-family: inherit; font-weight: 100 } 
+.pum-theme-1226473 .pum-content + .pum-close, .pum-theme-enterprise-blue .pum-content + .pum-close { position: absolute; height: 28px; width: 28px; left: auto; right: 8px; bottom: auto; top: 8px; padding: 4px; color: #ffffff; font-family: Times New Roman; font-weight: 100; font-size: 20px; line-height: 20px; border: 1px none #ffffff; border-radius: 42px; box-shadow: 0px 0px 0px 0px rgba( 2, 2, 2, 0.23 ); text-shadow: 0px 0px 0px rgba( 0, 0, 0, 0.23 ); background-color: rgba( 49, 91, 124, 1.00 ) } 
+
+/* Popup Theme 1226474: Hello Box */
+.pum-theme-1226474, .pum-theme-hello-box { background-color: rgba( 0, 0, 0, 0.75 ) } 
+.pum-theme-1226474 .pum-container, .pum-theme-hello-box .pum-container { padding: 30px; border-radius: 80px; border: 14px solid #81d742; box-shadow: 0px 0px 0px 0px rgba( 2, 2, 2, 0.00 ); background-color: rgba( 255, 255, 255, 1.00 ) } 
+.pum-theme-1226474 .pum-title, .pum-theme-hello-box .pum-title { color: #2d2d2d; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: Montserrat; font-weight: 100; font-size: 32px; line-height: 36px } 
+.pum-theme-1226474 .pum-content, .pum-theme-hello-box .pum-content { color: #2d2d2d; font-family: inherit; font-weight: 100 } 
+.pum-theme-1226474 .pum-content + .pum-close, .pum-theme-hello-box .pum-content + .pum-close { position: absolute; height: auto; width: auto; left: auto; right: -30px; bottom: auto; top: -30px; padding: 0px; color: #2d2d2d; font-family: Times New Roman; font-weight: 100; font-size: 32px; line-height: 28px; border: 1px none #ffffff; border-radius: 28px; box-shadow: 0px 0px 0px 0px rgba( 2, 2, 2, 0.23 ); text-shadow: 0px 0px 0px rgba( 0, 0, 0, 0.23 ); background-color: rgba( 255, 255, 255, 1.00 ) } 
+
+/* Popup Theme 1226475: Cutting Edge */
+.pum-theme-1226475, .pum-theme-cutting-edge { background-color: rgba( 0, 0, 0, 0.50 ) } 
+.pum-theme-1226475 .pum-container, .pum-theme-cutting-edge .pum-container { padding: 18px; border-radius: 0px; border: 1px none #000000; box-shadow: 0px 10px 25px 0px rgba( 2, 2, 2, 0.50 ); background-color: rgba( 30, 115, 190, 1.00 ) } 
+.pum-theme-1226475 .pum-title, .pum-theme-cutting-edge .pum-title { color: #ffffff; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: Sans-Serif; font-weight: 100; font-size: 26px; line-height: 28px } 
+.pum-theme-1226475 .pum-content, .pum-theme-cutting-edge .pum-content { color: #ffffff; font-family: inherit; font-weight: 100 } 
+.pum-theme-1226475 .pum-content + .pum-close, .pum-theme-cutting-edge .pum-content + .pum-close { position: absolute; height: 24px; width: 24px; left: auto; right: 0px; bottom: auto; top: 0px; padding: 0px; color: #1e73be; font-family: Times New Roman; font-weight: 100; font-size: 32px; line-height: 24px; border: 1px none #ffffff; border-radius: 0px; box-shadow: -1px 1px 1px 0px rgba( 2, 2, 2, 0.10 ); text-shadow: -1px 1px 1px rgba( 0, 0, 0, 0.10 ); background-color: rgba( 238, 238, 34, 1.00 ) } 
+
+/* Popup Theme 1226476: Framed Border */
+.pum-theme-1226476, .pum-theme-framed-border { background-color: rgba( 255, 255, 255, 0.50 ) } 
+.pum-theme-1226476 .pum-container, .pum-theme-framed-border .pum-container { padding: 18px; border-radius: 0px; border: 20px outset #dd3333; box-shadow: 1px 1px 3px 0px rgba( 2, 2, 2, 0.97 ) inset; background-color: rgba( 255, 251, 239, 1.00 ) } 
+.pum-theme-1226476 .pum-title, .pum-theme-framed-border .pum-title { color: #000000; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: inherit; font-weight: 100; font-size: 32px; line-height: 36px } 
+.pum-theme-1226476 .pum-content, .pum-theme-framed-border .pum-content { color: #2d2d2d; font-family: inherit; font-weight: 100 } 
+.pum-theme-1226476 .pum-content + .pum-close, .pum-theme-framed-border .pum-content + .pum-close { position: absolute; height: 20px; width: 20px; left: auto; right: -20px; bottom: auto; top: -20px; padding: 0px; color: #ffffff; font-family: Tahoma; font-weight: 700; font-size: 16px; line-height: 18px; border: 1px none #ffffff; border-radius: 0px; box-shadow: 0px 0px 0px 0px rgba( 2, 2, 2, 0.23 ); text-shadow: 0px 0px 0px rgba( 0, 0, 0, 0.23 ); background-color: rgba( 0, 0, 0, 0.55 ) } 
+
+/* Popup Theme 1226477: Floating Bar - Soft Blue */
+.pum-theme-1226477, .pum-theme-floating-bar { background-color: rgba( 255, 255, 255, 0.00 ) } 
+.pum-theme-1226477 .pum-container, .pum-theme-floating-bar .pum-container { padding: 8px; border-radius: 0px; border: 1px none #000000; box-shadow: 1px 1px 3px 0px rgba( 2, 2, 2, 0.23 ); background-color: rgba( 238, 246, 252, 1.00 ) } 
+.pum-theme-1226477 .pum-title, .pum-theme-floating-bar .pum-title { color: #505050; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: inherit; font-weight: 400; font-size: 32px; line-height: 36px } 
+.pum-theme-1226477 .pum-content, .pum-theme-floating-bar .pum-content { color: #505050; font-family: inherit; font-weight: 400 } 
+.pum-theme-1226477 .pum-content + .pum-close, .pum-theme-floating-bar .pum-content + .pum-close { position: absolute; height: 18px; width: 18px; left: auto; right: 5px; bottom: auto; top: 50%; padding: 0px; color: #505050; font-family: Sans-Serif; font-weight: 700; font-size: 15px; line-height: 18px; border: 1px solid #505050; border-radius: 15px; box-shadow: 0px 0px 0px 0px rgba( 2, 2, 2, 0.00 ); text-shadow: 0px 0px 0px rgba( 0, 0, 0, 0.00 ); background-color: rgba( 255, 255, 255, 0.00 ); transform: translate(0, -50%) } 
+
+/* Popup Theme 1226478: Content Only - For use with page builders or block editor */
+.pum-theme-1226478, .pum-theme-content-only { background-color: rgba( 0, 0, 0, 0.70 ) } 
+.pum-theme-1226478 .pum-container, .pum-theme-content-only .pum-container { padding: 0px; border-radius: 0px; border: 1px none #000000; box-shadow: 0px 0px 0px 0px rgba( 2, 2, 2, 0.00 ) } 
+.pum-theme-1226478 .pum-title, .pum-theme-content-only .pum-title { color: #000000; text-align: left; text-shadow: 0px 0px 0px rgba( 2, 2, 2, 0.23 ); font-family: inherit; font-weight: 400; font-size: 32px; line-height: 36px } 
+.pum-theme-1226478 .pum-content, .pum-theme-content-only .pum-content { color: #8c8c8c; font-family: inherit; font-weight: 400 } 
+.pum-theme-1226478 .pum-content + .pum-close, .pum-theme-content-only .pum-content + .pum-close { position: absolute; height: 18px; width: 18px; left: auto; right: 7px; bottom: auto; top: 7px; padding: 0px; color: #000000; font-family: inherit; font-weight: 700; font-size: 20px; line-height: 20px; border: 1px none #ffffff; border-radius: 15px; box-shadow: 0px 0px 0px 0px rgba( 2, 2, 2, 0.00 ); text-shadow: 0px 0px 0px rgba( 0, 0, 0, 0.00 ); background-color: rgba( 255, 255, 255, 0.00 ) } 
+
+#pum-1226480 {z-index: 1999999999}
+#pum-1226479 {z-index: 1999999999}
+
+/*# sourceURL=popup-maker-site-inline-css */
+</style>
+<link rel='stylesheet' id='elementor-frontend-css' href='https://www.inquisitr.com/wp-content/plugins/elementor/assets/css/frontend.min.css?ver=3.26.3' media='all' />
+<link rel='stylesheet' id='elementor-post-180054-css' href='https://www.inquisitr.com/wp-content/uploads/elementor/css/post-180054.css?ver=1768219635' media='all' />
+<link rel='stylesheet' id='elementor-post-625128-css' href='https://www.inquisitr.com/wp-content/uploads/elementor/css/post-625128.css?ver=1768219637' media='all' />
+
+<link rel='stylesheet' id='foxiz-main-css' href='https://www.inquisitr.com/wp-content/themes/foxiz/assets/css/main.css?ver=2.5.5' media='all' />
+<style id='foxiz-main-inline-css'>
+:root {--body-fweight:400;--body-fsize:17px;--tagline-family:Oxygen, 'Comic Sans MS', cursive;--tagline-fweight:400;--tagline-fsize:18px;--subheading-family:Oxygen, 'MS Sans Serif', Geneva, sans-serif;--subheading-fweight:400;--subheading-fsize:18px;}:root {--g-color :#ef1615;--g-color-90 :#ef1615e6;--indicator-bg-from :#ef0000;--indicator-bg-to :#ef9494;}[data-theme="dark"], .light-scheme {--g-color :#ef1615;--g-color-90 :#ef1615e6;}[data-theme="dark"].is-hd-4 {--nav-bg: #191c20;--nav-bg-from: #191c20;--nav-bg-to: #191c20;}:root {--top-site-bg :#0e0f12;--hyperlink-line-color :var(--g-color);--s-content-width : 760px;--max-width-wo-sb : 860px;--s10-feat-ratio :45%;--s11-feat-ratio :45%;--login-popup-w : 350px;}[data-theme="dark"], .light-scheme {--top-site-bg :#0e0f12; }.search-header:before { background-repeat : no-repeat;background-size : cover;background-image : var(--wpr-bg-9f6223bb-62bf-4c8d-825b-6a26dff980e2);background-attachment : scroll;background-position : center center;}[data-theme="dark"] .search-header:before { background-repeat : no-repeat;background-size : cover;background-image : var(--wpr-bg-cf40f7c3-abd0-4d82-94c8-9ce7e14a8378);background-attachment : scroll;background-position : center center;}.footer-has-bg { background-color : #00000007;}[data-theme="dark"] .footer-has-bg { background-color : #16181c;}.top-site-ad .ad-image { max-width: 1500px; }.yes-hd-transparent .top-site-ad {--top-site-bg :#0e0f12;}#amp-mobile-version-switcher { display: none; }#single-post-infinite > .single-post-outer:nth-child(2) .continue-reading { display: none}#single-post-infinite > .single-post-outer:nth-child(2) .s-ct { height: auto; max-height: none }
+/*# sourceURL=foxiz-main-inline-css */
+</style>
+<link rel='stylesheet' id='foxiz-print-css' href='https://www.inquisitr.com/wp-content/themes/foxiz/assets/css/print.css?ver=2.5.5' media='all' />
+<link rel='stylesheet' id='foxiz-style-css' href='https://www.inquisitr.com/wp-content/themes/foxiz-child/style.css?ver=2.5.5' media='all' />
+<link rel='stylesheet' id='lh2-google-sso-frontend-css' href='https://www.inquisitr.com/wp-content/plugins/lh2-google-sso/assets/css/frontend.css?ver=1.0.0' media='all' />
+<style id='rocket-lazyload-inline-css'>
+.rll-youtube-player{position:relative;padding-bottom:56.23%;height:0;overflow:hidden;max-width:100%;}.rll-youtube-player:focus-within{outline: 2px solid currentColor;outline-offset: 5px;}.rll-youtube-player iframe{position:absolute;top:0;left:0;width:100%;height:100%;z-index:100;background:0 0}.rll-youtube-player img{bottom:0;display:block;left:0;margin:auto;max-width:100%;width:100%;position:absolute;right:0;top:0;border:none;height:auto;-webkit-transition:.4s all;-moz-transition:.4s all;transition:.4s all}.rll-youtube-player img:hover{-webkit-filter:brightness(75%)}.rll-youtube-player .play{height:100%;width:100%;left:0;top:0;position:absolute;background:var(--wpr-bg-9ca8f237-9201-4cd6-84d6-40454f887f9b) no-repeat center;background-color: transparent !important;cursor:pointer;border:none;}.wp-embed-responsive .wp-has-aspect-ratio .rll-youtube-player{position:absolute;padding-bottom:0;width:100%;height:100%;top:0;bottom:0;left:0;right:0}
+/*# sourceURL=rocket-lazyload-inline-css */
+</style>
+
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin><script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1" id="jquery-migrate-js"></script>
+<script async="async" fetchpriority="high" data-noptimize="1" data-cfasync="false" src="https://scripts.pubnation.com/tags/inquisitr.js?ver=6.9" id="mv-script-wrapper-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/themes/foxiz-child/assets/css/custom-script.js?ver=6.9" id="custom-script-js"></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/wp-content/themes/foxiz/assets/js/highlight-share.js?ver=1768818829" id="highlight-share-js"></script>
+<link rel="preload" href="https://www.inquisitr.com/wp-content/themes/foxiz/assets/fonts/icons.woff2?ver=2.5.0" as="font" type="font/woff2" crossorigin="anonymous"> <link rel="https://api.w.org/" href="https://www.inquisitr.com/wp-json/" /><link rel="alternate" title="JSON" type="application/json" href="https://www.inquisitr.com/wp-json/wp/v2/tags/1307" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.inquisitr.com/xmlrpc.php?rsd" />
+<meta name="generator" content="WordPress 6.9" />
+        <!-- PushAlert WordPress 2.5.4 -->
+        <script type="rocketlazyloadscript" data-rocket-type="text/javascript">
+        var pushalert_sw_file = 'https://www.inquisitr.com/?pa_service_worker=1';
+var pushalert_manifest_file = 'https://cdn.pushalert.co/manifest-80472.json';
+
+            (function (d, t) {
+                var g = d.createElement(t),
+                        s = d.getElementsByTagName(t)[0];
+                g.src = "//cdn.pushalert.co/integrate_0501af2e32dd85e4d89028c036bb53b3.js";
+                s.parentNode.insertBefore(g, s);
+            }(document, "script"));
+        </script>
+        <!-- End PushAlert WordPress -->
+        <!-- Google tag (gtag.js) -->
+<script type="rocketlazyloadscript" async data-rocket-src="https://www.googletagmanager.com/gtag/js?id=G-BSGX8GYJBR"></script>
+<script type="rocketlazyloadscript">
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-BSGX8GYJBR');
+</script>
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript">
+!function(){"use strict";function e(e){var t=!(arguments.length>1&&void 0!==arguments[1])||arguments[1],c=document.createElement("script");c.src=e,t?c.type="module":(c.async=!0,c.type="text/javascript",c.setAttribute("nomodule",""));var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(c,n)}!function(t,c){!function(t,c,n){var a,o,r;n.accountId=c,null!==(a=t.marfeel)&&void 0!==a||(t.marfeel={}),null!==(o=(r=t.marfeel).cmd)&&void 0!==o||(r.cmd=[]),t.marfeel.config=n;var i="https://sdk.mrf.io/statics";e("".concat(i,"/marfeel-sdk.js?id=").concat(c),!0),e("".concat(i,"/marfeel-sdk.es5.js?id=").concat(c),!1)}(t,c,arguments.length>2&&void 0!==arguments[2]?arguments[2]:{})}(window,7745,{} /* Config */)}();
+</script>
+
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript" data-no-optimize="1">
+!function (e, f, u) {
+e.async = 1;
+e.src = u;
+f.parentNode.insertBefore(e, f);
+}(document.createElement('script'), document.getElementsByTagName('script')[0], '//cdn.taboola.com/libtrc/lh2holdings-network/loader.js');
+</script>
+<!-- MailerLite Universal -->
+<script type="rocketlazyloadscript">
+    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+    ml('account', '1443623');
+</script>
+<!-- End MailerLite Universal -->
+<meta name="generator" content="Elementor 3.26.3; features: e_font_icon_svg, additional_custom_breakpoints, e_element_cache; settings: css_print_method-external, google_font-enabled, font_display-swap">
+<script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://www.inquisitr.com/#website",
+    "url": "https://www.inquisitr.com/",
+    "name": "Inquisitr News",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.inquisitr.com/?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}</script>
+			<style>
+				.e-con.e-parent:nth-of-type(n+4):not(.e-lazyloaded):not(.e-no-lazyload),
+				.e-con.e-parent:nth-of-type(n+4):not(.e-lazyloaded):not(.e-no-lazyload) * {
+					background-image: none !important;
+				}
+				@media screen and (max-height: 1024px) {
+					.e-con.e-parent:nth-of-type(n+3):not(.e-lazyloaded):not(.e-no-lazyload),
+					.e-con.e-parent:nth-of-type(n+3):not(.e-lazyloaded):not(.e-no-lazyload) * {
+						background-image: none !important;
+					}
+				}
+				@media screen and (max-height: 640px) {
+					.e-con.e-parent:nth-of-type(n+2):not(.e-lazyloaded):not(.e-no-lazyload),
+					.e-con.e-parent:nth-of-type(n+2):not(.e-lazyloaded):not(.e-no-lazyload) * {
+						background-image: none !important;
+					}
+				}
+			</style>
+			<link rel="icon" href="https://www.inquisitr.com/wp-content/uploads/2024/12/favicon.png" sizes="32x32" />
+<link rel="icon" href="https://www.inquisitr.com/wp-content/uploads/2024/12/favicon.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://www.inquisitr.com/wp-content/uploads/2024/12/favicon.png" />
+<meta name="msapplication-TileImage" content="https://www.inquisitr.com/wp-content/uploads/2024/12/favicon.png" />
+		<style id="wp-custom-css">
+			.footer-wrap .footer-inner{
+	padding-top: 0 !important;
+}
+
+.collapse-inner > *:last-child{
+	padding-bottom: 0 !important;
+}
+
+/*.meta-inner{
+	gap: 0;
+}
+
+body .meta-avatar img, .bio-avatar {
+    display: none;
+}*/
+
+
+/* Sidebar Adjustment */
+@media only screen and (min-width: 992px) {
+  .grid-container .s-ct {
+    max-width: calc(100% - 370px);
+  }
+  .sidebar-wrap.single-sidebar {
+    min-width: 360px !important;
+    display: block !important;
+  }
+  .sidebar-inner.clearfix {
+    top: unset !important;
+    position: unset !important;
+  }
+}
+
+@media (max-width: 600px) {
+.s-tagline{
+		font-size: 14px;
+	}
+}
+.s-tagline{
+	margin-top: 10px;
+	font-style: italic;
+}
+
+
+.mr-logo {
+  font-family: 'Arial Black', sans-serif;
+  font-size: 13px;       /* default size for small screens */
+  font-weight: 100;
+  fill: #000;
+  vertical-align: middle;
+  margin-left: -5px;
+  margin-top: -30px;
+  border-radius: 4px;
+  transition: fill 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
+}
+
+/* Medium screens (tablets) */
+@media (min-width: 600px) {
+  .mr-logo {
+    font-size: 16px;
+    margin-top: -28px;
+  }
+}
+
+/* Large screens (desktops) */
+@media (min-width: 1024px) {
+  .mr-logo {
+    font-size: 15px;
+        margin-top: -28px;
+       
+  }
+}
+[data-theme="dark"] .mr-logo{
+	fill: white;
+}
+
+.mr-logo:hover {
+  fill: #ff184e; 
+}
+
+
+/* Desktop */
+.fullwidth-giveaway-banner img {
+   
+    display: block;
+	 margin-top: 12px;
+    margin-bottom: 20px;
+}
+
+/* Mobile – prevent text cutting */
+@media (max-width: 768px) {
+    .fullwidth-giveaway-banner img {
+        width: 100%;
+    height: 75px;
+   object-fit: initial;     
+    }
+}
+
+.lh2-sso-shortcode{
+	height: fit-content;
+}
+
+.beehiiv-form {
+  text-align: left;
+}
+.beehiiv-title{
+	font-size:23px !important;
+	font-weight:700 !important;
+	line-height:33px !important;
+	text-align: center;
+	margin-bottom: 10px !important;
+}
+.beehiiv-subtitle {
+  font-size: 14px !important;
+	font-weight:400; !important;
+	line-height:20px !important;
+  margin-bottom: 14px !important;
+	text-align: center;
+}
+
+.beehiiv-email {
+  border: 2px solid #ff0000 !important;
+}
+
+.beehiiv-disclaimer {
+  font-size: 12px !important;
+  margin-top: 10px !important;
+  text-align: initial;
+}
+
+.wpforms-submit{
+	background-color: red !important;
+	width: 100% !important;
+	font-weight: 700 !important;
+  font-size: 15px !important;
+}
+.wpforms-container .wpforms-field{
+	padding: 0px 0!important;
+}
+
+div.wpforms-container-full input[type=email]{
+	border: 2px solid red !important;
+
+}
+.beehiiv-disclaimer a{
+	text-decoration:underline;
+}
+
+#wpforms-1226466-field_17{
+	display: flex;
+    justify-content: center;
+}
+
+.popup-beehiiv-title{
+	color:red;
+	font-size: 30px !important;
+    text-align: center !important;
+}
+
+.wpforms-confirmation-container-full{
+	display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  background: #fff !important;
+  width: 100% !important;
+  max-width: 70%;
+  border: none !important;
+}
+
+.wpforms-confirmation-container-full h3{
+	color: red;
+	font-size: 20px !important;
+}
+
+.wpforms-confirmation-container-full p{
+	text-align: center;
+	font-size: 14px !important;
+}		</style>
+		<noscript><style id="rocket-lazyload-nojs-css">.rll-youtube-player, [data-lazy-src]{display:none !important;}</style></noscript>	<!-- <script type="rocketlazyloadscript" data-rocket-type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "pr70f4eyw6");
+</script> -->
+	<!--Mainline Script-->
+	<script type="rocketlazyloadscript" data-rocket-type="text/javascript">
+!function(){var geq=window.geq=window.geq||[];if(geq.initialize) return;if (geq.invoked){if (window.console && console.error) {console.error("GE snippet included twice.");}return;}geq.invoked = true;geq.methods = ["page", "suppress", "track", "doNotTrack", "trackOrder", "identify", "addToCart", "callBack", "event"];geq.factory = function(method){return function(){var args = Array.prototype.slice.call(arguments);args.unshift(method);geq.push(args);return geq;};};for (var i = 0; i < geq.methods.length; i++) {var key = geq.methods[i];geq[key] = geq.factory(key);} geq.load = function(key){var script = document.createElement("script");script.type = "text/javascript";script.async = true; if (location.href.includes("vge=true")) {script.src = "https://s3-us-west-2.amazonaws.com/jsstore/a/" + key + "/ge.js?v=" + Math.random();} else {script.src = "https://s3-us-west-2.amazonaws.com/jsstore/a/" + key + "/ge.js";} var first = document.getElementsByTagName("script")[0];first.parentNode.insertBefore(script, first);};geq.SNIPPET_VERSION = "1.6.1";
+geq.load("V3VHN5W1");}();
+</script>
+<link rel='stylesheet' id='e-animation-fadeIn-css' href='https://www.inquisitr.com/wp-content/plugins/elementor/assets/lib/animations/styles/fadeIn.min.css?ver=3.26.3' media='all' />
+<link rel='stylesheet' id='widget-spacer-css' href='https://www.inquisitr.com/wp-content/plugins/elementor/assets/css/widget-spacer.min.css?ver=3.26.3' media='all' />
+<link rel='stylesheet' id='wpforms-modern-full-css' href='https://www.inquisitr.com/wp-content/plugins/wpforms/assets/css/frontend/modern/wpforms-full.min.css?ver=1.9.8.7' media='all' />
+<style id='wpforms-modern-full-inline-css'>
+:root {
+				--wpforms-field-border-radius: 3px;
+--wpforms-field-border-style: solid;
+--wpforms-field-border-size: 1px;
+--wpforms-field-background-color: #ffffff;
+--wpforms-field-border-color: rgba( 0, 0, 0, 0.25 );
+--wpforms-field-border-color-spare: rgba( 0, 0, 0, 0.25 );
+--wpforms-field-text-color: rgba( 0, 0, 0, 0.7 );
+--wpforms-field-menu-color: #ffffff;
+--wpforms-label-color: rgba( 0, 0, 0, 0.85 );
+--wpforms-label-sublabel-color: rgba( 0, 0, 0, 0.55 );
+--wpforms-label-error-color: #d63637;
+--wpforms-button-border-radius: 3px;
+--wpforms-button-border-style: none;
+--wpforms-button-border-size: 1px;
+--wpforms-button-background-color: #066aab;
+--wpforms-button-border-color: #066aab;
+--wpforms-button-text-color: #ffffff;
+--wpforms-page-break-color: #066aab;
+--wpforms-background-image: none;
+--wpforms-background-position: center center;
+--wpforms-background-repeat: no-repeat;
+--wpforms-background-size: cover;
+--wpforms-background-width: 100px;
+--wpforms-background-height: 100px;
+--wpforms-background-color: rgba( 0, 0, 0, 0 );
+--wpforms-background-url: none;
+--wpforms-container-padding: 0px;
+--wpforms-container-border-style: none;
+--wpforms-container-border-width: 1px;
+--wpforms-container-border-color: #000000;
+--wpforms-container-border-radius: 3px;
+--wpforms-field-size-input-height: 43px;
+--wpforms-field-size-input-spacing: 15px;
+--wpforms-field-size-font-size: 16px;
+--wpforms-field-size-line-height: 19px;
+--wpforms-field-size-padding-h: 14px;
+--wpforms-field-size-checkbox-size: 16px;
+--wpforms-field-size-sublabel-spacing: 5px;
+--wpforms-field-size-icon-size: 1;
+--wpforms-label-size-font-size: 16px;
+--wpforms-label-size-line-height: 19px;
+--wpforms-label-size-sublabel-font-size: 14px;
+--wpforms-label-size-sublabel-line-height: 17px;
+--wpforms-button-size-font-size: 17px;
+--wpforms-button-size-height: 41px;
+--wpforms-button-size-padding-h: 15px;
+--wpforms-button-size-margin-top: 10px;
+--wpforms-container-shadow-size-box-shadow: none;
+			}
+/*# sourceURL=wpforms-modern-full-inline-css */
+</style>
+<link rel='stylesheet' id='wpforms-pro-modern-full-css' href='https://www.inquisitr.com/wp-content/cache/background-css/1/www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/css/frontend/modern/wpforms-full.min.css?ver=1.9.8.7&wpr_t=1768960850' media='all' />
+<style id="wpr-lazyload-bg-container"></style><style id="wpr-lazyload-bg-exclusion"></style>
+<noscript>
+<style id="wpr-lazyload-bg-nostyle">div.wpforms-container-full .wpforms-field-phone-flag{--wpr-bg-215eff79-c145-47c3-bbcb-86a150128f34: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/images/phone/us-flag.png');}body .wpforms-camera-modal-overlay.wpforms-camera-format-video .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel{--wpr-bg-5aeee90b-170f-4503-809d-93a7e73c0e78: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/camera-video.svg');}body .wpforms-camera-modal-overlay.wpforms-camera-format-video .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop{--wpr-bg-551acc59-9991-4996-b39e-8f2f35c5102f: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/crop.svg');}body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-actions .wpforms-camera-flip{--wpr-bg-4d954750-86b1-4a57-9835-c893fa1a6132: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/camera-rotate.svg');}body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel{--wpr-bg-1f3941dd-e6a1-460c-8cdb-cb7d2e0c4314: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/camera.svg');}body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop{--wpr-bg-189931f4-0629-4f04-a1ed-404a864a8929: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/crop.svg');}body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop-cancel{--wpr-bg-93f8b468-2175-43ea-9b02-4dcedb1354b9: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/cancel.svg');}body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel-video{--wpr-bg-9eb51b7e-9872-47d8-8201-62f39f5a881c: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/trash.svg');}.wpforms-container .wpforms-datepicker-wrap .wpforms-datepicker-clear{--wpr-bg-56a12474-488d-47c6-9e90-ac86d16ed88d: url('https://www.inquisitr.com/wp-content/plugins/wpforms/assets/pro/images/times-solid-white.svg');}.search-header:before{--wpr-bg-9f6223bb-62bf-4c8d-825b-6a26dff980e2: url('https://export.themeruby.com/foxiz/default/wp-content/uploads/sites/2/2021/09/search-bg.jpg');}[data-theme="dark"] .search-header:before{--wpr-bg-cf40f7c3-abd0-4d82-94c8-9ce7e14a8378: url('https://export.themeruby.com/foxiz/default/wp-content/uploads/sites/2/2021/09/search-bgd.jpg');}.rll-youtube-player .play{--wpr-bg-9ca8f237-9201-4cd6-84d6-40454f887f9b: url('https://www.inquisitr.com/wp-content/plugins/wp-rocket/assets/img/youtube.png');}</style>
+</noscript>
+<script type="application/javascript">const rocket_pairs = [{"selector":"div.wpforms-container-full .wpforms-field-phone-flag","style":"div.wpforms-container-full .wpforms-field-phone-flag{--wpr-bg-215eff79-c145-47c3-bbcb-86a150128f34: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/images\/phone\/us-flag.png');}","hash":"215eff79-c145-47c3-bbcb-86a150128f34","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/images\/phone\/us-flag.png"},{"selector":"body .wpforms-camera-modal-overlay.wpforms-camera-format-video .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel","style":"body .wpforms-camera-modal-overlay.wpforms-camera-format-video .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel{--wpr-bg-5aeee90b-170f-4503-809d-93a7e73c0e78: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/camera-video.svg');}","hash":"5aeee90b-170f-4503-809d-93a7e73c0e78","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/camera-video.svg"},{"selector":"body .wpforms-camera-modal-overlay.wpforms-camera-format-video .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop","style":"body .wpforms-camera-modal-overlay.wpforms-camera-format-video .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop{--wpr-bg-551acc59-9991-4996-b39e-8f2f35c5102f: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/crop.svg');}","hash":"551acc59-9991-4996-b39e-8f2f35c5102f","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/crop.svg"},{"selector":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-actions .wpforms-camera-flip","style":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-actions .wpforms-camera-flip{--wpr-bg-4d954750-86b1-4a57-9835-c893fa1a6132: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/camera-rotate.svg');}","hash":"4d954750-86b1-4a57-9835-c893fa1a6132","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/camera-rotate.svg"},{"selector":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel","style":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel{--wpr-bg-1f3941dd-e6a1-460c-8cdb-cb7d2e0c4314: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/camera.svg');}","hash":"1f3941dd-e6a1-460c-8cdb-cb7d2e0c4314","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/camera.svg"},{"selector":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop","style":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop{--wpr-bg-189931f4-0629-4f04-a1ed-404a864a8929: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/crop.svg');}","hash":"189931f4-0629-4f04-a1ed-404a864a8929","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/crop.svg"},{"selector":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop-cancel","style":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-crop-cancel{--wpr-bg-93f8b468-2175-43ea-9b02-4dcedb1354b9: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/cancel.svg');}","hash":"93f8b468-2175-43ea-9b02-4dcedb1354b9","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/cancel.svg"},{"selector":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel-video","style":"body .wpforms-camera-modal .wpforms-camera-modal-footer .wpforms-camera-modal-buttons .wpforms-camera-cancel-video{--wpr-bg-9eb51b7e-9872-47d8-8201-62f39f5a881c: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/trash.svg');}","hash":"9eb51b7e-9872-47d8-8201-62f39f5a881c","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/trash.svg"},{"selector":".wpforms-container .wpforms-datepicker-wrap .wpforms-datepicker-clear","style":".wpforms-container .wpforms-datepicker-wrap .wpforms-datepicker-clear{--wpr-bg-56a12474-488d-47c6-9e90-ac86d16ed88d: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/times-solid-white.svg');}","hash":"56a12474-488d-47c6-9e90-ac86d16ed88d","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/images\/times-solid-white.svg"},{"selector":".search-header","style":".search-header:before{--wpr-bg-9f6223bb-62bf-4c8d-825b-6a26dff980e2: url('https:\/\/export.themeruby.com\/foxiz\/default\/wp-content\/uploads\/sites\/2\/2021\/09\/search-bg.jpg');}","hash":"9f6223bb-62bf-4c8d-825b-6a26dff980e2","url":"https:\/\/export.themeruby.com\/foxiz\/default\/wp-content\/uploads\/sites\/2\/2021\/09\/search-bg.jpg"},{"selector":"[data-theme=\"dark\"] .search-header","style":"[data-theme=\"dark\"] .search-header:before{--wpr-bg-cf40f7c3-abd0-4d82-94c8-9ce7e14a8378: url('https:\/\/export.themeruby.com\/foxiz\/default\/wp-content\/uploads\/sites\/2\/2021\/09\/search-bgd.jpg');}","hash":"cf40f7c3-abd0-4d82-94c8-9ce7e14a8378","url":"https:\/\/export.themeruby.com\/foxiz\/default\/wp-content\/uploads\/sites\/2\/2021\/09\/search-bgd.jpg"},{"selector":".rll-youtube-player .play","style":".rll-youtube-player .play{--wpr-bg-9ca8f237-9201-4cd6-84d6-40454f887f9b: url('https:\/\/www.inquisitr.com\/wp-content\/plugins\/wp-rocket\/assets\/img\/youtube.png');}","hash":"9ca8f237-9201-4cd6-84d6-40454f887f9b","url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wp-rocket\/assets\/img\/youtube.png"}]; const rocket_excluded_pairs = [];</script><meta name="generator" content="WP Rocket 3.18.3" data-wpr-features="wpr_lazyload_css_bg_img wpr_delay_js wpr_minify_js wpr_lazyload_images wpr_lazyload_iframes wpr_preload_links wpr_desktop" /></head>
+<body class="archive tag tag-technology tag-1307 wp-custom-logo wp-embed-responsive wp-theme-foxiz wp-child-theme-foxiz-child elementor-default elementor-kit-180054 menu-ani-1 hover-ani-1 btn-ani-1 is-rm-0 lmeta-dot loader-1 is-hd-1 is-backtop none-m-backtop  is-mstick dark-opacity" data-theme="dark">
+<div data-rocket-location-hash="7e4f4a3adee48df92822953dbaffab3d" class="site-outer">
+			<div data-rocket-location-hash="7caa4f9ba5c29ce90124a2b235b1e11c" id="site-header" class="header-wrap rb-section header-set-1 header-1 header-wrapper style-shadow">
+						<div data-rocket-location-hash="c7f11dea892965d3fb1a785f1d7cbe60" id="navbar-outer" class="navbar-outer">
+				<div id="sticky-holder" class="sticky-holder">
+					<div class="navbar-wrap">
+						<div class="rb-container edge-padding">
+							<div class="navbar-inner">
+								<div class="navbar-left">
+											<div class="logo-wrap is-image-logo site-branding">
+			<a href="https://www.inquisitr.com/" class="logo" title="Inquisitr News">
+				<img fetchpriority="high" class="logo-default" data-mode="default" height="142" width="492" src="https://www.inquisitr.com/wp-content/uploads/2024/12/inquisitr-logo.png" alt="Inquisitr News" decoding="async" loading="eager"><img class="logo-dark" data-mode="dark" height="142" width="492" src="https://www.inquisitr.com/wp-content/uploads/2025/02/inquisitr-logo-Transparent-Dark-Mode.png" alt="Inquisitr News" decoding="async" loading="eager"><img class="logo-transparent" height="142" width="492" src="https://www.inquisitr.com/wp-content/uploads/2025/02/inquisitr-logo-Transparent.png" alt="Inquisitr News" decoding="async" loading="eager">			</a>
+		</div>
+				<nav id="site-navigation" class="main-menu-wrap" aria-label="main menu"><ul id="menu-primary-navigation" class="main-menu rb-menu large-menu" itemscope itemtype="https://www.schema.org/SiteNavigationElement"><li id="menu-item-1137108" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1137108"><a href="https://www.inquisitr.com/news"><span>News</span></a></li>
+<li id="menu-item-611" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-611"><a href="https://www.inquisitr.com/celebrity"><span>Celebrity</span></a></li>
+<li id="menu-item-180045" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-180045"><a href="https://www.inquisitr.com/entertainment"><span>Entertainment</span></a></li>
+<li id="menu-item-614" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-614"><a href="https://www.inquisitr.com/politics"><span>Politics</span></a></li>
+<li id="menu-item-180046" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-180046"><a href="https://www.inquisitr.com/sports"><span>Sports</span></a></li>
+<li id="menu-item-1217936" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1217936"><a href="https://www.inquisitr.com/newsletter"><span>Newsletter</span></a></li>
+</ul></nav>
+										</div>
+								<div class="navbar-right">
+									        <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=353746870042-ptuffqad5p8nuh8p7n4jcfuvfsqeep1a.apps.googleusercontent.com&#038;redirect_uri=https%3A%2F%2Fwww.inquisitr.com&#038;response_type=code&#038;scope=openid%20email%20profile&#038;state=eyJub25jZSI6ImQ0YTlhMTkzMGEiLCJyZXR1cm5fdXJsIjoiaHR0cHM6XC9cL3d3dy5pbnF1aXNpdHIuY29tXC9wcm9maWxlXC90ZWNobm9sb2d5In0%3D" 
+           class="lh2-sso-sleek-btn"
+           style="display:inline-flex !important; align-items:center !important; gap:6px !important; padding:7px 15px !important; background:#fff !important; border:1px solid #dadce0 !important; border-radius:0 !important; cursor:pointer !important; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif !important; font-size:12px !important; font-weight:500 !important; color:#3c4043 !important; white-space:nowrap !important; vertical-align:middle !important; margin:10px 8px !important; transition:all 0.2s ease !important; height:auto !important; line-height:1.2 !important; text-decoration:none !important;">
+            <svg width="16" height="16" viewBox="0 0 24 24" style="flex-shrink:0;">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span>Get updates in your inbox</span>
+        </a>
+        		<div class="dark-mode-toggle-wrap">
+			<div class="dark-mode-toggle">
+                <span class="dark-mode-slide">
+                    <i class="dark-mode-slide-btn mode-icon-dark" data-title="Switch to Light"><svg class="svg-icon svg-mode-dark" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M507.681,209.011c-1.297-6.991-7.324-12.111-14.433-12.262c-7.104-0.122-13.347,4.711-14.936,11.643 c-15.26,66.497-73.643,112.94-141.978,112.94c-80.321,0-145.667-65.346-145.667-145.666c0-68.335,46.443-126.718,112.942-141.976 c6.93-1.59,11.791-7.826,11.643-14.934c-0.149-7.108-5.269-13.136-12.259-14.434C287.546,1.454,271.735,0,256,0 C187.62,0,123.333,26.629,74.98,74.981C26.628,123.333,0,187.62,0,256s26.628,132.667,74.98,181.019 C123.333,485.371,187.62,512,256,512s132.667-26.629,181.02-74.981C485.372,388.667,512,324.38,512,256 C512,240.278,510.546,224.469,507.681,209.011z" /></svg></i>
+                    <i class="dark-mode-slide-btn mode-icon-default" data-title="Switch to Dark"><svg class="svg-icon svg-mode-light" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232.447 232.447"><path fill="currentColor" d="M116.211,194.8c-4.143,0-7.5,3.357-7.5,7.5v22.643c0,4.143,3.357,7.5,7.5,7.5s7.5-3.357,7.5-7.5V202.3 C123.711,198.157,120.354,194.8,116.211,194.8z" /><path fill="currentColor" d="M116.211,37.645c4.143,0,7.5-3.357,7.5-7.5V7.505c0-4.143-3.357-7.5-7.5-7.5s-7.5,3.357-7.5,7.5v22.641 C108.711,34.288,112.068,37.645,116.211,37.645z" /><path fill="currentColor" d="M50.054,171.78l-16.016,16.008c-2.93,2.929-2.931,7.677-0.003,10.606c1.465,1.466,3.385,2.198,5.305,2.198 c1.919,0,3.838-0.731,5.302-2.195l16.016-16.008c2.93-2.929,2.931-7.677,0.003-10.606C57.731,168.852,52.982,168.851,50.054,171.78 z" /><path fill="currentColor" d="M177.083,62.852c1.919,0,3.838-0.731,5.302-2.195L198.4,44.649c2.93-2.929,2.931-7.677,0.003-10.606 c-2.93-2.932-7.679-2.931-10.607-0.003l-16.016,16.008c-2.93,2.929-2.931,7.677-0.003,10.607 C173.243,62.12,175.163,62.852,177.083,62.852z" /><path fill="currentColor" d="M37.645,116.224c0-4.143-3.357-7.5-7.5-7.5H7.5c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5,7.5,7.5h22.645 C34.287,123.724,37.645,120.366,37.645,116.224z" /><path fill="currentColor" d="M224.947,108.724h-22.652c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5,7.5,7.5h22.652c4.143,0,7.5-3.357,7.5-7.5 S229.09,108.724,224.947,108.724z" /><path fill="currentColor" d="M50.052,60.655c1.465,1.465,3.384,2.197,5.304,2.197c1.919,0,3.839-0.732,5.303-2.196c2.93-2.929,2.93-7.678,0.001-10.606 L44.652,34.042c-2.93-2.93-7.679-2.929-10.606-0.001c-2.93,2.929-2.93,7.678-0.001,10.606L50.052,60.655z" /><path fill="currentColor" d="M182.395,171.782c-2.93-2.929-7.679-2.93-10.606-0.001c-2.93,2.929-2.93,7.678-0.001,10.607l16.007,16.008 c1.465,1.465,3.384,2.197,5.304,2.197c1.919,0,3.839-0.732,5.303-2.196c2.93-2.929,2.93-7.678,0.001-10.607L182.395,171.782z" /><path fill="currentColor" d="M116.22,48.7c-37.232,0-67.523,30.291-67.523,67.523s30.291,67.523,67.523,67.523s67.522-30.291,67.522-67.523 S153.452,48.7,116.22,48.7z M116.22,168.747c-28.962,0-52.523-23.561-52.523-52.523S87.258,63.7,116.22,63.7 c28.961,0,52.522,23.562,52.522,52.523S145.181,168.747,116.22,168.747z" /></svg></i>
+                </span>
+			</div>
+		</div>
+										</div>
+							</div>
+						</div>
+					</div>
+							<div id="header-mobile" class="header-mobile">
+			<div class="header-mobile-wrap">
+						<div class="mbnav edge-padding">
+			<div class="navbar-left">
+						<div class="mobile-toggle-wrap">
+							<a href="#" class="mobile-menu-trigger" aria-label="mobile trigger">		<span class="burger-icon"><span></span><span></span><span></span></span>
+	</a>
+					</div>
+			<div class="mobile-logo-wrap is-image-logo site-branding">
+			<a href="https://www.inquisitr.com/" title="Inquisitr News">
+				<img fetchpriority="high" class="logo-default" data-mode="default" height="142" width="492" src="https://www.inquisitr.com/wp-content/uploads/2024/12/inquisitr-logo.png" alt="Inquisitr News" decoding="async" loading="eager"><img class="logo-dark" data-mode="dark" height="142" width="492" src="https://www.inquisitr.com/wp-content/uploads/2025/02/inquisitr-logo-Transparent-Dark-Mode.png" alt="Inquisitr News" decoding="async" loading="eager">			</a>
+		</div>
+					</div>
+			<div class="navbar-right aa">
+				        <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=353746870042-ptuffqad5p8nuh8p7n4jcfuvfsqeep1a.apps.googleusercontent.com&#038;redirect_uri=https%3A%2F%2Fwww.inquisitr.com&#038;response_type=code&#038;scope=openid%20email%20profile&#038;state=eyJub25jZSI6ImQ0YTlhMTkzMGEiLCJyZXR1cm5fdXJsIjoiaHR0cHM6XC9cL3d3dy5pbnF1aXNpdHIuY29tXC9wcm9maWxlXC90ZWNobm9sb2d5In0%3D" 
+           class="lh2-sso-sleek-btn"
+           style="display:inline-flex !important; align-items:center !important; gap:6px !important; padding:7px 15px !important; background:#fff !important; border:1px solid #dadce0 !important; border-radius:0 !important; cursor:pointer !important; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif !important; font-size:12px !important; font-weight:500 !important; color:#3c4043 !important; white-space:nowrap !important; vertical-align:middle !important; margin:10px 8px !important; transition:all 0.2s ease !important; height:auto !important; line-height:1.2 !important; text-decoration:none !important;">
+            <svg width="16" height="16" viewBox="0 0 24 24" style="flex-shrink:0;">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span>News Alerts</span>
+        </a>
+        		<div class="dark-mode-toggle-wrap">
+			<div class="dark-mode-toggle">
+                <span class="dark-mode-slide">
+                    <i class="dark-mode-slide-btn mode-icon-dark" data-title="Switch to Light"><svg class="svg-icon svg-mode-dark" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M507.681,209.011c-1.297-6.991-7.324-12.111-14.433-12.262c-7.104-0.122-13.347,4.711-14.936,11.643 c-15.26,66.497-73.643,112.94-141.978,112.94c-80.321,0-145.667-65.346-145.667-145.666c0-68.335,46.443-126.718,112.942-141.976 c6.93-1.59,11.791-7.826,11.643-14.934c-0.149-7.108-5.269-13.136-12.259-14.434C287.546,1.454,271.735,0,256,0 C187.62,0,123.333,26.629,74.98,74.981C26.628,123.333,0,187.62,0,256s26.628,132.667,74.98,181.019 C123.333,485.371,187.62,512,256,512s132.667-26.629,181.02-74.981C485.372,388.667,512,324.38,512,256 C512,240.278,510.546,224.469,507.681,209.011z" /></svg></i>
+                    <i class="dark-mode-slide-btn mode-icon-default" data-title="Switch to Dark"><svg class="svg-icon svg-mode-light" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232.447 232.447"><path fill="currentColor" d="M116.211,194.8c-4.143,0-7.5,3.357-7.5,7.5v22.643c0,4.143,3.357,7.5,7.5,7.5s7.5-3.357,7.5-7.5V202.3 C123.711,198.157,120.354,194.8,116.211,194.8z" /><path fill="currentColor" d="M116.211,37.645c4.143,0,7.5-3.357,7.5-7.5V7.505c0-4.143-3.357-7.5-7.5-7.5s-7.5,3.357-7.5,7.5v22.641 C108.711,34.288,112.068,37.645,116.211,37.645z" /><path fill="currentColor" d="M50.054,171.78l-16.016,16.008c-2.93,2.929-2.931,7.677-0.003,10.606c1.465,1.466,3.385,2.198,5.305,2.198 c1.919,0,3.838-0.731,5.302-2.195l16.016-16.008c2.93-2.929,2.931-7.677,0.003-10.606C57.731,168.852,52.982,168.851,50.054,171.78 z" /><path fill="currentColor" d="M177.083,62.852c1.919,0,3.838-0.731,5.302-2.195L198.4,44.649c2.93-2.929,2.931-7.677,0.003-10.606 c-2.93-2.932-7.679-2.931-10.607-0.003l-16.016,16.008c-2.93,2.929-2.931,7.677-0.003,10.607 C173.243,62.12,175.163,62.852,177.083,62.852z" /><path fill="currentColor" d="M37.645,116.224c0-4.143-3.357-7.5-7.5-7.5H7.5c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5,7.5,7.5h22.645 C34.287,123.724,37.645,120.366,37.645,116.224z" /><path fill="currentColor" d="M224.947,108.724h-22.652c-4.143,0-7.5,3.357-7.5,7.5s3.357,7.5,7.5,7.5h22.652c4.143,0,7.5-3.357,7.5-7.5 S229.09,108.724,224.947,108.724z" /><path fill="currentColor" d="M50.052,60.655c1.465,1.465,3.384,2.197,5.304,2.197c1.919,0,3.839-0.732,5.303-2.196c2.93-2.929,2.93-7.678,0.001-10.606 L44.652,34.042c-2.93-2.93-7.679-2.929-10.606-0.001c-2.93,2.929-2.93,7.678-0.001,10.606L50.052,60.655z" /><path fill="currentColor" d="M182.395,171.782c-2.93-2.929-7.679-2.93-10.606-0.001c-2.93,2.929-2.93,7.678-0.001,10.607l16.007,16.008 c1.465,1.465,3.384,2.197,5.304,2.197c1.919,0,3.839-0.732,5.303-2.196c2.93-2.929,2.93-7.678,0.001-10.607L182.395,171.782z" /><path fill="currentColor" d="M116.22,48.7c-37.232,0-67.523,30.291-67.523,67.523s30.291,67.523,67.523,67.523s67.522-30.291,67.522-67.523 S153.452,48.7,116.22,48.7z M116.22,168.747c-28.962,0-52.523-23.561-52.523-52.523S87.258,63.7,116.22,63.7 c28.961,0,52.522,23.562,52.522,52.523S145.181,168.747,116.22,168.747z" /></svg></i>
+                </span>
+			</div>
+		</div>
+					</div>
+		</div>
+				</div>
+					<div class="mobile-collapse">
+			<div class="collapse-holder">
+				<div class="collapse-inner">
+										<nav class="mobile-menu-wrap edge-padding">
+						<ul id="mobile-menu" class="mobile-menu"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1137108"><a href="https://www.inquisitr.com/news"><span>News</span></a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-611"><a href="https://www.inquisitr.com/celebrity"><span>Celebrity</span></a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-180045"><a href="https://www.inquisitr.com/entertainment"><span>Entertainment</span></a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-614"><a href="https://www.inquisitr.com/politics"><span>Politics</span></a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-180046"><a href="https://www.inquisitr.com/sports"><span>Sports</span></a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1217936"><a href="https://www.inquisitr.com/newsletter"><span>Newsletter</span></a></li>
+</ul>					</nav>
+										<div class="collapse-sections">
+													<div class="mobile-socials">
+								<span class="mobile-social-title h6">Follow US</span>
+								<a class="social-link-facebook" aria-label="Facebook" data-title="Facebook" href="https://www.facebook.com/theinquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-facebook" aria-hidden="true"></i></a><a class="social-link-twitter" aria-label="X" data-title="X" href="https://x.com/theinquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-twitter" aria-hidden="true"></i></a><a class="social-link-youtube" aria-label="YouTube" data-title="YouTube" href="https://www.youtube.com/@Inquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-youtube" aria-hidden="true"></i></a><a class="social-link-google-news" aria-label="Google News" data-title="Google News" href="https://news.google.com/publications/CAAqBwgKML3a-wowv8_oAg" target="_blank" rel="noopener nofollow"><i class="rbi rbi-gnews" aria-hidden="true"></i></a><a class="social-link-pinterest" aria-label="Pinterest" data-title="Pinterest" href="https://pinterest.com/inquisitr/" target="_blank" rel="noopener nofollow"><i class="rbi rbi-pinterest" aria-hidden="true"></i></a><a class="social-link-linkedin" aria-label="LinkedIn" data-title="LinkedIn" href="https://linkedin.com/company/inquisitr-ltd-" target="_blank" rel="noopener nofollow"><i class="rbi rbi-linkedin" aria-hidden="true"></i></a><a class="social-link-flipboard" aria-label="flipboard" data-title="Flipboard" href="https://flipboard.com/@inquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-flipboard" aria-hidden="true"></i></a><a class="social-link-rss" aria-label="Rss" data-title="Rss" href="https://www.inquisitr.com/feed" target="_blank" rel="noopener nofollow"><i class="rbi rbi-rss" aria-hidden="true"></i></a>							</div>
+											</div>
+											<div class="collapse-footer">
+															<div class="collapse-copyright">© 2026  Inquisitr Ltd. All Rights Reserved.</div>
+													</div>
+									</div>
+			</div>
+		</div>
+			</div>
+					</div>
+			</div>
+					</div>
+		    <div data-rocket-location-hash="8359df42325fa8be33d3c75f855880bd" class="site-wrap">		<header data-rocket-location-hash="bb973aef28791d55387c26be8d22d792" class="archive-header is-archive-page is-pattern pattern-dot">
+			<div class="rb-container edge-padding archive-header-content">
+							<h1 class="archive-title">technology Stories</h1>
+					</div>
+		</header>
+	<div data-rocket-location-hash="57bf2ce2f7a0ebba07462b21cbcf2240" class="blog-builder">		<div data-elementor-type="wp-post" data-elementor-id="625128" class="elementor elementor-625128">
+						<section class="elementor-section elementor-top-section elementor-element elementor-element-76adb26 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="76adb26" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-no">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3254f99" data-id="3254f99" data-element_type="column">
+			<div class="elementor-widget-wrap elementor-element-populated">
+						<section class="elementor-section elementor-inner-section elementor-element elementor-element-f43d0b6 elementor-section-boxed elementor-section-height-default elementor-section-height-default elementor-invisible" data-id="f43d0b6" data-element_type="section" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;}">
+						<div class="elementor-container elementor-column-gap-custom">
+					<div class="elementor-column elementor-col-66 elementor-inner-column elementor-element elementor-element-080df59" data-id="080df59" data-element_type="column">
+			<div class="elementor-widget-wrap elementor-element-populated">
+						<div class="elementor-element elementor-element-775e411 elementor-widget elementor-widget-foxiz-overlay-1" data-id="775e411" data-element_type="widget" data-widget_type="foxiz-overlay-1.default">
+				<div class="elementor-widget-container">
+					<div id="uid_775e411" class="block-wrap block-overlay overlay-1 light-overlay-scheme p-gradient ecat-bg-1 ecat-size-big meta-s-"><div class="block-inner">		<div class="p-wrap p-highlight p-overlay-1" data-pid="1232461">
+			<div class="overlay-holder">
+					<div class="p-featured">
+					<a class="p-flink" href="https://www.inquisitr.com/libs-of-tiktok-suggests-dei-to-blame-for-major-verizon-outage" title="Libs of TikTok Suggests DEI to Blame for Major Verizon Outage">
+			<img width="860" height="466" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20860%20466'%3E%3C/svg%3E" class="featured-img wp-post-image" alt="The Verizon logo" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2026/01/Verizon-Logo-860x466.jpg" /><noscript><img loading="lazy" width="860" height="466" src="https://www.inquisitr.com/wp-content/uploads/2026/01/Verizon-Logo-860x466.jpg" class="featured-img wp-post-image" alt="The Verizon logo" loading="lazy" decoding="async" /></noscript>		</a>
+				</div>
+				<div class="overlay-wrap">
+				<div class="overlay-inner p-content overlay-text">
+					<div class="p-categories p-top"><a class="p-category category-id-12" href="https://www.inquisitr.com/news" rel="category">News</a></div><h2 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/libs-of-tiktok-suggests-dei-to-blame-for-major-verizon-outage" rel="bookmark">Libs of TikTok Suggests DEI to Blame for Major Verizon Outage</a></h2><p class="entry-summary">Libs of TikTok owner Chaya Raichik blasted Verizon CEO Dan Schulman on Wednesday, citing his political and personal beliefs as&hellip;</p>
+						<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/jake"><img alt='Jake Elman' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/999664a11fa04958cb0952af9906c71e4d9fba361c95ce408a85c90053af9c66?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/999664a11fa04958cb0952af9906c71e4d9fba361c95ce408a85c90053af9c66?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Jake Elman' src='https://secure.gravatar.com/avatar/999664a11fa04958cb0952af9906c71e4d9fba361c95ce408a85c90053af9c66?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/999664a11fa04958cb0952af9906c71e4d9fba361c95ce408a85c90053af9c66?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/jake">Jake Elman</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2026-01-15T08:09:57-05:00">January 15, 2026</time>
+		</span>
+						</div>
+							</div>
+						</div>
+			</div>
+		</div>
+				</div>
+	</div></div>				</div>
+				</div>
+					</div>
+		</div>
+				<div class="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-f96aa90" data-id="f96aa90" data-element_type="column">
+			<div class="elementor-widget-wrap elementor-element-populated">
+						<div class="elementor-element elementor-element-b429567 elementor-widget elementor-widget-foxiz-overlay-2" data-id="b429567" data-element_type="widget" data-widget_type="foxiz-overlay-2.default">
+				<div class="elementor-widget-container">
+					<div id="uid_b429567" class="block-wrap block-overlay block-overlay-2 light-overlay-scheme p-gradient rb-columns rb-col-1 rb-tcol-2 rb-mcol-1 is-gap-7 meta-s-"><div class="block-inner">		<div class="p-wrap p-overlay p-overlay-2" data-pid="1217331">
+			<div class="overlay-holder">
+					<div class="p-featured">
+					<a class="p-flink" href="https://www.inquisitr.com/trump-administration-takes-150m-stake-in-laser-startup-xlight-to-boost-u-s-chipmaking" title="Trump Administration Takes $150M Stake in Laser Startup xLight to Boost U.S. Chipmaking">
+			<img width="420" height="280" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20420%20280'%3E%3C/svg%3E" class="featured-img wp-post-image" alt="trump on his phone" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2025/07/trump-on-his-phone-420x280.jpg" /><noscript><img loading="lazy" width="420" height="280" src="https://www.inquisitr.com/wp-content/uploads/2025/07/trump-on-his-phone-420x280.jpg" class="featured-img wp-post-image" alt="trump on his phone" loading="lazy" decoding="async" /></noscript>		</a>
+				</div>
+				<div class="overlay-wrap">
+				<div class="p-content overlay-inner overlay-text">
+					<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/trump-administration-takes-150m-stake-in-laser-startup-xlight-to-boost-u-s-chipmaking" rel="bookmark">Trump Administration Takes $150M Stake in Laser Startup xLight to Boost U.S. Chipmaking</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/tracey"><img alt='Tracey Ashlee' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Tracey Ashlee' src='https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/tracey">Tracey Ashlee</a>
+				</span>
+		<span class="meta-el meta-date">
+				<time class="date published" datetime="2025-12-02T16:22:30-05:00">December 2, 2025</time>
+		</span>				</div>
+							</div>
+						</div>
+			</div>
+		</div>
+				</div>
+			<div class="p-wrap p-overlay p-overlay-2" data-pid="1209114">
+			<div class="overlay-holder">
+					<div class="p-featured">
+					<a class="p-flink" href="https://www.inquisitr.com/trump-draws-a-line-around-americas-ai-power-and-nvidias-blackwell-chip" title="Trump Draws a Line Around America’s AI Power and Nvidia’s Blackwell Chip">
+			<img width="420" height="280" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20420%20280'%3E%3C/svg%3E" class="featured-img wp-post-image" alt="Donald Trump aboard Air Force One announcing increased tariffs on Canada" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2025/10/Donald-Trump-aboard-Air-Force-One-announcing-increased-tariffs-on-Canada-420x280.jpg" /><noscript><img loading="lazy" width="420" height="280" src="https://www.inquisitr.com/wp-content/uploads/2025/10/Donald-Trump-aboard-Air-Force-One-announcing-increased-tariffs-on-Canada-420x280.jpg" class="featured-img wp-post-image" alt="Donald Trump aboard Air Force One announcing increased tariffs on Canada" loading="lazy" decoding="async" /></noscript>		</a>
+				</div>
+				<div class="overlay-wrap">
+				<div class="p-content overlay-inner overlay-text">
+					<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/trump-draws-a-line-around-americas-ai-power-and-nvidias-blackwell-chip" rel="bookmark">Trump Draws a Line Around America’s AI Power and Nvidia’s Blackwell Chip</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/tracey"><img alt='Tracey Ashlee' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Tracey Ashlee' src='https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/dfc04fc11deb76e2aef0ba3bc442314e579e8c99ece8eab69af332348eb6dc9a?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/tracey">Tracey Ashlee</a>
+				</span>
+		<span class="meta-el meta-date">
+				<time class="date published" datetime="2025-11-03T13:24:04-05:00">November 3, 2025</time>
+		</span>				</div>
+							</div>
+						</div>
+			</div>
+		</div>
+				</div>
+	</div></div>				</div>
+				</div>
+					</div>
+		</div>
+					</div>
+		</section>
+					</div>
+		</div>
+					</div>
+		</section>
+		<div class="elementor-element elementor-element-8ee8bfa e-flex e-con-boxed e-con e-parent" data-id="8ee8bfa" data-element_type="container">
+					<div class="e-con-inner">
+					</div>
+				</div>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3292839 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3292839" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-no">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0a7b538" data-id="0a7b538" data-element_type="column">
+			<div class="elementor-widget-wrap elementor-element-populated">
+						<div class="elementor-element elementor-element-334777c elementor-widget elementor-widget-spacer" data-id="334777c" data-element_type="widget" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+							<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"></div>
+		</div>
+						</div>
+				</div>
+					</div>
+		</div>
+					</div>
+		</section>
+		<div class="elementor-element elementor-element-42ef3c8 e-flex e-con-boxed e-con e-parent" data-id="42ef3c8" data-element_type="container">
+					<div class="e-con-inner">
+				<div class="elementor-element elementor-element-c5ba52d elementor-widget elementor-widget-foxiz-grid-flex-1" data-id="c5ba52d" data-element_type="widget" data-widget_type="foxiz-grid-flex-1.default">
+				<div class="elementor-widget-container">
+					<div id="uid_c5ba52d" class="block-wrap block-grid block-grid-flex-1 rb-columns rb-col-3 is-gap-20 ecat-bg-1 meta-s-"><div class="block-inner">		<div class="p-wrap p-grid p-grid-1" data-pid="1202410">
+				<div class="feat-holder overlay-text">
+						<div class="p-featured">
+					<a class="p-flink" href="https://www.inquisitr.com/a-fourth-traffic-light-color-could-soon-hit-u-s-streets-and-change-the-commute-forever" title="A Fourth Traffic Light Color Could Soon Hit U.S. Streets &#8211; And Change the Commute Forever">
+			<img width="420" height="280" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20420%20280'%3E%3C/svg%3E" class="featured-img wp-post-image" alt="a fourth color may be added to the traditional traffic lights — here&#039;s how it could help manage traffic more efficiently (Left: uploaded by Ron Lach via Pexels | Right: photo by Martin Vorel via Libreshot | Insert image: via Pixnio)" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2025/10/A-fourth-color-might-join-the-age-old-traffic-lights-Heres-why-it-could-be-a-game-changer-420x280.jpg" /><noscript><img loading="lazy" width="420" height="280" src="https://www.inquisitr.com/wp-content/uploads/2025/10/A-fourth-color-might-join-the-age-old-traffic-lights-Heres-why-it-could-be-a-game-changer-420x280.jpg" class="featured-img wp-post-image" alt="a fourth color may be added to the traditional traffic lights — here&#039;s how it could help manage traffic more efficiently (Left: uploaded by Ron Lach via Pexels | Right: photo by Martin Vorel via Libreshot | Insert image: via Pixnio)" loading="lazy" decoding="async" /></noscript>		</a>
+				</div>
+	<div class="p-categories p-top"><a class="p-category category-id-6062" href="https://www.inquisitr.com/profile/accident" >accident</a></div>			</div>
+		<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/a-fourth-traffic-light-color-could-soon-hit-u-s-streets-and-change-the-commute-forever" rel="bookmark">A Fourth Traffic Light Color Could Soon Hit U.S. Streets &#8211; And Change the Commute Forever</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/sweta"><img alt='Sweta Choudhury' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Sweta Choudhury' src='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/sweta">Sweta Choudhury</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2025-10-06T11:01:15-04:00">October 6, 2025</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="1166979">
+				<div class="feat-holder overlay-text">
+						<div class="p-featured">
+					<a class="p-flink" href="https://www.inquisitr.com/tsas-new-tech-at-checkpoints-will-change-the-way-you-travel-heres-how-it-works" title="TSA&#8217;s New Tech at Checkpoints Will Change the Way You Travel—Here&#8217;s How It Works!">
+			<img width="420" height="280" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20420%20280'%3E%3C/svg%3E" class="featured-img wp-post-image" alt="TSA making airport experience hell for trans passengers" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2025/05/TSA-upgrades-technology-420x280.jpg" /><noscript><img loading="lazy" width="420" height="280" src="https://www.inquisitr.com/wp-content/uploads/2025/05/TSA-upgrades-technology-420x280.jpg" class="featured-img wp-post-image" alt="TSA making airport experience hell for trans passengers" loading="lazy" decoding="async" /></noscript>		</a>
+				</div>
+	<div class="p-categories p-top"><a class="p-category category-id-5457" href="https://www.inquisitr.com/profile/real-id" >Real ID</a></div>			</div>
+		<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/tsas-new-tech-at-checkpoints-will-change-the-way-you-travel-heres-how-it-works" rel="bookmark">TSA&#8217;s New Tech at Checkpoints Will Change the Way You Travel—Here&#8217;s How It Works!</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/diksha"><img alt='Diksha' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/bb6992903b2f0e230b6bb56d1bc4dea5d87df2200654a8854408f504177af50b?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/bb6992903b2f0e230b6bb56d1bc4dea5d87df2200654a8854408f504177af50b?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Diksha' src='https://secure.gravatar.com/avatar/bb6992903b2f0e230b6bb56d1bc4dea5d87df2200654a8854408f504177af50b?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/bb6992903b2f0e230b6bb56d1bc4dea5d87df2200654a8854408f504177af50b?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/diksha">Diksha</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2025-05-13T09:04:38-04:00">May 13, 2025</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="1167010">
+				<div class="feat-holder overlay-text">
+						<div class="p-featured">
+					<a class="p-flink" href="https://www.inquisitr.com/chatgpt-told-woman-her-husband-was-having-an-affair-youll-not-believe-what-she-did-next" title="ChatGPT Told Woman Her Husband Was Having an Affair—You&#8217;ll Not Believe What She Did Next!">
+			<img width="420" height="280" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20420%20280'%3E%3C/svg%3E" class="featured-img wp-post-image" alt="Chatgpt (photo by Sanket Mishra—via Pexels) and a couple fighting in anger (photo by Kaboompics.com—via Pexels)" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2025/05/Chatgpt-and-a-couple-fighting-in-anger--420x280.jpg" /><noscript><img loading="lazy" width="420" height="280" src="https://www.inquisitr.com/wp-content/uploads/2025/05/Chatgpt-and-a-couple-fighting-in-anger--420x280.jpg" class="featured-img wp-post-image" alt="Chatgpt (photo by Sanket Mishra—via Pexels) and a couple fighting in anger (photo by Kaboompics.com—via Pexels)" loading="lazy" decoding="async" /></noscript>		</a>
+				</div>
+	<div class="p-categories p-top"><a class="p-category category-id-5018" href="https://www.inquisitr.com/profile/ai" >AI</a></div>			</div>
+		<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/chatgpt-told-woman-her-husband-was-having-an-affair-youll-not-believe-what-she-did-next" rel="bookmark">ChatGPT Told Woman Her Husband Was Having an Affair—You&#8217;ll Not Believe What She Did Next!</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/sweta"><img alt='Sweta Choudhury' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Sweta Choudhury' src='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/sweta">Sweta Choudhury</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2025-05-13T09:30:07-04:00">May 13, 2025</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="1162192">
+				<div class="feat-holder overlay-text">
+						<div class="p-featured">
+					<a class="p-flink" href="https://www.inquisitr.com/is-being-polite-to-chatgpt-more-harmful-than-you-think-heres-what-experts-have-to-say" title="Is Being Polite to ChatGPT More Harmful Than You Think? Here&#8217;s What Experts Have to Say">
+			<img width="420" height="280" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20420%20280'%3E%3C/svg%3E" class="featured-img wp-post-image" alt="Should you be polite to AI platforms like ChatGPT? Find out what experts say about it. (Uploaded by Matheus Bertelli- via Pexels)" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2025/04/Should-you-be-polite-to-platforms-like-ChatGPT-Find-out--420x280.jpg" /><noscript><img loading="lazy" width="420" height="280" src="https://www.inquisitr.com/wp-content/uploads/2025/04/Should-you-be-polite-to-platforms-like-ChatGPT-Find-out--420x280.jpg" class="featured-img wp-post-image" alt="Should you be polite to AI platforms like ChatGPT? Find out what experts say about it. (Uploaded by Matheus Bertelli- via Pexels)" loading="lazy" decoding="async" /></noscript>		</a>
+				</div>
+	<div class="p-categories p-top"><a class="p-category category-id-1308" href="https://www.inquisitr.com/profile/microsoft" >microsoft</a></div>			</div>
+		<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/is-being-polite-to-chatgpt-more-harmful-than-you-think-heres-what-experts-have-to-say" rel="bookmark">Is Being Polite to ChatGPT More Harmful Than You Think? Here&#8217;s What Experts Have to Say</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/sweta"><img alt='Sweta Choudhury' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Sweta Choudhury' src='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/f54ea19e1e54602dc55153e49962291f76f9a56767ac8ffd48bcbe3d8ddbf4b9?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/sweta">Sweta Choudhury</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2025-04-21T13:13:41-04:00">April 21, 2025</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="39169">
+	<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/facebook-secret-mind-reading" rel="bookmark">Facebook Is Secretly Creating A Mind-Reading Device, Leaked Audio Confirms</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/annaharnes"><img alt='Anna Harnes' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Anna Harnes' src='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/annaharnes">Anna Harnes</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2020-12-16T18:18:00-05:00">December 16, 2020</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="61882">
+	<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/huawei-surveillance-race" rel="bookmark">Huawei Has Allegedly Built Surveillance Tools That Identify And Monitor People By Race</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/annaharnes"><img alt='Anna Harnes' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Anna Harnes' src='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/annaharnes">Anna Harnes</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2020-12-13T22:40:00-05:00">December 13, 2020</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="66490">
+	<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/top-9-instagram-2020" rel="bookmark">Instagram Top 9 Lets You Share Your Most Popular Photos From 2020, Here’s How To Create It</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/terrencesmith"><img alt='Terrence Smith' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/c50832b7fa420ad66af43a8e06a9d7426701d49e3ad24f1e3b3f14fb7bebe42b?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/c50832b7fa420ad66af43a8e06a9d7426701d49e3ad24f1e3b3f14fb7bebe42b?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Terrence Smith' src='https://secure.gravatar.com/avatar/c50832b7fa420ad66af43a8e06a9d7426701d49e3ad24f1e3b3f14fb7bebe42b?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/c50832b7fa420ad66af43a8e06a9d7426701d49e3ad24f1e3b3f14fb7bebe42b?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/terrencesmith">Terrence Smith</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2020-12-01T09:26:00-05:00">December 1, 2020</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="62078">
+	<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/voter-registration-email-scam" rel="bookmark">A New Voter Registration Scam Is Tricking Americans Into Giving Out Personal Data</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/annaharnes"><img alt='Anna Harnes' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Anna Harnes' src='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/910e34a7c47c3ef87ce06ac481e912be497bbe4cfa86a160fe9a99594a9ce606?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/annaharnes">Anna Harnes</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2020-10-23T23:21:00-04:00">October 23, 2020</time>
+		</span>
+						</div>
+							</div>
+				</div>
+			<div class="p-wrap p-grid p-grid-1" data-pid="31102">
+	<h3 class="entry-title">		<a class="p-url" href="https://www.inquisitr.com/ring-debuts-autonomous-flying-drone" rel="bookmark">Ring Takes Flight, Debuts Autonomous Flying Drone For Homes</a></h3>			<div class="p-meta">
+				<div class="meta-inner is-meta">
+							<a class="meta-el meta-avatar" href="https://www.inquisitr.com/author/lukejones"><img alt='Luke Jones' src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2044%2044'%3E%3C/svg%3E" data-lazy-srcset='https://secure.gravatar.com/avatar/fd7e96be532643c14ae2e511a20c1a75f660ec9f83b9161fbfdff51a27dd38fe?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async' data-lazy-src="https://secure.gravatar.com/avatar/fd7e96be532643c14ae2e511a20c1a75f660ec9f83b9161fbfdff51a27dd38fe?s=44&#038;d=mm&#038;r=g"/><noscript><img alt='Luke Jones' src='https://secure.gravatar.com/avatar/fd7e96be532643c14ae2e511a20c1a75f660ec9f83b9161fbfdff51a27dd38fe?s=44&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/fd7e96be532643c14ae2e511a20c1a75f660ec9f83b9161fbfdff51a27dd38fe?s=88&#038;d=mm&#038;r=g 2x' class='avatar avatar-44 photo' height='44' width='44' decoding='async'/></noscript></a>
+		<span class="meta-el meta-author">
+				<a href="https://www.inquisitr.com/author/lukejones">Luke Jones</a>
+				</span>
+		<span class="meta-el meta-update">
+				<time class="updated" datetime="2020-09-25T09:05:00-04:00">September 25, 2020</time>
+		</span>
+						</div>
+							</div>
+				</div>
+	</div>		<div class="pagination-wrap pagination-infinite">
+			<div class="infinite-trigger"><i class="rb-loader" aria-hidden="true"></i></div>
+		</div>
+		</div>				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		</div></div>
+		<footer data-rocket-location-hash="591efc584346997ed9fd9cf0427de981" class="footer-wrap rb-section left-dot">
+			<div data-rocket-location-hash="9bf26ef984ca916242788fb118ce0c43" class="footer-inner footer-has-bg">		<div class="footer-copyright footer-bottom-centered">
+			<div class="rb-container edge-padding">
+							<div class="bottom-footer-section">
+									<a class="footer-logo" href="https://www.inquisitr.com/" title="Inquisitr News">
+						<img class="logo-default" data-mode="default" height="142" width="492" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20492%20142'%3E%3C/svg%3E" alt="Inquisitr News" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2024/12/transparent-logo.png"><noscript><img loading="lazy" class="logo-default" data-mode="default" height="142" width="492" src="https://www.inquisitr.com/wp-content/uploads/2024/12/transparent-logo.png" alt="Inquisitr News" decoding="async" loading="lazy"></noscript><img class="logo-dark" data-mode="dark" height="142" width="492" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20492%20142'%3E%3C/svg%3E" alt="Inquisitr News" decoding="async" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2024/12/transparent-logo-white.png"><noscript><img loading="lazy" class="logo-dark" data-mode="dark" height="142" width="492" src="https://www.inquisitr.com/wp-content/uploads/2024/12/transparent-logo-white.png" alt="Inquisitr News" decoding="async" loading="lazy"></noscript>					</a>
+									<div class="footer-social-list">
+						<span class="footer-social-list-title h6">Follow US</span>
+						<a class="social-link-facebook" aria-label="Facebook" data-title="Facebook" href="https://www.facebook.com/theinquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-facebook" aria-hidden="true"></i></a><a class="social-link-twitter" aria-label="X" data-title="X" href="https://x.com/theinquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-twitter" aria-hidden="true"></i></a><a class="social-link-youtube" aria-label="YouTube" data-title="YouTube" href="https://www.youtube.com/@Inquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-youtube" aria-hidden="true"></i></a><a class="social-link-google-news" aria-label="Google News" data-title="Google News" href="https://news.google.com/publications/CAAqBwgKML3a-wowv8_oAg" target="_blank" rel="noopener nofollow"><i class="rbi rbi-gnews" aria-hidden="true"></i></a><a class="social-link-pinterest" aria-label="Pinterest" data-title="Pinterest" href="https://pinterest.com/inquisitr/" target="_blank" rel="noopener nofollow"><i class="rbi rbi-pinterest" aria-hidden="true"></i></a><a class="social-link-linkedin" aria-label="LinkedIn" data-title="LinkedIn" href="https://linkedin.com/company/inquisitr-ltd-" target="_blank" rel="noopener nofollow"><i class="rbi rbi-linkedin" aria-hidden="true"></i></a><a class="social-link-flipboard" aria-label="flipboard" data-title="Flipboard" href="https://flipboard.com/@inquisitr" target="_blank" rel="noopener nofollow"><i class="rbi rbi-flipboard" aria-hidden="true"></i></a><a class="social-link-rss" aria-label="Rss" data-title="Rss" href="https://www.inquisitr.com/feed" target="_blank" rel="noopener nofollow"><i class="rbi rbi-rss" aria-hidden="true"></i></a>					</div>
+							</div>
+					<div class="copyright-inner">
+				<div class="copyright">© 2026  Inquisitr Ltd. All Rights Reserved.
+</div><ul id="copyright-menu" class="copyright-menu"><li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-375563"><a href="https://www.inquisitr.com/about-us"><span>About Us</span></a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-375562"><a href="https://www.inquisitr.com/terms-and-conditions"><span>Terms and Conditions</span></a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-privacy-policy menu-item-375533"><a rel="privacy-policy" href="https://www.inquisitr.com/privacy-policy"><span>Privacy Policy</span></a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-375561"><a href="https://www.inquisitr.com/dmca"><span>DMCA</span></a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-375564"><a href="https://www.inquisitr.com/contact"><span>Contact</span></a></li>
+</ul>			</div>
+					</div>
+		</div>
+	</div></footer>
+		</div>
+		<script type="rocketlazyloadscript">
+            (function () {
+                const yesStorage = () => {
+                    let storage;
+                    try {
+                        storage = window['localStorage'];
+                        storage.setItem('__rbStorageSet', 'x');
+                        storage.removeItem('__rbStorageSet');
+                        return true;
+                    } catch {
+                        return false;
+                    }
+                };
+				                const darkModeID = 'RubyDarkMode';
+                const currentMode = yesStorage() ? (localStorage.getItem(darkModeID) || 'default') : 'default';
+                const selector = currentMode === 'dark' ? '.mode-icon-dark' : '.mode-icon-default';
+                const icons = document.querySelectorAll(selector);
+                if (icons.length) {
+                    icons.forEach(icon => icon.classList.add('activated'));
+                }
+				
+				                const readingSize = yesStorage() ? sessionStorage.getItem('rubyResizerStep') || '' : '1';
+                if (readingSize) {
+                    const body = document.querySelector('body');
+                    switch (readingSize) {
+                        case '2':
+                            body.classList.add('medium-entry-size');
+                            break;
+                        case '3':
+                            body.classList.add('big-entry-size');
+                            break;
+                    }
+                }
+            })();
+		</script>
+				<script type="rocketlazyloadscript">
+            (function () {
+                const yesStorage = () => {
+                    let storage;
+                    try {
+                        storage = window['localStorage'];
+                        storage.setItem('__rbStorageSet', 'x');
+                        storage.removeItem('__rbStorageSet');
+                        return true;
+                    } catch {
+                        return false;
+                    }
+                };
+                let currentMode = null;
+                const darkModeID = 'RubyDarkMode';
+				                currentMode = yesStorage() ? localStorage.getItem(darkModeID) || null : 'default';
+                if (!currentMode) {
+					                    currentMode = 'dark';
+                    yesStorage() && localStorage.setItem(darkModeID, 'dark');
+					                }
+                document.body.setAttribute('data-theme', currentMode === 'dark' ? 'dark' : 'default');
+				            })();
+		</script>
+		<script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/foxiz-child/*","/wp-content/themes/foxiz/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<script type="rocketlazyloadscript" data-minify="1" async data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/widgets.js?ver=1768818829" charset="utf-8"></script> 
+<script type="rocketlazyloadscript" async data-rocket-src="https://www.instagram.com/embed.js" charset="utf-8"></script> 
+
+<div 
+	id="pum-1226480" 
+	role="dialog" 
+	aria-modal="false"
+	class="pum pum-overlay pum-theme-1226472 pum-theme-lightbox popmake-overlay auto_open click_open" 
+	data-popmake="{&quot;id&quot;:1226480,&quot;slug&quot;:&quot;inqustir-popup&quot;,&quot;theme_id&quot;:1226472,&quot;cookies&quot;:[{&quot;event&quot;:&quot;on_popup_close&quot;,&quot;settings&quot;:{&quot;name&quot;:&quot;pum-1226480&quot;,&quot;key&quot;:&quot;&quot;,&quot;session&quot;:false,&quot;path&quot;:&quot;1&quot;,&quot;time&quot;:&quot;1 month&quot;}},{&quot;event&quot;:&quot;form_submission&quot;,&quot;settings&quot;:{&quot;name&quot;:&quot;pum-1226480&quot;,&quot;key&quot;:&quot;&quot;,&quot;session&quot;:null,&quot;path&quot;:true,&quot;time&quot;:&quot;6 months&quot;,&quot;form&quot;:&quot;any&quot;}},{&quot;event&quot;:&quot;pum_sub_form_success&quot;,&quot;settings&quot;:{&quot;name&quot;:&quot;pum-1226480&quot;,&quot;key&quot;:&quot;&quot;,&quot;session&quot;:null,&quot;path&quot;:true,&quot;time&quot;:&quot;6 months&quot;}},{&quot;event&quot;:&quot;pum_sub_form_already_subscribed&quot;,&quot;settings&quot;:{&quot;name&quot;:&quot;pum-1226480&quot;,&quot;key&quot;:&quot;&quot;,&quot;session&quot;:null,&quot;path&quot;:true,&quot;time&quot;:&quot;6 months&quot;}},{&quot;event&quot;:&quot;on_popup_close&quot;,&quot;settings&quot;:{&quot;name&quot;:&quot;pum-1226480&quot;,&quot;key&quot;:&quot;&quot;,&quot;session&quot;:false,&quot;path&quot;:&quot;1&quot;,&quot;time&quot;:&quot;1 month&quot;}}],&quot;triggers&quot;:[{&quot;type&quot;:&quot;auto_open&quot;,&quot;settings&quot;:{&quot;delay&quot;:10000,&quot;cookie_name&quot;:[&quot;pum-1226480&quot;]}},{&quot;type&quot;:&quot;click_open&quot;,&quot;settings&quot;:{&quot;extra_selectors&quot;:&quot;&quot;,&quot;cookie_name&quot;:null}}],&quot;mobile_disabled&quot;:null,&quot;tablet_disabled&quot;:null,&quot;meta&quot;:{&quot;display&quot;:{&quot;stackable&quot;:false,&quot;overlay_disabled&quot;:false,&quot;scrollable_content&quot;:false,&quot;disable_reposition&quot;:false,&quot;size&quot;:&quot;tiny&quot;,&quot;responsive_min_width&quot;:&quot;0%&quot;,&quot;responsive_min_width_unit&quot;:false,&quot;responsive_max_width&quot;:&quot;100%&quot;,&quot;responsive_max_width_unit&quot;:false,&quot;custom_width&quot;:&quot;640px&quot;,&quot;custom_width_unit&quot;:false,&quot;custom_height&quot;:&quot;380px&quot;,&quot;custom_height_unit&quot;:false,&quot;custom_height_auto&quot;:false,&quot;location&quot;:&quot;center top&quot;,&quot;position_from_trigger&quot;:false,&quot;position_top&quot;:&quot;100&quot;,&quot;position_left&quot;:&quot;0&quot;,&quot;position_bottom&quot;:&quot;0&quot;,&quot;position_right&quot;:&quot;0&quot;,&quot;position_fixed&quot;:false,&quot;animation_type&quot;:&quot;fade&quot;,&quot;animation_speed&quot;:&quot;350&quot;,&quot;animation_origin&quot;:&quot;center top&quot;,&quot;overlay_zindex&quot;:false,&quot;zindex&quot;:&quot;1999999999&quot;},&quot;close&quot;:{&quot;text&quot;:&quot;&quot;,&quot;button_delay&quot;:&quot;0&quot;,&quot;overlay_click&quot;:false,&quot;esc_press&quot;:false,&quot;f4_press&quot;:false},&quot;click_open&quot;:[]}}">
+
+	<div data-rocket-location-hash="67f2347dcafb84962be44e7aef439eb2" id="popmake-1226480" class="pum-container popmake theme-1226472 pum-responsive pum-responsive-tiny responsive size-tiny">
+
+				
+				
+		
+				<div data-rocket-location-hash="767e6f29688a69d04c764feabb3f5e55" class="pum-content popmake-content" tabindex="0">
+			<style id="wpforms-css-vars-1226464">
+				#wpforms-1226464 {
+				--wpforms-field-size-input-height: 43px;
+--wpforms-field-size-input-spacing: 15px;
+--wpforms-field-size-font-size: 16px;
+--wpforms-field-size-line-height: 19px;
+--wpforms-field-size-padding-h: 14px;
+--wpforms-field-size-checkbox-size: 16px;
+--wpforms-field-size-sublabel-spacing: 5px;
+--wpforms-field-size-icon-size: 1;
+--wpforms-label-size-font-size: 16px;
+--wpforms-label-size-line-height: 19px;
+--wpforms-label-size-sublabel-font-size: 14px;
+--wpforms-label-size-sublabel-line-height: 17px;
+--wpforms-button-size-font-size: 17px;
+--wpforms-button-size-height: 41px;
+--wpforms-button-size-padding-h: 15px;
+--wpforms-button-size-margin-top: 10px;
+--wpforms-container-shadow-size-box-shadow: none;
+			}
+			</style><div class="wpforms-container wpforms-container-full wpforms-render-modern" id="wpforms-1226464"><form id="wpforms-form-1226464" class="wpforms-validate wpforms-form wpforms-ajax-form" data-formid="1226464" method="post" enctype="multipart/form-data" action="/profile/technology" data-token="e299c8a58b35311b5062db58e20ecd28" data-token-time="1768978850"><noscript class="wpforms-error-noscript">Please enable JavaScript in your browser to complete this form.</noscript><div id="wpforms-error-noscript" style="display: none;">Please enable JavaScript in your browser to complete this form.</div><div class="wpforms-field-container"><div id="wpforms-1226464-field_5-container" class="wpforms-field wpforms-field-html" data-field-id="5"><div id="wpforms-1226464-field_5" aria-errormessage="wpforms-1226464-field_5-error"><div class="beehiiv-form beehiiv-embedded">
+
+  <h3 class="popup-beehiiv-title">
+    Want the latest updates on news, celeb gossip & political chaos?
+  </h3>
+
+  <p class="beehiiv-subtitle">
+    From hard news and political drama to celeb stories and entertainment buzz,
+    delivered straight to your inbox.
+  </p>
+
+  
+
+</div>
+</div></div><div id="wpforms-1226464-field_8-container" class="wpforms-field wpforms-field-email" data-field-id="8"><input type="email" id="wpforms-1226464-field_8" class="wpforms-field-large wpforms-field-required" name="wpforms[fields][8]" placeholder="Email Address" spellcheck="false" aria-errormessage="wpforms-1226464-field_8-error" required></div>		<div id="wpforms-1226464-field_1-container"
+			class="wpforms-field wpforms-field-text"
+			data-field-type="text"
+			data-field-id="1"
+			>
+			<label class="wpforms-field-label" for="wpforms-1226464-field_1" >Field Hidden</label>
+			<input type="text" id="wpforms-1226464-field_1" class="wpforms-field-medium" name="wpforms[fields][1]" >
+		</div>
+		<div id="wpforms-1226464-field_16-container" class="wpforms-field wpforms-field-html" data-field-id="16"><div id="wpforms-1226464-field_16" aria-errormessage="wpforms-1226464-field_16-error"><div class="beehiiv-form beehiiv-embedded">
+  <p class="beehiiv-disclaimer">
+    You can unsubscribe anytime. For more details, review our
+    <a href="/privacy-policy" target="_blank">Privacy Policy</a>.
+  </p>
+
+</div>
+</div></div><div id="wpforms-1226464-field_10-container" class="wpforms-field wpforms-field-hidden" data-field-id="10"><input type="hidden" id="wpforms-1226464-field_10" name="wpforms[fields][10]" value="Popup"></div><script type="rocketlazyloadscript">
+				( function() {
+					const style = document.createElement( 'style' );
+					style.appendChild( document.createTextNode( '#wpforms-1226464-field_1-container { position: absolute !important; overflow: hidden !important; display: inline !important; height: 1px !important; width: 1px !important; z-index: -1000 !important; padding: 0 !important; } #wpforms-1226464-field_1-container input { visibility: hidden; } #wpforms-conversational-form-page #wpforms-1226464-field_1-container label { counter-increment: none; }' ) );
+					document.head.appendChild( style );
+					document.currentScript?.remove();
+				} )();
+			</script></div><!-- .wpforms-field-container --><div class="wpforms-submit-container" ><input type="hidden" name="wpforms[id]" value="1226464"><input type="hidden" name="page_title" value="technology"><input type="hidden" name="page_url" value="https://www.inquisitr.com/profile/technology"><input type="hidden" name="url_referer" value=""><button type="submit" name="wpforms[submit]" id="wpforms-submit-1226464" class="wpforms-submit" data-alt-text="Sending..." data-submit-text="Yes, sign me up!" aria-live="assertive" value="wpforms-submit">Yes, sign me up!</button><img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2026%2026'%3E%3C/svg%3E" class="wpforms-submit-spinner" style="display: none;" width="26" height="26" alt="Loading" data-lazy-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/images/submit-spin.svg"><noscript><img src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/images/submit-spin.svg" class="wpforms-submit-spinner" style="display: none;" width="26" height="26" alt="Loading"></noscript></div></form></div>  <!-- .wpforms-container -->
+		</div>
+
+				
+							<button type="button" class="pum-close popmake-close" aria-label="Close">
+			×			</button>
+		
+	</div>
+
+</div>
+        <script type="rocketlazyloadscript" data-rocket-type="text/javascript">
+        (function() {
+            'use strict';
+            
+            var ajaxUrl = 'https://www.inquisitr.com/wp-admin/admin-ajax.php';
+            var nonce = '2156d009b5';
+            var emailCaptured = {}; // Track captured emails to prevent duplicates
+            
+            function captureEmail(email) {
+                if (!email || email.indexOf('@') < 1) return;
+                
+                // Prevent duplicate captures within 30 seconds
+                var emailLower = email.toLowerCase();
+                var now = Date.now();
+                if (emailCaptured[emailLower] && (now - emailCaptured[emailLower]) < 30000) {
+                    return;
+                }
+                emailCaptured[emailLower] = now;
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', ajaxUrl, true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.success && response.data && response.data.ppid) {
+                                // Store PPID in localStorage
+                                localStorage.setItem('lh2_ppid', response.data.ppid);
+                                
+                                // Store email in localStorage for "Sign in as" feature
+                                localStorage.setItem('lh2_user_email', email);
+                                // Use email prefix as name if we don't have actual name
+                                var userName = email.split('@')[0];
+                                localStorage.setItem('lh2_user_name', userName);
+                                
+                                // Trigger Clarity identification
+                                if (typeof clarity !== 'undefined') {
+                                    try {
+                                        clarity('identify', response.data.ppid);
+                                    } catch(e) {
+                                        console.error('Clarity identify error:', e);
+                                    }
+                                }
+                                
+                                // Dispatch event for other listeners
+                                if (typeof jQuery !== 'undefined') {
+                                    jQuery(document).trigger('lh2_user_logged_in', [response.data.ppid]);
+                                }
+                                
+                                // Update any shortcode buttons on the page
+                                var $buttons = document.querySelectorAll('[data-lh2-sso-trigger="true"]');
+                                $buttons.forEach(function(btn) {
+                                    btn.classList.add('lh2-sso-btn--recognized');
+                                    var emailEl = btn.querySelector('.lh2-sso-btn__email');
+                                    if (emailEl) {
+                                        emailEl.textContent = email;
+                                    }
+                                });
+                                
+                                console.log('MailerLite email captured, account created, PPID:', response.data.ppid);
+                            } else if (response.success) {
+                                console.log('MailerLite email captured:', response.data ? response.data.message : 'success');
+                            }
+                        } catch(e) {
+                            console.error('Error parsing response:', e);
+                        }
+                    }
+                };
+                
+                // Get existing PPID from localStorage to link email to it
+                var existingPPID = localStorage.getItem('lh2_ppid');
+                var postData = 'action=lh2_ml_capture_email&email=' + encodeURIComponent(email) + '&nonce=' + encodeURIComponent(nonce);
+                if (existingPPID) {
+                    postData += '&ppid=' + encodeURIComponent(existingPPID);
+                }
+                xhr.send(postData);
+            }
+            
+            // Method 1: Use MailerLite Universal API (poll until available)
+            function initMailerLiteHook() {
+                if (typeof ml !== 'undefined' && typeof ml === 'function') {
+                    // MailerLite Universal callback API
+                    ml('on', 'submit', function(event) {
+                        if (event && event.fields && event.fields.email) {
+                            captureEmail(event.fields.email);
+                        }
+                    });
+                    console.log('MailerLite hook registered via ml() API');
+                    return true;
+                }
+                return false;
+            }
+            
+            // Poll for MailerLite availability (up to 10 seconds)
+            var attempts = 0;
+            var maxAttempts = 40;
+            var pollInterval = setInterval(function() {
+                if (initMailerLiteHook() || attempts >= maxAttempts) {
+                    clearInterval(pollInterval);
+                }
+                attempts++;
+            }, 250);
+            
+            // Method 2: MutationObserver fallback - watch for MailerLite form success states
+            if (typeof MutationObserver !== 'undefined') {
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) {
+                                // Look for MailerLite success messages or thank-you states
+                                var isSuccess = node.classList && (
+                                    node.classList.contains('ml-block-success') ||
+                                    node.classList.contains('ml-thank-you')
+                                );
+                                var successEl = isSuccess ? node : (node.querySelector ? node.querySelector('.ml-block-success, .ml-thank-you, [data-form="success"]') : null);
+                                
+                                if (successEl) {
+                                    // Form was submitted - try to find the email from the form
+                                    var forms = document.querySelectorAll('.ml-embedded form, .ml-block-form form, [class*="ml-form"] form, form[class*="ml-"]');
+                                    forms.forEach(function(form) {
+                                        var emailInput = form.querySelector('input[type="email"]');
+                                        if (emailInput && emailInput.value) {
+                                            captureEmail(emailInput.value);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                // Start observing when DOM is ready
+                if (document.body) {
+                    observer.observe(document.body, { childList: true, subtree: true });
+                } else {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        observer.observe(document.body, { childList: true, subtree: true });
+                    });
+                }
+            }
+            
+            // Method 3: Form submit listener as ultimate fallback
+            document.addEventListener('submit', function(e) {
+                var form = e.target;
+                if (!form) return;
+                
+                // Check if this is a MailerLite form
+                var isMLForm = form.closest('.ml-embedded') || 
+                               form.closest('.ml-block-form') || 
+                               form.closest('[class*="ml-form"]') ||
+                               form.classList.contains('ml-block-form') ||
+                               form.querySelector('[name="ml-submit"]') ||
+                               form.action && form.action.indexOf('mailerlite') > -1;
+                
+                if (isMLForm) {
+                    var emailInput = form.querySelector('input[type="email"]');
+                    if (emailInput && emailInput.value) {
+                        var emailValue = emailInput.value;
+                        // Delay to let MailerLite process first
+                        setTimeout(function() {
+                            captureEmail(emailValue);
+                        }, 1500);
+                    }
+                }
+            }, true); // Use capture phase
+            
+        })();
+        </script>
+                <script type="rocketlazyloadscript">
+            // Set configuration before loading script
+            window.LH2_EMAIL_EXTRACTOR_CONFIG = {
+                backendUrl: 'https://www.inquisitr.com/wp-json/lh2-google-sso/v1/save-email',
+                ajaxUrl: 'https://www.inquisitr.com/wp-admin/admin-ajax.php',
+                nonce: '2bf9585e39'
+            };
+        </script>
+        <script type="rocketlazyloadscript" data-minify="1" data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/wp-content/plugins/lh2-google-sso/assets/js/email-extractor.js?ver=1768818829"></script>
+        <script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "url": "https://www.inquisitr.com/libs-of-tiktok-suggests-dei-to-blame-for-major-verizon-outage",
+            "name": "Libs of TikTok Suggests DEI to Blame for Major Verizon Outage",
+            "image": "https://www.inquisitr.com/wp-content/uploads/2026/01/Verizon-Logo.jpg"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "url": "https://www.inquisitr.com/trump-administration-takes-150m-stake-in-laser-startup-xlight-to-boost-u-s-chipmaking",
+            "name": "Trump Administration Takes $150M Stake in Laser Startup xLight to Boost U.S. Chipmaking",
+            "image": "https://www.inquisitr.com/wp-content/uploads/2025/07/trump-on-his-phone.jpg"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "url": "https://www.inquisitr.com/trump-draws-a-line-around-americas-ai-power-and-nvidias-blackwell-chip",
+            "name": "Trump Draws a Line Around America\u2019s AI Power and Nvidia\u2019s Blackwell Chip",
+            "image": "https://www.inquisitr.com/wp-content/uploads/2025/10/Donald-Trump-aboard-Air-Force-One-announcing-increased-tariffs-on-Canada.jpg"
+        },
+        {
+            "@type": "ListItem",
+            "position": 4,
+            "url": "https://www.inquisitr.com/a-fourth-traffic-light-color-could-soon-hit-u-s-streets-and-change-the-commute-forever",
+            "name": "A Fourth Traffic Light Color Could Soon Hit U.S. Streets &#8211; And Change the Commute Forever",
+            "image": "https://www.inquisitr.com/wp-content/uploads/2025/10/A-fourth-color-might-join-the-age-old-traffic-lights-Heres-why-it-could-be-a-game-changer.jpg"
+        },
+        {
+            "@type": "ListItem",
+            "position": 5,
+            "url": "https://www.inquisitr.com/tsas-new-tech-at-checkpoints-will-change-the-way-you-travel-heres-how-it-works",
+            "name": "TSA&#8217;s New Tech at Checkpoints Will Change the Way You Travel\u2014Here&#8217;s How It Works!",
+            "image": "https://www.inquisitr.com/wp-content/uploads/2025/05/TSA-upgrades-technology.jpg"
+        },
+        {
+            "@type": "ListItem",
+            "position": 6,
+            "url": "https://www.inquisitr.com/chatgpt-told-woman-her-husband-was-having-an-affair-youll-not-believe-what-she-did-next",
+            "name": "ChatGPT Told Woman Her Husband Was Having an Affair\u2014You&#8217;ll Not Believe What She Did Next!",
+            "image": "https://www.inquisitr.com/wp-content/uploads/2025/05/Chatgpt-and-a-couple-fighting-in-anger-.jpg"
+        },
+        {
+            "@type": "ListItem",
+            "position": 7,
+            "url": "https://www.inquisitr.com/is-being-polite-to-chatgpt-more-harmful-than-you-think-heres-what-experts-have-to-say",
+            "name": "Is Being Polite to ChatGPT More Harmful Than You Think? Here&#8217;s What Experts Have to Say",
+            "image": "https://www.inquisitr.com/wp-content/uploads/2025/04/Should-you-be-polite-to-platforms-like-ChatGPT-Find-out-.jpg"
+        },
+        {
+            "@type": "ListItem",
+            "position": 8,
+            "url": "https://www.inquisitr.com/facebook-secret-mind-reading",
+            "name": "Facebook Is Secretly Creating A Mind-Reading Device, Leaked Audio Confirms",
+            "image": false
+        },
+        {
+            "@type": "ListItem",
+            "position": 9,
+            "url": "https://www.inquisitr.com/huawei-surveillance-race",
+            "name": "Huawei Has Allegedly Built Surveillance Tools That Identify And Monitor People By Race",
+            "image": false
+        },
+        {
+            "@type": "ListItem",
+            "position": 10,
+            "url": "https://www.inquisitr.com/top-9-instagram-2020",
+            "name": "Instagram Top 9 Lets You Share Your Most Popular Photos From 2020, Here\u2019s How To Create It",
+            "image": false
+        },
+        {
+            "@type": "ListItem",
+            "position": 11,
+            "url": "https://www.inquisitr.com/voter-registration-email-scam",
+            "name": "A New Voter Registration Scam Is Tricking Americans Into Giving Out Personal Data",
+            "image": false
+        },
+        {
+            "@type": "ListItem",
+            "position": 12,
+            "url": "https://www.inquisitr.com/ring-debuts-autonomous-flying-drone",
+            "name": "Ring Takes Flight, Debuts Autonomous Flying Drone For Homes",
+            "image": false
+        }
+    ]
+}</script>
+			<script type="rocketlazyloadscript" data-rocket-type='text/javascript'>
+				const lazyloadRunObserver = () => {
+					const lazyloadBackgrounds = document.querySelectorAll( `.e-con.e-parent:not(.e-lazyloaded)` );
+					const lazyloadBackgroundObserver = new IntersectionObserver( ( entries ) => {
+						entries.forEach( ( entry ) => {
+							if ( entry.isIntersecting ) {
+								let lazyloadBackground = entry.target;
+								if( lazyloadBackground ) {
+									lazyloadBackground.classList.add( 'e-lazyloaded' );
+								}
+								lazyloadBackgroundObserver.unobserve( entry.target );
+							}
+						});
+					}, { rootMargin: '200px 0px 200px 0px' } );
+					lazyloadBackgrounds.forEach( ( lazyloadBackground ) => {
+						lazyloadBackgroundObserver.observe( lazyloadBackground );
+					} );
+				};
+				const events = [
+					'DOMContentLoaded',
+					'elementor/lazyload/observe',
+				];
+				events.forEach( ( event ) => {
+					document.addEventListener( event, lazyloadRunObserver );
+				} );
+			</script>
+					<div data-rocket-location-hash="02d665e0afbde234849ab005ea9be2e3" id="rb-user-popup-form" class="rb-user-popup-form mfp-animation mfp-hide">
+			<div data-rocket-location-hash="d6684e53069df7587523eac8762563b7" class="logo-popup-outer">
+				<div data-rocket-location-hash="5b1c19414e6ac899fc1da66499cb624c" class="logo-popup">
+					<div class="login-popup-header">
+													<div class="logo-popup-logo">
+																	<img decoding="async" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20492%20142'%3E%3C/svg%3E" alt="" height="142" width="492" data-lazy-src="https://www.inquisitr.com/wp-content/uploads/2024/12/transparent-logo.png"/><noscript><img loading="lazy" loading="lazy" decoding="async" src="https://www.inquisitr.com/wp-content/uploads/2024/12/transparent-logo.png" alt="" height="142" width="492"/></noscript>
+															</div>
+													<span class="logo-popup-heading h3">Welcome Back!</span>
+													<p class="logo-popup-description is-meta">Sign in to your account</p>
+											</div>
+					<div class="user-login-form">
+						<form name="popup-form" id="popup-form" action="https://www.inquisitr.com/wp-login.php" method="post"><div class="login-username">
+				<div class="rb-login-label">Username or Email Address</div>
+				<input type="text" name="log" required="required" autocomplete="username" class="input" value="" />
+				</div><div class="login-password">
+				<div class="rb-login-label">Password</div>
+				<div class="is-relative">
+				<input type="password" name="pwd" required="required" autocomplete="current-password" spellcheck="false" class="input" value="" />
+				<span class="rb-password-toggle"><i class="rbi rbi-show"></i></span></div>
+				</div><div class="remember-wrap"><p class="login-remember"><label class="rb-login-label"><input name="rememberme" type="checkbox" id="rememberme" value="forever" /> Remember me</label></p><a class="lostpassw-link" href="https://www.inquisitr.com/wp-login.php?action=lostpassword">Lost your password?</a></div><p class="login-submit">
+				<input type="submit" name="wp-submit" class="button button-primary" value="Log In" />
+				<input type="hidden" name="redirect_to" value="https://www.inquisitr.com/profile/technology" />
+			</p></form>						<div class="login-form-footer">
+													</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	<script id="foxiz-core-js-extra">
+var foxizCoreParams = {"ajaxurl":"https://www.inquisitr.com/wp-admin/admin-ajax.php","darkModeID":"RubyDarkMode","cookieDomain":"","cookiePath":"/"};
+//# sourceURL=foxiz-core-js-extra
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/wp-content/plugins/foxiz-core/assets/core.js?ver=1768818829" id="foxiz-core-js"></script>
+<script type="rocketlazyloadscript" id="rocket-browser-checker-js-after">
+"use strict";var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||!1,descriptor.configurable=!0,"value"in descriptor&&(descriptor.writable=!0),Object.defineProperty(target,descriptor.key,descriptor)}}return function(Constructor,protoProps,staticProps){return protoProps&&defineProperties(Constructor.prototype,protoProps),staticProps&&defineProperties(Constructor,staticProps),Constructor}}();function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor))throw new TypeError("Cannot call a class as a function")}var RocketBrowserCompatibilityChecker=function(){function RocketBrowserCompatibilityChecker(options){_classCallCheck(this,RocketBrowserCompatibilityChecker),this.passiveSupported=!1,this._checkPassiveOption(this),this.options=!!this.passiveSupported&&options}return _createClass(RocketBrowserCompatibilityChecker,[{key:"_checkPassiveOption",value:function(self){try{var options={get passive(){return!(self.passiveSupported=!0)}};window.addEventListener("test",null,options),window.removeEventListener("test",null,options)}catch(err){self.passiveSupported=!1}}},{key:"initRequestIdleCallback",value:function(){!1 in window&&(window.requestIdleCallback=function(cb){var start=Date.now();return setTimeout(function(){cb({didTimeout:!1,timeRemaining:function(){return Math.max(0,50-(Date.now()-start))}})},1)}),!1 in window&&(window.cancelIdleCallback=function(id){return clearTimeout(id)})}},{key:"isDataSaverModeOn",value:function(){return"connection"in navigator&&!0===navigator.connection.saveData}},{key:"supportsLinkPrefetch",value:function(){var elem=document.createElement("link");return elem.relList&&elem.relList.supports&&elem.relList.supports("prefetch")&&window.IntersectionObserver&&"isIntersecting"in IntersectionObserverEntry.prototype}},{key:"isSlowConnection",value:function(){return"connection"in navigator&&"effectiveType"in navigator.connection&&("2g"===navigator.connection.effectiveType||"slow-2g"===navigator.connection.effectiveType)}}]),RocketBrowserCompatibilityChecker}();
+//# sourceURL=rocket-browser-checker-js-after
+</script>
+<script id="rocket-preload-links-js-extra">
+var RocketPreloadLinksConfig = {"excludeUris":"/feed/|/(?:.+/)?feed(?:/(?:.+/?)?)?$|/(?:.+/)?embed/|/(index.php/)?(.*)wp-json(/.*|$)|/refer/|/go/|/recommend/|/recommends/","usesTrailingSlash":"","imageExt":"jpg|jpeg|gif|png|tiff|bmp|webp|avif|pdf|doc|docx|xls|xlsx|php","fileExt":"jpg|jpeg|gif|png|tiff|bmp|webp|avif|pdf|doc|docx|xls|xlsx|php|html|htm","siteUrl":"https://www.inquisitr.com","onHoverDelay":"100","rateThrottle":"3"};
+//# sourceURL=rocket-preload-links-js-extra
+</script>
+<script type="rocketlazyloadscript" id="rocket-preload-links-js-after">
+(function() {
+"use strict";var r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},e=function(){function i(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(e,t,n){return t&&i(e.prototype,t),n&&i(e,n),e}}();function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var t=function(){function n(e,t){i(this,n),this.browser=e,this.config=t,this.options=this.browser.options,this.prefetched=new Set,this.eventTime=null,this.threshold=1111,this.numOnHover=0}return e(n,[{key:"init",value:function(){!this.browser.supportsLinkPrefetch()||this.browser.isDataSaverModeOn()||this.browser.isSlowConnection()||(this.regex={excludeUris:RegExp(this.config.excludeUris,"i"),images:RegExp(".("+this.config.imageExt+")$","i"),fileExt:RegExp(".("+this.config.fileExt+")$","i")},this._initListeners(this))}},{key:"_initListeners",value:function(e){-1<this.config.onHoverDelay&&document.addEventListener("mouseover",e.listener.bind(e),e.listenerOptions),document.addEventListener("mousedown",e.listener.bind(e),e.listenerOptions),document.addEventListener("touchstart",e.listener.bind(e),e.listenerOptions)}},{key:"listener",value:function(e){var t=e.target.closest("a"),n=this._prepareUrl(t);if(null!==n)switch(e.type){case"mousedown":case"touchstart":this._addPrefetchLink(n);break;case"mouseover":this._earlyPrefetch(t,n,"mouseout")}}},{key:"_earlyPrefetch",value:function(t,e,n){var i=this,r=setTimeout(function(){if(r=null,0===i.numOnHover)setTimeout(function(){return i.numOnHover=0},1e3);else if(i.numOnHover>i.config.rateThrottle)return;i.numOnHover++,i._addPrefetchLink(e)},this.config.onHoverDelay);t.addEventListener(n,function e(){t.removeEventListener(n,e,{passive:!0}),null!==r&&(clearTimeout(r),r=null)},{passive:!0})}},{key:"_addPrefetchLink",value:function(i){return this.prefetched.add(i.href),new Promise(function(e,t){var n=document.createElement("link");n.rel="prefetch",n.href=i.href,n.onload=e,n.onerror=t,document.head.appendChild(n)}).catch(function(){})}},{key:"_prepareUrl",value:function(e){if(null===e||"object"!==(void 0===e?"undefined":r(e))||!1 in e||-1===["http:","https:"].indexOf(e.protocol))return null;var t=e.href.substring(0,this.config.siteUrl.length),n=this._getPathname(e.href,t),i={original:e.href,protocol:e.protocol,origin:t,pathname:n,href:t+n};return this._isLinkOk(i)?i:null}},{key:"_getPathname",value:function(e,t){var n=t?e.substring(this.config.siteUrl.length):e;return n.startsWith("/")||(n="/"+n),this._shouldAddTrailingSlash(n)?n+"/":n}},{key:"_shouldAddTrailingSlash",value:function(e){return this.config.usesTrailingSlash&&!e.endsWith("/")&&!this.regex.fileExt.test(e)}},{key:"_isLinkOk",value:function(e){return null!==e&&"object"===(void 0===e?"undefined":r(e))&&(!this.prefetched.has(e.href)&&e.origin===this.config.siteUrl&&-1===e.href.indexOf("?")&&-1===e.href.indexOf("#")&&!this.regex.excludeUris.test(e.href)&&!this.regex.images.test(e.href))}}],[{key:"run",value:function(){"undefined"!=typeof RocketPreloadLinksConfig&&new n(new RocketBrowserCompatibilityChecker({capture:!0,passive:!0}),RocketPreloadLinksConfig).init()}}]),n}();t.run();
+}());
+
+//# sourceURL=rocket-preload-links-js-after
+</script>
+<script id="rocket_lazyload_css-js-extra">
+var rocket_lazyload_css_data = {"threshold":"300"};
+//# sourceURL=rocket_lazyload_css-js-extra
+</script>
+<script id="rocket_lazyload_css-js-after">
+!function o(n,c,a){function u(t,e){if(!c[t]){if(!n[t]){var r="function"==typeof require&&require;if(!e&&r)return r(t,!0);if(s)return s(t,!0);throw(e=new Error("Cannot find module '"+t+"'")).code="MODULE_NOT_FOUND",e}r=c[t]={exports:{}},n[t][0].call(r.exports,function(e){return u(n[t][1][e]||e)},r,r.exports,o,n,c,a)}return c[t].exports}for(var s="function"==typeof require&&require,e=0;e<a.length;e++)u(a[e]);return u}({1:[function(e,t,r){"use strict";{const c="undefined"==typeof rocket_pairs?[]:rocket_pairs,a=(("undefined"==typeof rocket_excluded_pairs?[]:rocket_excluded_pairs).map(t=>{var e=t.selector;document.querySelectorAll(e).forEach(e=>{e.setAttribute("data-rocket-lazy-bg-"+t.hash,"excluded")})}),document.querySelector("#wpr-lazyload-bg-container"));var o=rocket_lazyload_css_data.threshold||300;const u=new IntersectionObserver(e=>{e.forEach(t=>{t.isIntersecting&&c.filter(e=>t.target.matches(e.selector)).map(t=>{var e;t&&((e=document.createElement("style")).textContent=t.style,a.insertAdjacentElement("afterend",e),t.elements.forEach(e=>{u.unobserve(e),e.setAttribute("data-rocket-lazy-bg-"+t.hash,"loaded")}))})})},{rootMargin:o+"px"});function n(){0<(0<arguments.length&&void 0!==arguments[0]?arguments[0]:[]).length&&c.forEach(t=>{try{document.querySelectorAll(t.selector).forEach(e=>{"loaded"!==e.getAttribute("data-rocket-lazy-bg-"+t.hash)&&"excluded"!==e.getAttribute("data-rocket-lazy-bg-"+t.hash)&&(u.observe(e),(t.elements||=[]).push(e))})}catch(e){console.error(e)}})}n(),function(){const r=window.MutationObserver;return function(e,t){if(e&&1===e.nodeType)return(t=new r(t)).observe(e,{attributes:!0,childList:!0,subtree:!0}),t}}()(document.querySelector("body"),n)}},{}]},{},[1]);
+//# sourceURL=rocket_lazyload_css-js-after
+</script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-includes/js/jquery/ui/core.min.js?ver=1.13.3" id="jquery-ui-core-js"></script>
+<script id="popup-maker-site-js-extra">
+var pum_vars = {"version":"1.21.5","pm_dir_url":"https://www.inquisitr.com/wp-content/plugins/popup-maker/","ajaxurl":"https://www.inquisitr.com/wp-admin/admin-ajax.php","restapi":"https://www.inquisitr.com/wp-json/pum/v1","rest_nonce":null,"default_theme":"1226471","debug_mode":"","disable_tracking":"","home_url":"/","message_position":"top","core_sub_forms_enabled":"1","popups":[],"cookie_domain":"","analytics_enabled":"1","analytics_route":"analytics","analytics_api":"https://www.inquisitr.com/wp-json/pum/v1"};
+var pum_sub_vars = {"ajaxurl":"https://www.inquisitr.com/wp-admin/admin-ajax.php","message_position":"top"};
+var pum_popups = {"pum-1226480":{"triggers":[{"type":"auto_open","settings":{"delay":10000,"cookie_name":["pum-1226480"]}}],"cookies":[{"event":"on_popup_close","settings":{"name":"pum-1226480","key":"","session":false,"path":"1","time":"1 month"}},{"event":"form_submission","settings":{"name":"pum-1226480","key":"","session":null,"path":true,"time":"6 months","form":"any"}},{"event":"pum_sub_form_success","settings":{"name":"pum-1226480","key":"","session":null,"path":true,"time":"6 months"}},{"event":"pum_sub_form_already_subscribed","settings":{"name":"pum-1226480","key":"","session":null,"path":true,"time":"6 months"}},{"event":"on_popup_close","settings":{"name":"pum-1226480","key":"","session":false,"path":"1","time":"1 month"}}],"disable_on_mobile":false,"disable_on_tablet":false,"atc_promotion":null,"explain":null,"type_section":null,"theme_id":"1226472","size":"tiny","responsive_min_width":"0%","responsive_max_width":"100%","custom_width":"640px","custom_height_auto":false,"custom_height":"380px","scrollable_content":false,"animation_type":"fade","animation_speed":"350","animation_origin":"center top","open_sound":"none","custom_sound":"","location":"center top","position_top":"100","position_bottom":"0","position_left":"0","position_right":"0","position_from_trigger":false,"position_fixed":false,"overlay_disabled":false,"stackable":false,"disable_reposition":false,"zindex":"1999999999","close_button_delay":"0","fi_promotion":null,"close_on_form_submission":true,"close_on_form_submission_delay":"0","close_on_overlay_click":false,"close_on_esc_press":false,"close_on_f4_press":false,"disable_form_reopen":false,"disable_accessibility":false,"theme_slug":"lightbox","id":1226480,"slug":"inqustir-popup"}};
+//# sourceURL=popup-maker-site-js-extra
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/wp-content/plugins/popup-maker/dist/assets/site.js?ver=1768818829" id="popup-maker-site-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/themes/foxiz/assets/js/jquery.waypoints.min.js?ver=3.1.1" id="jquery-waypoints-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/themes/foxiz/assets/js/rbswiper.min.js?ver=6.5.8" id="rbswiper-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/themes/foxiz/assets/js/jquery.mp.min.js?ver=1.1.0" id="jquery-magnific-popup-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/themes/foxiz/assets/js/jquery.tipsy.min.js?ver=1.0" id="rb-tipsy-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/themes/foxiz/assets/js/jquery.ui.totop.min.js?ver=v1.2" id="jquery-uitotop-js"></script>
+<script id="foxiz-global-js-extra">
+var foxizParams = {"sliderSpeed":"5000","sliderEffect":"slide","sliderFMode":"1"};
+var uid_c5ba52d = {"uuid":"uid_c5ba52d","name":"grid_flex_1","tags":"technology","order":"date_post","posts_per_page":"9","builder_pagination":"number","pagination":"infinite_scroll","unique":"1","entry_category":"bg-1","entry_meta":["avatar","author","update"],"review_meta":"-1","sponsor_meta":"1","entry_format":"bottom","excerpt_length":"12","readmore":"Read More","divider_style":"solid","entry_tax":"post_tag","post_not_in":"1232461,1217331,1209114","paged":"1","page_max":"25"};
+//# sourceURL=foxiz-global-js-extra
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/wp-content/themes/foxiz/assets/js/global.js?ver=1768818829" id="foxiz-global-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://accounts.google.com/gsi/client" id="google-gsi-js"></script>
+<script id="lh2-google-sso-frontend-js-extra">
+var lh2GoogleSSO = {"ajaxUrl":"https://www.inquisitr.com/wp-admin/admin-ajax.php","nonce":"0f9c22f19e","ppidNonce":"2bf9585e39","googleClientId":"353746870042-ptuffqad5p8nuh8p7n4jcfuvfsqeep1a.apps.googleusercontent.com","clarityTag":"pr70f4eyw6"};
+//# sourceURL=lh2-google-sso-frontend-js-extra
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/wp-content/plugins/lh2-google-sso/assets/js/frontend.js?ver=1768818829" id="lh2-google-sso-frontend-js"></script>
+<script id="lh2-google-sso-clarity-js-extra">
+var lh2Clarity = {"clarityTag":"pr70f4eyw6","userPPID":null,"ajaxUrl":"https://www.inquisitr.com/wp-admin/admin-ajax.php","nonce":"2bf9585e39"};
+//# sourceURL=lh2-google-sso-clarity-js-extra
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-src="https://www.inquisitr.com/wp-content/cache/min/1/wp-content/plugins/lh2-google-sso/assets/js/clarity.js?ver=1768818829" id="lh2-google-sso-clarity-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/elementor/assets/js/webpack.runtime.min.js?ver=3.26.3" id="elementor-webpack-runtime-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/elementor/assets/js/frontend-modules.min.js?ver=3.26.3" id="elementor-frontend-modules-js"></script>
+<script type="rocketlazyloadscript" id="elementor-frontend-js-before">
+var elementorFrontendConfig = {"environmentMode":{"edit":false,"wpPreview":false,"isScriptDebug":false},"i18n":{"shareOnFacebook":"Share on Facebook","shareOnTwitter":"Share on Twitter","pinIt":"Pin it","download":"Download","downloadImage":"Download image","fullscreen":"Fullscreen","zoom":"Zoom","share":"Share","playVideo":"Play Video","previous":"Previous","next":"Next","close":"Close","a11yCarouselPrevSlideMessage":"Previous slide","a11yCarouselNextSlideMessage":"Next slide","a11yCarouselFirstSlideMessage":"This is the first slide","a11yCarouselLastSlideMessage":"This is the last slide","a11yCarouselPaginationBulletMessage":"Go to slide"},"is_rtl":false,"breakpoints":{"xs":0,"sm":480,"md":768,"lg":1025,"xl":1440,"xxl":1600},"responsive":{"breakpoints":{"mobile":{"label":"Mobile Portrait","value":767,"default_value":767,"direction":"max","is_enabled":true},"mobile_extra":{"label":"Mobile Landscape","value":880,"default_value":880,"direction":"max","is_enabled":false},"tablet":{"label":"Tablet Portrait","value":1024,"default_value":1024,"direction":"max","is_enabled":true},"tablet_extra":{"label":"Tablet Landscape","value":1200,"default_value":1200,"direction":"max","is_enabled":false},"laptop":{"label":"Laptop","value":1366,"default_value":1366,"direction":"max","is_enabled":false},"widescreen":{"label":"Widescreen","value":2400,"default_value":2400,"direction":"min","is_enabled":false}},"hasCustomBreakpoints":false},"version":"3.26.3","is_static":false,"experimentalFeatures":{"e_font_icon_svg":true,"additional_custom_breakpoints":true,"container":true,"e_swiper_latest":true,"e_nested_atomic_repeaters":true,"e_onboarding":true,"e_css_smooth_scroll":true,"home_screen":true,"nested-elements":true,"editor_v2":true,"e_element_cache":true,"link-in-bio":true,"floating-buttons":true,"launchpad-checklist":true},"urls":{"assets":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/elementor\/assets\/","ajaxurl":"https:\/\/www.inquisitr.com\/wp-admin\/admin-ajax.php","uploadUrl":"https:\/\/www.inquisitr.com\/wp-content\/uploads"},"nonces":{"floatingButtonsClickTracking":"6b1f829943"},"swiperClass":"swiper","settings":{"editorPreferences":[]},"kit":{"active_breakpoints":["viewport_mobile","viewport_tablet"],"global_image_lightbox":"yes","lightbox_enable_counter":"yes","lightbox_enable_fullscreen":"yes","lightbox_enable_zoom":"yes","lightbox_enable_share":"yes","lightbox_title_src":"title","lightbox_description_src":"description"},"post":{"id":0,"title":"technology - Inquisitr News","excerpt":""}};
+//# sourceURL=elementor-frontend-js-before
+</script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/elementor/assets/js/frontend.min.js?ver=3.26.3" id="elementor-frontend-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/lib/jquery.validate.min.js?ver=1.21.0" id="wpforms-validation-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/lib/mailcheck.min.js?ver=1.1.2" id="wpforms-mailcheck-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/lib/punycode.min.js?ver=1.0.0" id="wpforms-punycode-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/js/share/utils.min.js?ver=1.9.8.7" id="wpforms-generic-utils-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/js/frontend/wpforms.min.js?ver=1.9.8.7" id="wpforms-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/js/frontend/wpforms-modern.min.js?ver=1.9.8.7" id="wpforms-modern-js"></script>
+<script type="rocketlazyloadscript" data-rocket-src="https://www.inquisitr.com/wp-content/plugins/wpforms/assets/js/frontend/fields/address.min.js?ver=1.9.8.7" id="wpforms-address-field-js"></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var wpforms_settings = {"val_required":"This field is required.","val_email":"Please enter a valid email address.","val_email_suggestion":"Did you mean {suggestion}?","val_email_suggestion_title":"Click to accept this suggestion.","val_email_restricted":"This email address is not allowed.","val_number":"Please enter a valid number.","val_number_positive":"Please enter a valid positive number.","val_minimum_price":"Amount entered is less than the required minimum.","val_confirm":"Field values do not match.","val_checklimit":"You have exceeded the number of allowed selections: {#}.","val_limit_characters":"{count} of {limit} max characters.","val_limit_words":"{count} of {limit} max words.","val_min":"Please enter a value greater than or equal to {0}.","val_max":"Please enter a value less than or equal to {0}.","val_recaptcha_fail_msg":"Google reCAPTCHA verification failed, please try again later.","val_turnstile_fail_msg":"Cloudflare Turnstile verification failed, please try again later.","val_inputmask_incomplete":"Please fill out the field in required format.","uuid_cookie":"1","locale":"en","country":"","country_list_label":"Country list","wpforms_plugin_url":"https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/","gdpr":"","ajaxurl":"https:\/\/www.inquisitr.com\/wp-admin\/admin-ajax.php","mailcheck_enabled":"1","mailcheck_domains":[],"mailcheck_toplevel_domains":["dev"],"is_ssl":"1","currency_code":"USD","currency_thousands":",","currency_decimals":"2","currency_decimal":".","currency_symbol":"$","currency_symbol_pos":"left","val_requiredpayment":"Payment is required.","val_creditcard":"Please enter a valid credit card number.","css_vars":["field-border-radius","field-border-style","field-border-size","field-background-color","field-border-color","field-text-color","field-menu-color","label-color","label-sublabel-color","label-error-color","button-border-radius","button-border-style","button-border-size","button-background-color","button-border-color","button-text-color","page-break-color","background-image","background-position","background-repeat","background-size","background-width","background-height","background-color","background-url","container-padding","container-border-style","container-border-width","container-border-color","container-border-radius","field-size-input-height","field-size-input-spacing","field-size-font-size","field-size-line-height","field-size-padding-h","field-size-checkbox-size","field-size-sublabel-spacing","field-size-icon-size","label-size-font-size","label-size-line-height","label-size-sublabel-font-size","label-size-sublabel-line-height","button-size-font-size","button-size-height","button-size-padding-h","button-size-margin-top","container-shadow-size-box-shadow"],"val_post_max_size":"The total size of the selected files {totalSize} MB exceeds the allowed limit {maxSize} MB.","val_time12h":"Please enter time in 12-hour AM\/PM format (eg 8:45 AM).","val_time24h":"Please enter time in 24-hour format (eg 22:45).","val_time_limit":"Please enter time between {minTime} and {maxTime}.","val_url":"Please enter a valid URL.","val_fileextension":"File type is not allowed.","val_filesize":"File exceeds max size allowed. File was not uploaded.","post_max_size":"209715200","isModernMarkupEnabled":"1","formErrorMessagePrefix":"Form error message","errorMessagePrefix":"Error message","submitBtnDisabled":"Submit button is disabled during form submission.","readOnlyDisallowedFields":["captcha","repeater","content","divider","hidden","html","entry-preview","pagebreak","layout","payment-total"],"error_updating_token":"Error updating token. Please try again or contact support if the issue persists.","network_error":"Network error or server is unreachable. Check your connection or try again later.","token_cache_lifetime":"86400","hn_data":{"1226464":1},"address_field":{"list_countries_without_states":["GB","DE","CH","NL"]},"val_phone":"Please enter a valid phone number.","val_password_strength":"A stronger password is required. Consider using upper and lower case letters, numbers, and symbols.","entry_preview_iframe_styles":["https:\/\/www.inquisitr.com\/wp-includes\/js\/tinymce\/skins\/lightgray\/content.min.css?ver=6.9","https:\/\/www.inquisitr.com\/wp-includes\/css\/dashicons.min.css?ver=6.9","https:\/\/www.inquisitr.com\/wp-includes\/js\/tinymce\/skins\/wordpress\/wp-content.css?ver=6.9","https:\/\/www.inquisitr.com\/wp-content\/plugins\/wpforms\/assets\/pro\/css\/fields\/richtext\/editor-content.min.css"],"indicatorStepsPattern":"Step {current} of {total}"}
+/* ]]> */
+</script>
+<script>window.lazyLoadOptions=[{elements_selector:"img[data-lazy-src],.rocket-lazyload,iframe[data-lazy-src]",data_src:"lazy-src",data_srcset:"lazy-srcset",data_sizes:"lazy-sizes",class_loading:"lazyloading",class_loaded:"lazyloaded",threshold:300,callback_loaded:function(element){if(element.tagName==="IFRAME"&&element.dataset.rocketLazyload=="fitvidscompatible"){if(element.classList.contains("lazyloaded")){if(typeof window.jQuery!="undefined"){if(jQuery.fn.fitVids){jQuery(element).parent().fitVids()}}}}}},{elements_selector:".rocket-lazyload",data_src:"lazy-src",data_srcset:"lazy-srcset",data_sizes:"lazy-sizes",class_loading:"lazyloading",class_loaded:"lazyloaded",threshold:300,}];window.addEventListener('LazyLoad::Initialized',function(e){var lazyLoadInstance=e.detail.instance;if(window.MutationObserver){var observer=new MutationObserver(function(mutations){var image_count=0;var iframe_count=0;var rocketlazy_count=0;mutations.forEach(function(mutation){for(var i=0;i<mutation.addedNodes.length;i++){if(typeof mutation.addedNodes[i].getElementsByTagName!=='function'){continue}
+if(typeof mutation.addedNodes[i].getElementsByClassName!=='function'){continue}
+images=mutation.addedNodes[i].getElementsByTagName('img');is_image=mutation.addedNodes[i].tagName=="IMG";iframes=mutation.addedNodes[i].getElementsByTagName('iframe');is_iframe=mutation.addedNodes[i].tagName=="IFRAME";rocket_lazy=mutation.addedNodes[i].getElementsByClassName('rocket-lazyload');image_count+=images.length;iframe_count+=iframes.length;rocketlazy_count+=rocket_lazy.length;if(is_image){image_count+=1}
+if(is_iframe){iframe_count+=1}}});if(image_count>0||iframe_count>0||rocketlazy_count>0){lazyLoadInstance.update()}});var b=document.getElementsByTagName("body")[0];var config={childList:!0,subtree:!0};observer.observe(b,config)}},!1)</script><script data-no-minify="1" async src="https://www.inquisitr.com/wp-content/plugins/wp-rocket/assets/js/lazyload/17.8.3/lazyload.min.js"></script><script>function lazyLoadThumb(e,alt,l){var t='<img data-lazy-src="https://i.ytimg.com/vi/ID/hqdefault.jpg" alt="" width="480" height="360"><noscript><img src="https://i.ytimg.com/vi/ID/hqdefault.jpg" alt="" width="480" height="360"></noscript>',a='<button class="play" aria-label="Play Youtube video"></button>';if(l){t=t.replace('data-lazy-','');t=t.replace('loading="lazy"','');t=t.replace(/<noscript>.*?<\/noscript>/g,'');}t=t.replace('alt=""','alt="'+alt+'"');return t.replace("ID",e)+a}function lazyLoadYoutubeIframe(){var e=document.createElement("iframe"),t="ID?autoplay=1";t+=0===this.parentNode.dataset.query.length?"":"&"+this.parentNode.dataset.query;e.setAttribute("src",t.replace("ID",this.parentNode.dataset.src)),e.setAttribute("frameborder","0"),e.setAttribute("allowfullscreen","1"),e.setAttribute("allow","accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"),this.parentNode.parentNode.replaceChild(e,this.parentNode)}document.addEventListener("DOMContentLoaded",function(){var exclusions=[];var e,t,p,u,l,a=document.getElementsByClassName("rll-youtube-player");for(t=0;t<a.length;t++)(e=document.createElement("div")),(u='https://i.ytimg.com/vi/ID/hqdefault.jpg'),(u=u.replace('ID',a[t].dataset.id)),(l=exclusions.some(exclusion=>u.includes(exclusion))),e.setAttribute("data-id",a[t].dataset.id),e.setAttribute("data-query",a[t].dataset.query),e.setAttribute("data-src",a[t].dataset.src),(e.innerHTML=lazyLoadThumb(a[t].dataset.id,a[t].dataset.alt,l)),a[t].appendChild(e),(p=e.querySelector(".play")),(p.onclick=lazyLoadYoutubeIframe)});</script><script>var rocket_beacon_data = {"ajax_url":"https:\/\/www.inquisitr.com\/wp-admin\/admin-ajax.php","nonce":"56e81292d6","url":"https:\/\/www.inquisitr.com\/profile\/technology","is_mobile":false,"width_threshold":1600,"height_threshold":700,"delay":500,"debug":null,"status":{"atf":true,"lrc":true},"elements":"img, video, picture, p, main, div, li, svg, section, header, span","lrc_threshold":1800}</script><script data-name="wpr-wpr-beacon" src='https://www.inquisitr.com/wp-content/plugins/wp-rocket/assets/js/wpr-beacon.min.js' async></script><script>(()=>{class RocketElementorPreload{constructor(){this.deviceMode=document.createElement("span"),this.deviceMode.id="elementor-device-mode-wpr",this.deviceMode.setAttribute("class","elementor-screen-only"),document.body.appendChild(this.deviceMode)}t(){let t=getComputedStyle(this.deviceMode,":after").content.replace(/"/g,"");this.animationSettingKeys=this.i(t),document.querySelectorAll(".elementor-invisible[data-settings]").forEach((t=>{const e=t.getBoundingClientRect();if(e.bottom>=0&&e.top<=window.innerHeight)try{this.o(t)}catch(t){}}))}o(t){const e=JSON.parse(t.dataset.settings),i=e.m||e.animation_delay||0,n=e[this.animationSettingKeys.find((t=>e[t]))];if("none"===n)return void t.classList.remove("elementor-invisible");t.classList.remove(n),this.currentAnimation&&t.classList.remove(this.currentAnimation),this.currentAnimation=n;let o=setTimeout((()=>{t.classList.remove("elementor-invisible"),t.classList.add("animated",n),this.l(t,e)}),i);window.addEventListener("rocket-startLoading",(function(){clearTimeout(o)}))}i(t="mobile"){const e=[""];switch(t){case"mobile":e.unshift("_mobile");case"tablet":e.unshift("_tablet");case"desktop":e.unshift("_desktop")}const i=[];return["animation","_animation"].forEach((t=>{e.forEach((e=>{i.push(t+e)}))})),i}l(t,e){this.i().forEach((t=>delete e[t])),t.dataset.settings=JSON.stringify(e)}static run(){const t=new RocketElementorPreload;requestAnimationFrame(t.t.bind(t))}}document.addEventListener("DOMContentLoaded",RocketElementorPreload.run)})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"8dc90f6690c442edb91071f2438c5367","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html><!--
+Performance optimized by Redis Object Cache. Learn more: https://wprediscache.com
+
+Retrieved 7187 objects (1 MB) from Redis using PhpRedis (v6.1.0).
+-->
+
+<!-- This website is like a Rocket, isn't it? Performance optimized by WP Rocket. Learn more: https://wp-rocket.me -->

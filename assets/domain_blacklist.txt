@@ -15,3 +15,7 @@ abc7chicago.com
 www.fox32chicago.com
 abc7ny.com
 biztoc.com
+memeorandum.com
+www.memeorandum.com
+newrepublic.com
+www.newrepublic.com

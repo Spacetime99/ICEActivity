@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Backfill latitude/longitude for ice_detention_facilities.csv using the Google Geocoding API.
 Requires GOOGLE_ACC_KEY in the environment.

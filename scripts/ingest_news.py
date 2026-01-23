@@ -3,7 +3,7 @@
 Entry point used by cron to pull ICE-related news articles.
 
 Usage:
-    python scripts/ingest_news.py --output-dir datasets/news_ingest
+    python3 scripts/ingest_news.py --output-dir datasets/news_ingest
 """
 
 from __future__ import annotations

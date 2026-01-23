@@ -9,7 +9,7 @@ if [[ -f .venv/bin/activate ]]; then
   source .venv/bin/activate
 fi
 
-python scripts/ingest_news.py \
+python3 scripts/ingest_news.py \
   --output-dir datasets/news_ingest \
   --rss-only \
   --rss-feed-name substack-briantylercohen \

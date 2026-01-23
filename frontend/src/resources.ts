@@ -221,6 +221,187 @@ const RESOURCE_SECTIONS_DATA: ResourceSectionData[] = [
     ],
   },
   {
+    title: {
+      en: "ICE — Official & Institutional Sources",
+      es: "ICE — fuentes oficiales e institucionales",
+    },
+    links: [
+      {
+        label: { en: "History of ICE (ICE.gov)", es: "Historia de ICE (ICE.gov)" },
+        url: "https://www.ice.gov/history",
+        description: {
+          en: "Official overview of ICE history and mission.",
+          es: "Resumen oficial de la historia y la mision de ICE.",
+        },
+      },
+      {
+        label: { en: "Archived: History of ICE (ICE.gov)", es: "Archivado: Historia de ICE" },
+        url: "https://www.ice.gov/features/history",
+        description: {
+          en: "Archived history page with background context.",
+          es: "Pagina archivada con contexto historico.",
+        },
+      },
+      {
+        label: {
+          en: "ICE Organizational Structure (ICE.gov)",
+          es: "Estructura organizativa de ICE (ICE.gov)",
+        },
+        url: "https://www.ice.gov/leadership/organizational-structure",
+        description: {
+          en: "Org chart and leadership structure of ICE.",
+          es: "Organigrama y estructura de liderazgo de ICE.",
+        },
+      },
+      {
+        label: {
+          en: "Enforcement and Removal Operations (ICE.gov)",
+          es: "Operaciones de control y remocion (ICE.gov)",
+        },
+        url: "https://www.ice.gov/about-ice/ero",
+        description: {
+          en: "Overview of ERO responsibilities and scope.",
+          es: "Resumen de responsabilidades y alcance de ERO.",
+        },
+      },
+      {
+        label: {
+          en: "Creation of the Department of Homeland Security (DHS.gov)",
+          es: "Creacion del Departamento de Seguridad Nacional (DHS.gov)",
+        },
+        url: "https://www.dhs.gov/creation-department-homeland-security",
+        description: {
+          en: "Background on DHS formation after 9/11.",
+          es: "Contexto sobre la creacion del DHS tras 9/11.",
+        },
+      },
+      {
+        label: {
+          en: "Immigration Enforcement (DHS OHSS stats & definitions)",
+          es: "Control migratorio (DHS OHSS estadisticas y definiciones)",
+        },
+        url: "https://ohss.dhs.gov/topics/immigration/immigration-enforcement",
+        description: {
+          en: "Definitions and statistical context from DHS OHSS.",
+          es: "Definiciones y contexto estadistico de DHS OHSS.",
+        },
+      },
+    ],
+  },
+  {
+    title: {
+      en: "ICE — Neutral Explainers & Context",
+      es: "ICE — explicadores neutrales y contexto",
+    },
+    links: [
+      {
+        label: { en: "What is ICE and what does it do? (USAFacts)", es: "Que es ICE y que hace? (USAFacts)" },
+        url: "https://usafacts.org/articles/what-is-ice-and-what-does-it-do/",
+        description: {
+          en: "Plain-language explainer on ICE responsibilities and scope.",
+          es: "Explicacion clara sobre funciones y alcance de ICE.",
+        },
+      },
+      {
+        label: {
+          en: "What does ICE do? (USAFacts subagency explainer)",
+          es: "Que hace ICE? (USAFacts explicador de subagencia)",
+        },
+        url: "https://usafacts.org/explainers/what-does-the-us-government-do/subagency/us-immigration-and-customs-enforcement/",
+        description: {
+          en: "Overview of ICE within the US government structure.",
+          es: "Resumen de ICE dentro de la estructura del gobierno de EE.UU.",
+        },
+      },
+      {
+        label: { en: "Why ICE was created (TIME)", es: "Por que se creo ICE (TIME)" },
+        url: "https://time.com/5325492/abolish-ice-history/",
+        description: {
+          en: "Historical context for ICE creation and policy shifts.",
+          es: "Contexto historico sobre la creacion de ICE y cambios politicos.",
+        },
+      },
+    ],
+  },
+  {
+    title: {
+      en: "Fascism vs Trump — Serious Frameworks",
+      es: "Fascismo vs Trump — marcos serios",
+    },
+    links: [
+      {
+        label: { en: "Timothy Snyder — On Tyranny (official page)", es: "Timothy Snyder — On Tyranny (oficial)" },
+        url: "https://timothysnyder.org/on-tyranny",
+        description: {
+          en: "Author background and framework for understanding authoritarianism.",
+          es: "Marco de referencia sobre autoritarismo del autor.",
+        },
+      },
+      {
+        label: {
+          en: "Vox interview: \"Post-truth is pre-fascism\" (Snyder)",
+          es: "Entrevista Vox: \"Post-truth is pre-fascism\" (Snyder)",
+        },
+        url: "https://www.vox.com/conversations/2017/3/9/14838088/donald-trump-fascism-europe-history-totalitarianism-post-truth",
+        description: {
+          en: "Interview on historical framing and political language.",
+          es: "Entrevista sobre marco historico y lenguaje politico.",
+        },
+      },
+      {
+        label: {
+          en: "The New Yorker: What Does It Mean That Donald Trump Is a Fascist?",
+          es: "The New Yorker: Que significa que Donald Trump sea fascista?",
+        },
+        url: "https://www.newyorker.com/magazine/dispatches/what-does-it-mean-that-donald-trump-is-a-fascist",
+        description: {
+          en: "Essay on definitions and historical comparisons.",
+          es: "Ensayo sobre definiciones y comparaciones historicas.",
+        },
+      },
+      {
+        label: {
+          en: "The New Yorker: Why We Can’t Stop Arguing About Whether Trump Is a Fascist",
+          es: "The New Yorker: Por que no dejamos de debatir si Trump es fascista",
+        },
+        url: "https://www.newyorker.com/books/under-review/why-we-cant-stop-arguing-about-whether-trump-is-a-fascist",
+        description: {
+          en: "Review essay on debate and framing.",
+          es: "Ensayo sobre el debate y el marco conceptual.",
+        },
+      },
+    ],
+  },
+  {
+    title: {
+      en: "Immigration Enforcement History",
+      es: "Historia del control migratorio",
+    },
+    links: [
+      {
+        label: { en: "The Deportation Machine (book summary)", es: "The Deportation Machine (resumen)" },
+        url: "https://www.abbeys.com.au/book/the-deportation-machine-americas-long-history-of-expelling-immigrants-9780691204208.do",
+        description: {
+          en: "Book listing and summary on long-term enforcement history.",
+          es: "Resumen y ficha del libro sobre historia de la expulsion.",
+        },
+      },
+    ],
+  },
+  {
+    title: { en: "Commentary & Debate", es: "Comentario y debate" },
+    links: [
+      {
+        label: { en: "Guardian: Is Donald Trump a fascist?", es: "Guardian: Trump es fascista?" },
+        url: "https://www.theguardian.com/us-news/2024/sep/21/is-donald-trump-a-fascist",
+        description: {
+          en: "Opinion and debate coverage on political labeling.",
+          es: "Cobertura de opinion y debate sobre etiquetas politicas.",
+        },
+      },
+    ],
+  },
+  {
     title: { en: "Facilities & Detainee Lookup", es: "Instalaciones y localizacion" },
     links: [
       {
@@ -400,7 +581,7 @@ const RESOURCE_SECTIONS_DATA: ResourceSectionData[] = [
     links: [
       {
         label: { en: "ICE FY ERO Annual Report", es: "Informe anual ERO (ICE)" },
-        url: "https://www.ice.gov/doclib/about/offices/ero/pdf/eroAnnReportFY2023.pdf",
+        url: "https://www.ice.gov/information-library/annual-report",
         description: {
           en: "Breakdowns of arrests/removals with and without prior criminal convictions.",
           es: "Desglose de arrestos/expulsiones con y sin antecedentes.",
@@ -441,6 +622,17 @@ const RESOURCE_SECTIONS_DATA: ResourceSectionData[] = [
         description: {
           en: "Local NYC investigations into ICE raids, detention trends, and lawsuits.",
           es: "Investigaciones locales en NYC sobre redadas y tendencias.",
+        },
+      },
+      {
+        label: {
+          en: "The Economist – Trump Approval Tracker",
+          es: "The Economist – Trump Approval Tracker",
+        },
+        url: "https://www.economist.com/interactive/trump-approval-tracker",
+        description: {
+          en: "Interactive tracker of Trump approval ratings.",
+          es: "Seguimiento interactivo de aprobacion de Trump.",
         },
       },
       {

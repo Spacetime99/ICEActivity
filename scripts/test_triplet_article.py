@@ -18,9 +18,13 @@ from src.services.news_triplets import (
     combine_article_text,
     geocode_triplets,
     sanitize_triplet,
+    _complete_incomplete_actions,
     _drop_inverted_triplets,
+    _drop_uncompleted_actions,
     _rank_triplets,
     _rewrite_incomplete_actor_triplets,
+    _clause_after_action,
+    _sentence_window_for_action,
 )
 
 DATA_DIR = REPO_ROOT / "datasets" / "news_ingest"
@@ -41,11 +45,25 @@ def main(story_id: str) -> None:
     article_text = combine_article_text(record)
     extractor = TripletExtractor()
     triplets = extractor.extract(article_text, location_hints=record.get("city_mentions") or [])
+    triplets = _complete_incomplete_actions(triplets, extractor, article_text)
+    triplets = _drop_uncompleted_actions(triplets)
     triplets = _rewrite_incomplete_actor_triplets(triplets)
     triplets = _drop_inverted_triplets(triplets)
     triplets = _rank_triplets(triplets)[:2]
     print("LLM output:")
     print(json.dumps(triplets, indent=2))
+    if triplets:
+        print("\nContext windows:")
+        for item in triplets:
+            who = (item.get("who") or "").strip()
+            what = (item.get("what") or "").strip()
+            if not what:
+                continue
+            sentence = _sentence_window_for_action(what, article_text)
+            clause = _clause_after_action(what, sentence)
+            print(f"- who={who} what={what}")
+            print(f"  sentence: {sentence}")
+            print(f"  clause: {clause}")
     if not triplets:
         return
     geocoder = NominatimGeocoder(DATA_DIR / "geocache.sqlite")
@@ -72,7 +90,11 @@ def main(story_id: str) -> None:
     geocode_triplets(triplet_records, geocoder)
     sanitized = []
     for item in triplet_records:
-        sanitized_item = sanitize_triplet(item, article_text=article_text)
+        sanitized_item = sanitize_triplet(
+            item,
+            article_text=article_text,
+            extractor=extractor,
+        )
         if sanitized_item:
             sanitized.append(
                 {

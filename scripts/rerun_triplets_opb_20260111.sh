@@ -9,7 +9,7 @@ if [[ -f .venv/bin/activate ]]; then
   source .venv/bin/activate
 fi
 
-python scripts/extract_triplets.py \
+python3 scripts/extract_triplets.py \
   --input-file datasets/news_ingest/news_reports_20260111T190655Z.jsonl \
   --output-dir datasets/news_ingest \
   --model-id microsoft/Phi-3-mini-128k-instruct \

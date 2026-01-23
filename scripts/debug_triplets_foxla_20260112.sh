@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
+
+if [[ -f .venv/bin/activate ]]; then
+  # shellcheck source=/dev/null
+  source .venv/bin/activate
+fi
+
+python3 scripts/extract_triplets.py \
+  --input-file datasets/news_ingest/news_reports_20260112T190650Z.jsonl \
+  --output-dir datasets/news_ingest \
+  --model-id microsoft/Phi-3-mini-128k-instruct \
+  --max-new-tokens 160 \
+  --repetition-penalty 1.05 \
+  --log-level INFO
+
+python3 scripts/export_triplets_static.py
+
+python3 - <<'PY'
+import sqlite3
+url="https://www.foxla.com/news/sec-noem-says-dhs-send-hundreds-more-ice-agents-minnesota"
+conn=sqlite3.connect("datasets/news_ingest/triplets_index.sqlite")
+rows=conn.execute("SELECT who, what FROM triplets WHERE url = ?", (url,)).fetchall()
+print("DB rows:", rows)
+conn.close()
+PY
+
+rg -n "sec-noem-says-dhs-send-hundreds-more-ice-agents-minnesota" frontend/public/data/triplets_3d.json || true
