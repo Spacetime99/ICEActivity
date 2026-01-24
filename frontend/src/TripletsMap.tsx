@@ -10,15 +10,37 @@ import {
 } from "react-leaflet";
 import L, { LatLngBoundsExpression } from "leaflet";
 import { STATIC_DATA_BASE_URL } from "./config";
-import { STATIC_LOCATIONS } from "./staticLocations";
+import { STATIC_LOCATIONS, type StaticLocation } from "./staticLocations";
 import { FIELD_OFFICES } from "./fieldOffices";
 import { DETENTION_FACILITIES } from "./detentionFacilities";
 import type { DetentionFacility } from "./detentionFacilities";
 import { getResourceSections } from "./resources";
 import type { FieldOffice } from "./fieldOffices";
 import { DEFAULT_LANGUAGE, LANGUAGE_LABELS, TRANSLATIONS, type Language } from "./i18n";
-import { CHARTS } from "./charts";
+import { CHARTS, type ChartItem } from "./charts";
+import {
+  buildTripletBlob,
+  isChildMention,
+  isUsStatusMention,
+} from "./mentionPatterns";
 import { ABOUT_CONTENT, METHODOLOGY_CONTENT, getOverlayText } from "./overlays";
+import {
+  trackFilterChange,
+  trackLanguageChange,
+  trackNavClick,
+  trackOutboundClick,
+} from "./analytics";
+import {
+  AboutIcon,
+  ChartsIcon,
+  FeedbackIcon,
+  HeadlinesIcon,
+  MapIcon,
+  ProtestsIcon,
+  ResourcesIcon,
+  StatsIcon,
+} from "./navIcons";
+import PageHeader from "./PageHeader";
 
 type Triplet = {
   story_id: string;
@@ -50,7 +72,7 @@ type StoryGroup = {
 };
 
 type TimeRangeValue = number | "all";
-type ViewMode = "map" | "list" | "resources" | "charts";
+type ViewMode = "map" | "resources" | "charts";
 type EventFilter = "all" | "protest" | "severe";
 
 // Keep one hour under the API's 90-day upper bound to avoid validation errors on
@@ -97,6 +119,7 @@ const PROTEST_COLOR = "#2f9e44";
 const UNREST_COLOR = "#6f2dbd";
 const numberFormatter = new Intl.NumberFormat(undefined);
 const FEEDBACK_URL = "https://tally.so/r/lbOAvo";
+const ANALYTICS_PAGE = "map";
 const SEVERE_KEYWORDS = [
   "shot",
   "shooting",
@@ -167,6 +190,10 @@ const CHILD_CAMP_COUNT = CHILD_CAMP_LOCATIONS.length;
 
 const SOURCE_LOGO_EXTS = [".png", ".svg", ".ico"];
 const SOURCE_LOGO_BASE = import.meta.env.BASE_URL ?? "/";
+const NAV_BASE_URL = import.meta.env.BASE_URL ?? "/";
+const HEADLINES_URL = `${NAV_BASE_URL}headlines.html`;
+const PROTESTS_URL = `${NAV_BASE_URL}protests.html`;
+const STATS_URL = `${NAV_BASE_URL}stats.html`;
 const DEFAULT_TOPIC = "Immigration";
 const DEFAULT_IMPACT = "Enforcement";
 
@@ -256,6 +283,22 @@ function isSevereTriplet(triplet: Triplet): boolean {
     return false;
   }
   return SEVERE_KEYWORDS.some((keyword) => blob.includes(keyword));
+}
+
+function isChildTriplet(triplet: Triplet): boolean {
+  const blob = buildTripletBlob(triplet);
+  if (!blob) {
+    return false;
+  }
+  return isChildMention(blob);
+}
+
+function isUsNationalEnforcementTriplet(triplet: Triplet): boolean {
+  const blob = buildTripletBlob(triplet);
+  if (!blob) {
+    return false;
+  }
+  return isUsStatusMention(blob);
 }
 
 function isUnrestTriplet(triplet: Triplet): boolean {
@@ -512,6 +555,7 @@ const TripletsMap = () => {
   const [generalTriplets, setGeneralTriplets] = useState<Triplet[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [showFacilities, setShowFacilities] = useState(true);
   const [showChildCamps, setShowChildCamps] = useState(true);
   const [showFieldOffices, setShowFieldOffices] = useState(false);
@@ -522,10 +566,14 @@ const TripletsMap = () => {
   const [selectedFieldOffice, setSelectedFieldOffice] = useState<FieldOffice | null>(null);
   const [selectedDetentionFacility, setSelectedDetentionFacility] =
     useState<DetentionFacility | null>(null);
+  const [selectedStaticLocation, setSelectedStaticLocation] =
+    useState<StaticLocation | null>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showMethodology, setShowMethodology] = useState(false);
   const mapRef = useRef<L.Map | null>(null);
   const t = TRANSLATIONS[language];
+  const trackNav = (label: string, destination: string) =>
+    trackNavClick(label, destination, ANALYTICS_PAGE);
   const formatPublishedAt = (value?: string | null) => {
     if (!value) {
       return t.unknownDate;
@@ -546,6 +594,18 @@ const TripletsMap = () => {
     }
     return dayFormatter.format(parsed);
   };
+  const formatUpdatedAt = (value?: string | null) => {
+    if (!value) {
+      return null;
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+    return formatter.format(parsed);
+  };
+  const getStaticLocationTypeLabel = (location: StaticLocation) =>
+    location.type === "facility" ? t.facilitiesLabel : t.unaccompaniedChildrenSite;
   const getSourceLabels = (items: Triplet[]) => {
     const labels: Array<{
       label: string;
@@ -605,17 +665,56 @@ const TripletsMap = () => {
       return;
     }
     const handleHash = () => {
-      if (window.location.hash === "#about") {
+      const hash = window.location.hash;
+      if (hash === "#about") {
         setShowAbout(true);
         setShowMethodology(false);
-      } else if (window.location.hash === "#methodology") {
+        setViewMode("map");
+      } else if (hash === "#methodology") {
         setShowMethodology(true);
         setShowAbout(false);
+        setViewMode("map");
+      } else if (hash === "#resources") {
+        setViewMode("resources");
+        setShowAbout(false);
+        setShowMethodology(false);
+      } else if (hash === "#charts") {
+        setViewMode("charts");
+        setShowAbout(false);
+        setShowMethodology(false);
+      } else {
+        setViewMode("map");
+        setShowAbout(false);
+        setShowMethodology(false);
       }
     };
     handleHash();
     window.addEventListener("hashchange", handleHash);
     return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function fetchMeta() {
+      try {
+        const response = await fetch(`${STATIC_DATA_BASE_URL}/triplets_meta.json`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Static metadata request failed (${response.status})`);
+        }
+        const payload = (await response.json()) as { updatedAt?: string };
+        if (payload.updatedAt) {
+          setLastUpdated(payload.updatedAt);
+        }
+      } catch (err) {
+        if ((err as DOMException).name !== "AbortError") {
+          setLastUpdated(null);
+        }
+      }
+    }
+    fetchMeta();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -733,20 +832,6 @@ const TripletsMap = () => {
     () => groupByStory(filteredGeneralTriplets),
     [filteredGeneralTriplets],
   );
-  const groupedTripletsByDay = useMemo(() => {
-    const items = groupedTriplets.slice(0, 200);
-    const dayGroups: Array<{ label: string; items: StoryGroup[] }> = [];
-    let currentLabel = "";
-    items.forEach((item) => {
-      const label = formatPublishedDay(item.publishedAt);
-      if (label !== currentLabel) {
-        currentLabel = label;
-        dayGroups.push({ label, items: [] });
-      }
-      dayGroups[dayGroups.length - 1].items.push(item);
-    });
-    return dayGroups;
-  }, [groupedTriplets, language]);
   const groupedGeneralTripletsByDay = useMemo(() => {
     const dayGroups: Array<{ label: string; items: StoryGroup[] }> = [];
     let currentLabel = "";
@@ -770,6 +855,17 @@ const TripletsMap = () => {
       : eventFilter === "severe"
         ? t.filterSummarySevere
         : t.filterSummaryAll;
+  const countSummary =
+    `${totalEvents} ${t.eventsLabel}, ` +
+    `${filteredTriplets.length} ${t.mappedLabel}, ` +
+    `${filteredGeneralTriplets.length} ${t.generalCountLabel}`;
+  const headerSummary = `${countSummary} — ${activeFilterSummary} — ${activeRangeSummary}`;
+  const headerTitle =
+    viewMode === "resources"
+      ? t.resourcesTab
+      : viewMode === "charts"
+        ? t.chartsTab
+        : t.appLongName;
 
   const facilityIcon = useMemo(
     () =>
@@ -814,7 +910,7 @@ const TripletsMap = () => {
     () =>
       new L.DivIcon({
         className: "custom-marker child-camp-marker",
-        html: "<div>☠</div>",
+        html: "<div>🧒</div>",
         iconSize: [30, 30],
         iconAnchor: [15, 15],
       }),
@@ -867,12 +963,38 @@ const TripletsMap = () => {
     const base = window.location.pathname + window.location.search;
     window.history.replaceState(null, "", base);
   };
+  const openMapView = () => {
+    setViewMode("map");
+    setShowAbout(false);
+    setShowMethodology(false);
+    clearHash();
+    trackNav("map", "map");
+  };
+  const openResources = () => {
+    setViewMode("resources");
+    setShowAbout(false);
+    setShowMethodology(false);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "#resources");
+    }
+    trackNav("resources", "#resources");
+  };
+  const openCharts = () => {
+    setViewMode("charts");
+    setShowAbout(false);
+    setShowMethodology(false);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "#charts");
+    }
+    trackNav("charts", "#charts");
+  };
   const openAbout = () => {
     setShowAbout(true);
     setShowMethodology(false);
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", "#about");
     }
+    trackNav("about", "#about");
   };
   const openMethodology = () => {
     setShowMethodology(true);
@@ -880,6 +1002,7 @@ const TripletsMap = () => {
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", "#methodology");
     }
+    trackNav("methodology", "#methodology");
   };
   const closeOverlays = () => {
     setShowAbout(false);
@@ -890,8 +1013,31 @@ const TripletsMap = () => {
     if (typeof window === "undefined") {
       return;
     }
+    trackOutboundClick("feedback", FEEDBACK_URL, ANALYTICS_PAGE, "nav");
     window.open(FEEDBACK_URL, "_blank", "noopener");
   };
+  const handleLanguageChange = (value: Language) => {
+    setLanguage(value);
+    trackLanguageChange(value, ANALYTICS_PAGE);
+  };
+  const handleRangeChange = (value: TimeRangeValue) => {
+    setSinceHours(value);
+    trackFilterChange("time_range", value === "all" ? "all" : value, ANALYTICS_PAGE);
+  };
+  const handleEventFilterChange = (value: EventFilter) => {
+    setEventFilter(value);
+    trackFilterChange("event_filter", value, ANALYTICS_PAGE);
+  };
+  const trackLayerToggle = (layer: string, enabled: boolean) => {
+    trackFilterChange("layer_toggle", layer, ANALYTICS_PAGE, { enabled });
+  };
+  const handleOutboundClick =
+    (label: string, url?: string | null, context?: string) => () => {
+      if (!url) {
+        return;
+      }
+      trackOutboundClick(label, url, ANALYTICS_PAGE, context);
+    };
   const selectedItems = useMemo(() => {
     if (!selectedGroup) {
       return [] as Triplet[];
@@ -911,6 +1057,7 @@ const TripletsMap = () => {
     setSelectedGroupKey(null);
     setSelectedFieldOffice(null);
     setSelectedDetentionFacility(null);
+    setSelectedStaticLocation(null);
   };
 
   useEffect(() => {
@@ -918,6 +1065,7 @@ const TripletsMap = () => {
       setSelectedGroupKey(null);
       setSelectedFieldOffice(null);
       setSelectedDetentionFacility(null);
+      setSelectedStaticLocation(null);
     }
   }, [isMobile, viewMode]);
 
@@ -973,18 +1121,30 @@ const TripletsMap = () => {
           <input
             type="checkbox"
             checked={showFacilities}
-            onChange={() => setShowFacilities((prev) => !prev)}
+            onChange={() =>
+              setShowFacilities((prev) => {
+                const next = !prev;
+                trackLayerToggle("facilities", next);
+                return next;
+              })
+            }
           />{" "}
           {t.facilitiesLabel} ({FACILITY_COUNT})
         </label>
       </div>
       <div className="layer-toggle">
-        <span className="layer-icon child-camp-marker">☠</span>
+        <span className="layer-icon child-camp-marker">🧒</span>
         <label>
           <input
             type="checkbox"
             checked={showChildCamps}
-            onChange={() => setShowChildCamps((prev) => !prev)}
+            onChange={() =>
+              setShowChildCamps((prev) => {
+                const next = !prev;
+                trackLayerToggle("child_camps", next);
+                return next;
+              })
+            }
           />{" "}
           {t.childCampsLabel} ({CHILD_CAMP_COUNT})
         </label>
@@ -995,7 +1155,13 @@ const TripletsMap = () => {
           <input
             type="checkbox"
             checked={showDetentionFacilities}
-            onChange={() => setShowDetentionFacilities((prev) => !prev)}
+            onChange={() =>
+              setShowDetentionFacilities((prev) => {
+                const next = !prev;
+                trackLayerToggle("detention_facilities", next);
+                return next;
+              })
+            }
           />{" "}
           {t.detentionFacilitiesLabel} ({detentionFacilities.length})
         </label>
@@ -1006,7 +1172,13 @@ const TripletsMap = () => {
           <input
             type="checkbox"
             checked={showFieldOffices}
-            onChange={() => setShowFieldOffices((prev) => !prev)}
+            onChange={() =>
+              setShowFieldOffices((prev) => {
+                const next = !prev;
+                trackLayerToggle("field_offices", next);
+                return next;
+              })
+            }
           />{" "}
           {t.fieldOfficesShort} ({FIELD_OFFICES.length})
         </label>
@@ -1023,18 +1195,53 @@ const TripletsMap = () => {
             <div className="day-group-label">{dayGroup.label}</div>
             {dayGroup.items.map((group) => (
               <article className="list-card" key={group.storyId}>
-                <div className="list-card-meta">
-                  {t.reportedLabel} {formatPublishedAt(group.publishedAt)}
+                <div className="list-card-header">
+                  <div>
+                    <div className="list-card-meta">
+                      {t.reportedLabel} {formatPublishedAt(group.publishedAt)}
+                    </div>
+                    <h3>
+                      {group.url ? (
+                        <a
+                          href={group.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={handleOutboundClick(
+                            group.title,
+                            group.url,
+                            "general",
+                          )}
+                        >
+                          {group.title}
+                        </a>
+                      ) : (
+                        group.title
+                      )}
+                    </h3>
+                  </div>
+                  <div className="badge-group">
+                    {group.items.some(isProtestTriplet) && (
+                      <span className="badge badge-protest">
+                        {t.headlinesPageProtestTag}
+                      </span>
+                    )}
+                    {group.items.some(isSevereTriplet) && (
+                      <span className="badge badge-severe">
+                        {t.headlinesPageSevereTag}
+                      </span>
+                    )}
+                    {group.items.some(isChildTriplet) && (
+                      <span className="badge badge-child">
+                        {t.headlinesPageChildTag}
+                      </span>
+                    )}
+                    {group.items.some(isUsNationalEnforcementTriplet) && (
+                      <span className="badge badge-us-national">
+                        {t.headlinesPageUsNationalTag}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <h3>
-                  {group.url ? (
-                    <a href={group.url} target="_blank" rel="noreferrer">
-                      {group.title}
-                    </a>
-                  ) : (
-                    group.title
-                  )}
-                </h3>
                 <div className="headline-meta">
                   <span className="headline-chip">{getTopicLabel(group.items)}</span>
                   {getLocationLabel(group.items) && (
@@ -1056,11 +1263,6 @@ const TripletsMap = () => {
                     ))}
                   </div>
                 </div>
-                {group.url && (
-                  <a href={group.url} target="_blank" rel="noreferrer">
-                    {t.viewArticle}
-                  </a>
-                )}
               </article>
             ))}
           </section>
@@ -1090,7 +1292,7 @@ const TripletsMap = () => {
                       openMethodology();
                     }
                   }
-                : undefined;
+                : () => trackOutboundClick(link.label, link.url, ANALYTICS_PAGE, "resources");
               return (
                 <li key={link.url}>
                   <a
@@ -1110,154 +1312,171 @@ const TripletsMap = () => {
       ))}
     </div>
   );
-  const chartsView = (
-    <div className="resources-view">
-      {CHARTS.map((chart) => (
-        <section key={chart.href} className="resource-card chart-card">
-          <h2>{chart.title}</h2>
-          <a href={chart.href} target="_blank" rel="noreferrer">
-            <img src={chart.imgSrc} alt={chart.imgAlt} />
-          </a>
-          <p className="chart-credit">
-            {chart.creditText}{" "}
-            <a href={chart.creditHref} target="_blank" rel="noreferrer">
-              Statista
-            </a>
-            .
-          </p>
-        </section>
-      ))}
-    </div>
+  const gridCharts = CHARTS.filter(
+    (chart) => !chart.linkOnly && chart.layout !== "wide",
   );
-  const listView = (
-    <div className="list-view">
-      <h2>{t.latestIncidents}</h2>
-      {groupedTripletsByDay.length === 0 ? (
-        <p>{t.noIncidents}</p>
+  const wideCharts = CHARTS.filter(
+    (chart) => !chart.linkOnly && chart.layout === "wide",
+  );
+  const linkCharts = CHARTS.filter((chart) => chart.linkOnly);
+  const renderChartCard = (chart: ChartItem) => (
+    <section key={chart.href} className="resource-card chart-card">
+      <h2>{chart.title}</h2>
+      {chart.imgSrc ? (
+        <a
+          href={chart.href}
+          target="_blank"
+          rel="noreferrer"
+          onClick={handleOutboundClick(chart.title, chart.href, "charts")}
+        >
+          <img src={chart.imgSrc} alt={chart.imgAlt ?? chart.title} />
+        </a>
       ) : (
-        groupedTripletsByDay.map((dayGroup) => (
-          <section className="day-group" key={dayGroup.label}>
-            <div className="day-group-label">{dayGroup.label}</div>
-            {dayGroup.items.map((group) => (
-              <article className="list-card" key={group.storyId}>
-                <div className="list-card-meta">
-                  {t.reportedLabel} {formatPublishedAt(group.publishedAt)}
-                </div>
-                <h3>
-                  {group.url ? (
-                    <a href={group.url} target="_blank" rel="noreferrer">
-                      {group.title}
-                    </a>
-                  ) : (
-                    group.title
-                  )}
-                </h3>
-                <div className="headline-meta">
-                  <span className="headline-chip">{getTopicLabel(group.items)}</span>
-                  {getLocationLabel(group.items) && (
-                    <span className="headline-chip">{getLocationLabel(group.items)}</span>
-                  )}
-                  <span className="headline-chip">{getImpactLabel(group.items)}</span>
-                </div>
-                <div className="general-summary">
-                  <div className="summary-lines">
-                    {getSourceLabels(group.items).map(({ logoKey, fallbackKey, label }) => (
-                      <div className="summary-line source-line" key={label}>
-                        <SourceLogo primaryKey={logoKey} fallbackKey={fallbackKey} alt={label} />
-                        <span>{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </section>
-        ))
+        <div className="chart-embed">
+          {chart.embedUrl && (
+            <iframe title={chart.title} src={chart.embedUrl} loading="lazy" />
+          )}
+          <a
+            className="chart-embed-link"
+            href={chart.href}
+            target="_blank"
+            rel="noreferrer"
+            onClick={handleOutboundClick(chart.title, chart.href, "charts")}
+          >
+            Open chart
+          </a>
+        </div>
       )}
-      <div className="list-general">
-        <h3>{t.generalCoverage}</h3>
-        {generalCoverageBody}
+      {chart.creditText && chart.creditHref && chart.creditLabel && (
+        <p className="chart-credit">
+          {chart.creditText}{" "}
+          <a
+            href={chart.creditHref}
+            target="_blank"
+            rel="noreferrer"
+            onClick={handleOutboundClick(
+              chart.creditLabel,
+              chart.creditHref,
+              "charts",
+            )}
+          >
+            {chart.creditLabel}
+          </a>
+          .
+        </p>
+      )}
+    </section>
+  );
+  const chartsView = (
+    <div className="charts-view-wrapper">
+      <div className="resources-view charts-view">
+        {gridCharts.map((chart) => renderChartCard(chart))}
       </div>
+      {wideCharts.length > 0 && (
+        <div className="charts-wide">
+          {wideCharts.map((chart) => renderChartCard(chart))}
+        </div>
+      )}
+      {linkCharts.length > 0 && (
+        <div className="chart-links">
+          {linkCharts.map((chart) => (
+            <div className="chart-link-row" key={chart.href}>
+              <span className="chart-link-text">{chart.title}</span>
+              <a
+                className="chart-link-action"
+                href={chart.href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={handleOutboundClick(chart.title, chart.href, "charts")}
+              >
+                Open chart
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
-  const viewTabs = (
-    <div className="view-tabs">
+  const updatedLabel = (() => {
+    const formatted = formatUpdatedAt(lastUpdated);
+    if (!formatted) {
+      return null;
+    }
+    return t.dataUpdatedLabel.replace("{timestamp}", formatted);
+  })();
+  const headerNav = (
+    <nav className="site-nav">
       <button
         type="button"
         className={viewMode === "map" ? "active" : ""}
-        onClick={() => setViewMode("map")}
+        onClick={openMapView}
       >
         {t.mapTab}
       </button>
-      <button
-        type="button"
-        className={viewMode === "list" ? "active" : ""}
-        onClick={() => setViewMode("list")}
+      <a
+        href={HEADLINES_URL}
+        onClick={() => trackNav("headlines", HEADLINES_URL)}
       >
         {t.headlinesTab}
-      </button>
+      </a>
+      <a
+        href={PROTESTS_URL}
+        onClick={() => trackNav("protests", PROTESTS_URL)}
+      >
+        {t.protestsTab}
+      </a>
       <button
         type="button"
         className={viewMode === "resources" ? "active" : ""}
-        onClick={() => setViewMode("resources")}
+        onClick={openResources}
       >
         {t.resourcesTab}
       </button>
       <button
         type="button"
         className={viewMode === "charts" ? "active" : ""}
-        onClick={() => setViewMode("charts")}
+        onClick={openCharts}
       >
         {t.chartsTab}
       </button>
+      <a href={STATS_URL} onClick={() => trackNav("stats", STATS_URL)}>
+        {t.statsTab}
+      </a>
       <button type="button" className="ghost" onClick={openAbout}>
         {ABOUT_CONTENT.title[language]}
       </button>
       <button type="button" className="ghost" onClick={openFeedback}>
         {t.feedbackTab}
       </button>
-    </div>
+    </nav>
   );
 
   return (
     <div className={`map-page viewport-${viewport}`}>
-      <header className="map-header">
-        <div className="header-title">
-          <img
-            className="app-icon"
-            src={`${import.meta.env.BASE_URL}icon.svg`}
-            alt="ICEMap"
-          />
-          <div className="header-text">
-            <h1>
-              {t.appName}{" "}
-              <span className="header-subtitle">
-                <span className="header-intro">{t.headerIntro}</span>
-                <span className="header-divider" aria-hidden="true">
-                  —
-                </span>
-                <span className="header-counts">
-                  {totalEvents} {t.eventsLabel}, {filteredTriplets.length}{" "}
-                  {t.mappedLabel}, {filteredGeneralTriplets.length}{" "}
-                  {t.generalCountLabel}
-                </span>
-                <span className="header-divider header-divider-filters" aria-hidden="true">
-                  —
-                </span>
-                <span className="header-filters">
-                  {activeFilterSummary} — {activeRangeSummary}
-                </span>
-              </span>
-            </h1>
-          </div>
-        </div>
+      <PageHeader
+        headerClassName="map-header"
+        brandClassName="header-title"
+        textClassName="header-text"
+        title={headerTitle}
+        subtitle={headerSummary}
+        appName={t.appName}
+        updatedLabel={updatedLabel}
+        nav={headerNav}
+        languageLabel={t.languageLabel}
+        language={language}
+        languageOptions={LANGUAGE_LABELS}
+        onLanguageChange={handleLanguageChange}
+        selectId="icemap-language"
+        iconSrc={`${import.meta.env.BASE_URL}icon.svg`}
+        iconAlt="ICEMap"
+      >
         <div className="controls">
           <div className="time-controls">
             {TIME_RANGES.map((range) => (
               <button
                 key={range.label.en}
                 className={range.value === sinceHours ? "active" : ""}
-                onClick={() => setSinceHours(range.value)}
+                onClick={() => handleRangeChange(range.value)}
                 type="button"
               >
                 {range.label[language]}
@@ -1270,30 +1489,15 @@ const TripletsMap = () => {
               <button
                 key={filter.value}
                 className={filter.value === eventFilter ? "active" : ""}
-                onClick={() => setEventFilter(filter.value)}
+                onClick={() => handleEventFilterChange(filter.value)}
                 type="button"
               >
                 {t[filter.labelKey]}
               </button>
             ))}
           </div>
-          <div className="language-select">
-            <label htmlFor="icemap-language">{t.languageLabel}</label>
-            <select
-              id="icemap-language"
-              value={language}
-              onChange={(event) => setLanguage(event.target.value as Language)}
-            >
-              {Object.entries(LANGUAGE_LABELS).map(([code, label]) => (
-                <option key={code} value={code}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
-      </header>
-      {!isMobile && viewTabs}
+      </PageHeader>
       {error && <div className="banner error">{error}</div>}
       {loading && <div className="banner">{t.loading}</div>}
       <div className={`map-content ${isMobile ? "mobile" : ""}`}>
@@ -1301,8 +1505,6 @@ const TripletsMap = () => {
           <div className="resources-view-wrapper">{resourcesView}</div>
         ) : viewMode === "charts" ? (
           <div className="resources-view-wrapper">{chartsView}</div>
-        ) : viewMode === "list" ? (
-          listView
         ) : (
           <>
             <div className="map-frame">
@@ -1349,6 +1551,7 @@ const TripletsMap = () => {
                     setSelectedGroupKey(group.key);
                     setSelectedFieldOffice(null);
                     setSelectedDetentionFacility(null);
+                    setSelectedStaticLocation(null);
                     return;
                   }
                   focusMapOnMarker(group.lat, group.lon);
@@ -1398,7 +1601,16 @@ const TripletsMap = () => {
                           <li key={story.storyId}>
                             <div className="popup-article-title">
                               {story.url ? (
-                                <a href={story.url} target="_blank" rel="noreferrer">
+                                <a
+                                  href={story.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={handleOutboundClick(
+                                    story.title,
+                                    story.url,
+                                    "popup",
+                                  )}
+                                >
                                   {story.title}
                                 </a>
                               ) : (
@@ -1436,6 +1648,13 @@ const TripletsMap = () => {
                   icon={facilityIcon}
                   eventHandlers={{
                     click() {
+                      if (isMobile) {
+                        setSelectedStaticLocation(loc);
+                        setSelectedGroupKey(null);
+                        setSelectedFieldOffice(null);
+                        setSelectedDetentionFacility(null);
+                        return;
+                      }
                       focusMapOnMarker(loc.latitude, loc.longitude);
                     },
                   }}
@@ -1465,6 +1684,13 @@ const TripletsMap = () => {
                   icon={childCampIcon}
                   eventHandlers={{
                     click() {
+                      if (isMobile) {
+                        setSelectedStaticLocation(loc);
+                        setSelectedGroupKey(null);
+                        setSelectedFieldOffice(null);
+                        setSelectedDetentionFacility(null);
+                        return;
+                      }
                       focusMapOnMarker(loc.latitude, loc.longitude);
                     },
                   }}
@@ -1500,6 +1726,7 @@ const TripletsMap = () => {
                         setSelectedDetentionFacility(facility);
                         setSelectedGroupKey(null);
                         setSelectedFieldOffice(null);
+                        setSelectedStaticLocation(null);
                         return;
                       }
                       focusMapOnMarker(facility.latitude, facility.longitude);
@@ -1540,7 +1767,16 @@ const TripletsMap = () => {
                         </div>
                       )}
                       {facility.detailUrl && (
-                        <a href={facility.detailUrl} target="_blank" rel="noreferrer">
+                        <a
+                          href={facility.detailUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={handleOutboundClick(
+                            facility.name,
+                            facility.detailUrl,
+                            "facility",
+                          )}
+                        >
                           {t.viewFacility}
                         </a>
                       )}
@@ -1559,6 +1795,8 @@ const TripletsMap = () => {
                       if (isMobile) {
                         setSelectedFieldOffice(office);
                         setSelectedGroupKey(null);
+                        setSelectedDetentionFacility(null);
+                        setSelectedStaticLocation(null);
                         return;
                       }
                       focusMapOnMarker(office.latitude, office.longitude);
@@ -1622,43 +1860,80 @@ const TripletsMap = () => {
               <button
                 type="button"
                 className={viewMode === "map" ? "active" : ""}
-                onClick={() => setViewMode("map")}
+                onClick={openMapView}
               >
-                {t.mapTab}
+                <span className="nav-icon">
+                  <MapIcon />
+                </span>
+                <span className="nav-label">{t.mapTab}</span>
               </button>
-              <button
-                type="button"
-                className={viewMode === "list" ? "active" : ""}
-                onClick={() => setViewMode("list")}
+              <a
+                href={HEADLINES_URL}
+                onClick={() => trackNav("headlines", HEADLINES_URL)}
               >
-                {t.headlinesTab}
-              </button>
+                <span className="nav-icon">
+                  <HeadlinesIcon />
+                </span>
+                <span className="nav-label">{t.headlinesTab}</span>
+              </a>
+              <a
+                href={PROTESTS_URL}
+                onClick={() => trackNav("protests", PROTESTS_URL)}
+              >
+                <span className="nav-icon">
+                  <ProtestsIcon />
+                </span>
+                <span className="nav-label">{t.protestsTab}</span>
+              </a>
               <button
                 type="button"
                 className={viewMode === "resources" ? "active" : ""}
-                onClick={() => setViewMode("resources")}
+                onClick={openResources}
               >
-                {t.resourcesTabMobile ?? t.resourcesTab}
+                <span className="nav-icon">
+                  <ResourcesIcon />
+                </span>
+                <span className="nav-label">
+                  {t.resourcesTabMobile ?? t.resourcesTab}
+                </span>
               </button>
               <button
                 type="button"
                 className={viewMode === "charts" ? "active" : ""}
-                onClick={() => setViewMode("charts")}
+                onClick={openCharts}
               >
-                {t.chartsTab}
+                <span className="nav-icon">
+                  <ChartsIcon />
+                </span>
+                <span className="nav-label">{t.chartsTab}</span>
               </button>
+              <a href={STATS_URL} onClick={() => trackNav("stats", STATS_URL)}>
+                <span className="nav-icon">
+                  <StatsIcon />
+                </span>
+                <span className="nav-label">{t.statsTab}</span>
+              </a>
               <button type="button" onClick={openAbout}>
-                {ABOUT_CONTENT.title[language]}
+                <span className="nav-icon">
+                  <AboutIcon />
+                </span>
+                <span className="nav-label">{ABOUT_CONTENT.title[language]}</span>
               </button>
               <button type="button" onClick={openFeedback}>
-                {t.feedbackTab}
+                <span className="nav-icon">
+                  <FeedbackIcon />
+                </span>
+                <span className="nav-label">{t.feedbackTab}</span>
               </button>
           </nav>
         </>
       )}
       {isMobile &&
         viewMode === "map" &&
-        (selectedGroup || selectedFieldOffice || selectedDetentionFacility) && (
+        (selectedGroup ||
+          selectedFieldOffice ||
+          selectedDetentionFacility ||
+          selectedStaticLocation) && (
           <div className="mobile-event-sheet">
             <div className="mobile-event-sheet-header">
               <div>
@@ -1669,12 +1944,18 @@ const TripletsMap = () => {
                       }`
                     : selectedFieldOffice
                       ? t.fieldOfficeType
-                      : t.detentionFacilityType}
+                      : selectedDetentionFacility
+                        ? t.detentionFacilityType
+                        : selectedStaticLocation
+                          ? getStaticLocationTypeLabel(selectedStaticLocation)
+                          : ""}
                 </div>
                 <h3>
                   {selectedGroup
                     ? selectedLocationLabel
-                    : selectedFieldOffice?.name || selectedDetentionFacility?.name}
+                    : selectedFieldOffice?.name ||
+                      selectedDetentionFacility?.name ||
+                      selectedStaticLocation?.name}
                 </h3>
               </div>
               <button
@@ -1698,7 +1979,12 @@ const TripletsMap = () => {
                     </p>
                     <p className="sheet-item-title">
                       {item.url ? (
-                        <a href={item.url} target="_blank" rel="noreferrer">
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={handleOutboundClick(item.title, item.url, "sheet")}
+                        >
                           {item.title}
                         </a>
                       ) : (
@@ -1736,12 +2022,41 @@ const TripletsMap = () => {
                     : ""}
                 </p>
                 {selectedDetentionFacility.detailUrl && (
-                  <a href={selectedDetentionFacility.detailUrl} target="_blank" rel="noreferrer">
+                  <a
+                    href={selectedDetentionFacility.detailUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={handleOutboundClick(
+                      selectedDetentionFacility.name,
+                      selectedDetentionFacility.detailUrl,
+                      "facility",
+                    )}
+                  >
                     {t.facilityDetails}
                   </a>
                 )}
               </div>
             )}
+            {selectedStaticLocation &&
+              !selectedGroup &&
+              !selectedFieldOffice &&
+              !selectedDetentionFacility && (
+                <div className="sheet-field-office">
+                  {(selectedStaticLocation.addressFull ||
+                    selectedStaticLocation.address) && (
+                    <p className="sheet-item-text">
+                      {selectedStaticLocation.addressFull ||
+                        selectedStaticLocation.address}
+                    </p>
+                  )}
+                  {selectedStaticLocation.note && (
+                    <p className="sheet-item-text">{selectedStaticLocation.note}</p>
+                  )}
+                  <p className="sheet-item-meta">
+                    {t.coordinatesLabel}: {selectedStaticLocation.latitude.toFixed(3)}, {selectedStaticLocation.longitude.toFixed(3)}
+                  </p>
+                </div>
+              )}
           </div>
         )}
       {(showAbout || showMethodology) && (

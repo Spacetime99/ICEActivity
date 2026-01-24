@@ -60,6 +60,7 @@ The pattern is: every runnable CLI under `scripts/` just adds the repo root to `
 - Story index: `datasets/news_ingest/story_index.json` (cross-run dedupe).
 - SQLite index: `datasets/news_ingest/news_index.sqlite` (stories, sources, publications, locations).
 - Geocode cache: `datasets/news_ingest/geocache.sqlite` (successful and failed lookups; failures cached for 7 days).
+- Chat summaries: `docs/chat-YYYYMMDD.md`.
 
 ## Running the ingestor
 ```
@@ -100,6 +101,14 @@ Helpful switches:
 Outputs:
 - JSONL: `datasets/news_ingest/triplets_<timestamp>.jsonl`
 - SQLite index: `datasets/news_ingest/triplets_index.sqlite` (one row per triplet, keyed by story_id+who+what+where)
+
+Event type detection notes:
+- The triplet extractor tags protest-related event types by keyword scanning.
+- "March" is treated as a calendar month (not a protest) when it is capitalized and
+  appears mid-sentence, or when it starts a sentence and is followed immediately by
+  a 2- or 4-digit year (1960-2050 or 60-50). Action forms such as "marching" or
+  "marchers" still count as protest activity.
+- Avoid outlet-specific or story-specific hardcoded checks; prefer generic, reusable rules.
 
 To backfill historical triplets (e.g., after moving machines), first copy the archived
 `triplets_*.jsonl` files into `datasets/news_ingest`, then hydrate them into the SQLite index
