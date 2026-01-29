@@ -16,3 +16,24 @@ def test_detect_event_types_flags_unrest() -> None:
 
     assert "civil_unrest" in types
     assert "riot" in types
+
+
+def test_detect_event_types_ignores_month_march() -> None:
+    text = "The trial is set for March 2024 in Portland."
+    types = set(_detect_event_types(text))
+
+    assert "march" not in types
+
+
+def test_detect_event_types_ignores_mid_sentence_march_month() -> None:
+    text = "The hearing in March 2024 was continued."
+    types = set(_detect_event_types(text))
+
+    assert "march" not in types
+
+
+def test_detect_event_types_detects_march_event() -> None:
+    text = "Organizers announced a march for justice downtown."
+    types = set(_detect_event_types(text))
+
+    assert "march" in types

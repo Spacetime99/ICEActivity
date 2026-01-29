@@ -36,6 +36,7 @@ LOGGER = logging.getLogger(__name__)
 FACILITY_CATALOG_PATH = Path("assets/ice_facilities.csv")
 DOMAIN_BLACKLIST_PATH = Path("assets/domain_blacklist.txt")
 DOMAIN_FAILURES_PATH = Path("datasets/domain_failures.json")
+RSS_FEED_URL_FILE = Path("config/rss_feed_urls.txt")
 FAILURE_THRESHOLD = 3
 
 # Broad search tokens that surface ICE activity regardless of outlet.
@@ -849,6 +850,45 @@ def load_domain_blacklist(path: Path = DOMAIN_BLACKLIST_PATH) -> dict[str, list[
     except Exception:  # noqa: BLE001
         LOGGER.warning("Failed to read domain blacklist at %s", path, exc_info=True)
         return {}
+
+
+def _derive_feed_name(url: str) -> str:
+    parsed = urlparse(url)
+    host = parsed.netloc.lower().replace("www.", "")
+    path = parsed.path.strip("/").replace("/", "-") or "feed"
+    slug = re.sub(r"[^a-z0-9-]+", "-", f"{host}-{path}").strip("-")
+    return f"custom-{slug or 'feed'}"
+
+
+def load_custom_rss_feeds(path: Path = RSS_FEED_URL_FILE) -> list[RSSFeedConfig]:
+    if not path.exists():
+        return []
+    feeds: list[RSSFeedConfig] = []
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            raw = line.strip()
+            if not raw or raw.startswith("#"):
+                continue
+            name = None
+            url = None
+            if "|" in raw:
+                parts = [part.strip() for part in raw.split("|", 1)]
+                name = parts[0] or None
+                url = parts[1] if len(parts) > 1 else None
+            elif "," in raw:
+                parts = [part.strip() for part in raw.split(",", 1)]
+                name = parts[0] or None
+                url = parts[1] if len(parts) > 1 else None
+            else:
+                url = raw
+            if not url:
+                continue
+            if not name:
+                name = _derive_feed_name(url)
+            feeds.append(RSSFeedConfig(name=name, url=url))
+    if feeds:
+        LOGGER.info("Loaded %s custom RSS feeds from %s", len(feeds), path)
+    return feeds
 
 
 def _url_is_blacklisted(url: str, blacklist: dict[str, list[str]]) -> bool:
@@ -2330,7 +2370,8 @@ def build_default_sources(
     rss_feed_names: Sequence[str] | None = None,
     rss_only: bool = False,
 ) -> List[BaseNewsSource]:
-    rss_feeds = [*AP_RSS_FEEDS, *LOCAL_RSS_FEEDS, *NATIONAL_RSS_FEEDS]
+    extra_rss_feeds = load_custom_rss_feeds()
+    rss_feeds = [*AP_RSS_FEEDS, *LOCAL_RSS_FEEDS, *NATIONAL_RSS_FEEDS, *extra_rss_feeds]
     if rss_feed_names:
         selected = {name.strip().lower() for name in rss_feed_names if name.strip()}
         rss_feeds = [feed for feed in rss_feeds if feed.name.lower() in selected]

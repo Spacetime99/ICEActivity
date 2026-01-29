@@ -125,7 +125,6 @@ INVALID_LOCATION_PHRASES = {
 
 EVENT_TYPE_PATTERNS: dict[str, list[Pattern[str]]] = {
     "protest": [re.compile(r"\bprotest(?:s|ers|ing)?\b", re.IGNORECASE)],
-    "march": [re.compile(r"\bmarch(?:es|ers|ing)?\b", re.IGNORECASE)],
     "rally": [re.compile(r"\brally(?:ies|ied|ing)?\b", re.IGNORECASE)],
     "demonstration": [
         re.compile(r"\bdemonstration(?:s)?\b", re.IGNORECASE),
@@ -152,14 +151,89 @@ EVENT_TYPE_PATTERNS: dict[str, list[Pattern[str]]] = {
     "revolution": [re.compile(r"\brevolution(?:s|ary)?\b", re.IGNORECASE)],
 }
 
+MARCH_ACTION_PATTERN = re.compile(r"\bmarch(?:es|ers|ing|ed)\b", re.IGNORECASE)
+MARCH_WORD_PATTERN = re.compile(r"\bmarch\b", re.IGNORECASE)
+MARCH_YEAR_RANGE = (1960, 2050)
+MARCH_YEAR_TWO_DIGIT_MIN = 60
+MARCH_YEAR_TWO_DIGIT_MAX = 50
 
-def _detect_event_types(text: str) -> list[str]:
+
+def _extract_prev_word(text: str) -> str | None:
+    match = re.search(r"([A-Za-z]+)\W*$", text)
+    return match.group(1).lower() if match else None
+
+
+def _extract_next_word(text: str) -> str | None:
+    match = re.search(r"^\W*([A-Za-z0-9]+)", text)
+    return match.group(1).lower() if match else None
+
+
+def _is_sentence_start(text: str, index: int) -> bool:
+    prefix = text[:index].rstrip()
+    if not prefix:
+        return True
+    last_char = prefix[-1]
+    return last_char in ".!?\n\r"
+
+
+def _is_march_year_token(token: str | None) -> bool:
+    if not token:
+        return False
+    if re.fullmatch(r"\d{4}", token):
+        year = int(token)
+        return MARCH_YEAR_RANGE[0] <= year <= MARCH_YEAR_RANGE[1]
+    if re.fullmatch(r"\d{2}", token):
+        year = int(token)
+        return year >= MARCH_YEAR_TWO_DIGIT_MIN or year <= MARCH_YEAR_TWO_DIGIT_MAX
+    return False
+
+
+def _build_snippet(text: str, match: re.Match[str], radius: int = 80) -> str:
+    start = max(0, match.start() - radius)
+    end = min(len(text), match.end() + radius)
+    snippet = text[start:end].replace("\n", " ").replace("\r", " ")
+    if start > 0:
+        snippet = "..." + snippet
+    if end < len(text):
+        snippet = snippet + "..."
+    return snippet
+
+
+def _is_march_event(text: str, trigger_out: list[str] | None = None) -> bool:
+    match = MARCH_ACTION_PATTERN.search(text)
+    if match:
+        if trigger_out is not None:
+            trigger_out.append(match.group(0))
+        return True
+    for match in MARCH_WORD_PATTERN.finditer(text):
+        token = text[match.start() : match.end()]
+        if token == "March":
+            if not _is_sentence_start(text, match.start()):
+                continue
+            next_word = _extract_next_word(text[match.end() :])
+            if _is_march_year_token(next_word):
+                continue
+        if trigger_out is not None:
+            trigger_out.append(token)
+        return True
+    return False
+
+
+def _detect_event_types(text: str, triggers: dict[str, str] | None = None) -> list[str]:
     if not text:
         return []
     matches: list[str] = []
     for label, patterns in EVENT_TYPE_PATTERNS.items():
-        if any(pattern.search(text) for pattern in patterns):
+        match = next((pattern.search(text) for pattern in patterns if pattern.search(text)), None)
+        if match:
             matches.append(label)
+            if triggers is not None and label not in triggers:
+                triggers[label] = match.group(0)
+    march_triggers: list[str] = []
+    if _is_march_event(text, trigger_out=march_triggers):
+        matches.append("march")
+        if triggers is not None and march_triggers:
+            triggers["march"] = march_triggers[0]
     return matches
 
 
@@ -2468,6 +2542,8 @@ def extract_triplets_from_dump(
     limit: Optional[int] = None,
     max_article_chars: Optional[int] = None,
     allow_protest_related: bool = False,
+    debug_event_types: bool = False,
+    debug_march: bool = False,
 ) -> Path:
     for key in TIMING_STATS:
         TIMING_STATS[key] = 0.0
@@ -2622,7 +2698,36 @@ def extract_triplets_from_dump(
             _record_timing("sanitize", perf_counter() - sanitize_start)
             if sanitized:
                 event_blob = _build_event_blob(sanitized)
-                sanitized.event_types = _detect_event_types(event_blob)
+                triggers: dict[str, str] | None = None
+                if debug_event_types or debug_march:
+                    triggers = {}
+                    sanitized.event_types = _detect_event_types(event_blob, triggers)
+                else:
+                    sanitized.event_types = _detect_event_types(event_blob)
+                if debug_event_types and sanitized.event_types:
+                    LOGGER.info(
+                        "Event types detected story_id=%s types=%s triggers=%s title=%s who=%s what=%s",
+                        sanitized.story_id,
+                        sanitized.event_types,
+                        triggers or {},
+                        sanitized.title,
+                        sanitized.who,
+                        sanitized.what,
+                    )
+                if debug_march:
+                    march_match = None
+                    if sanitized.event_types and "march" in sanitized.event_types:
+                        march_match = MARCH_ACTION_PATTERN.search(event_blob) or MARCH_WORD_PATTERN.search(event_blob)
+                    else:
+                        march_match = MARCH_WORD_PATTERN.search(event_blob)
+                    if march_match:
+                        LOGGER.info(
+                            "March debug story_id=%s march_event=%s trigger=%s snippet=%s",
+                            sanitized.story_id,
+                            "march" in sanitized.event_types,
+                            (triggers or {}).get("march", march_match.group(0)),
+                            _build_snippet(event_blob, march_match),
+                        )
                 extracted_records.append(sanitized)
 
     if extracted_records:
@@ -2797,6 +2902,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Keep protest-related articles even if they lack immigration keywords.",
     )
     parser.add_argument(
+        "--debug-event-types",
+        action="store_true",
+        help="Log event type detection results for extracted triplets.",
+    )
+    parser.add_argument(
+        "--debug-march",
+        action="store_true",
+        help="Log march keyword detection snippets and whether they count as events.",
+    )
+    parser.add_argument(
         "--hydrate-existing",
         action="store_true",
         help="Replay all triplets_*.jsonl files into the SQLite index (skip extraction).",
@@ -2866,6 +2981,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             limit=args.limit,
             max_article_chars=args.max_article_chars,
             allow_protest_related=args.allow_protests,
+            debug_event_types=args.debug_event_types,
+            debug_march=args.debug_march,
         )
         LOGGER.info("Wrote triplets to %s", output_path)
     return 0

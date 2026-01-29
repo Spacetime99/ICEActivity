@@ -1,0 +1,7 @@
+# Custom RSS feeds for news ingestion.
+# Format:
+#   name|https://example.com/rss
+#   https://example.com/rss
+#
+# Lines starting with "#" are ignored.
+ap-rssapp|https://rss.app/feeds/tbvwWQ97sUlqTAlG.xml
