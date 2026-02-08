@@ -97,6 +97,10 @@ python scripts/extract_triplets.py \
 Helpful switches:
 - `--input-file datasets/news_ingest/news_reports_20260110T030329Z.jsonl`: re-run a specific dump without touching the rest.
 - `--process-all-dumps`: walk every `news_reports_*.jsonl` (oldest → newest) so you can rebuild the entire backlog after fixing GPU memory.
+- `--memory-percent 0.8`: cap the HF model to 80% of GPU RAM (default 90%) to leave a safety buffer for extra passes.
+- `--low-memory`: shorter inputs/tokens and skip the LLM location fallback so the extractor fits comfortably on 32 GB cards.
+- `--skip-llm-location`: disable the helper location extraction entirely and rely on text-based cues.
+- `--quantize 4bit`: load the extractor in quantized/4-bit mode (Phi-3 or Phi-4) for lower VRAM usage.
 
 Outputs:
 - JSONL: `datasets/news_ingest/triplets_<timestamp>.jsonl`
@@ -158,6 +162,12 @@ The helper script `scripts/run_ingest_and_extract.sh` chains a full ingest + tri
    ```
 The script recreates the SQLite caches and JSONL outputs automatically if they’re missing, so new environments can just schedule the timer and let the pipeline bootstrap itself.
 
+## Developer helpers
+- `scripts/run_pytest.sh` / `scripts/list_tests.sh`: activate the venv, ensure pytest is installed, and run/collect the requested tests.
+- `scripts/find_location_gaps.py`: scan the latest ingest dump for articles with location hints but no coordinates.
+- `scripts/run_find_triplet_gaps.sh`: wrap the above to also check `triplets_index.sqlite` for missing or un-geocoded triplets after extraction.
+- `scripts/run_low_memory_pipeline.sh`: run the full ingest→extract→export pipeline with the low-memory Phi-3/4 extractor flags (`--low-memory --skip-llm-location --memory-percent 0.8 --quantize 4bit`).
+
 ## Static Triplet Slices & Map Frontend
 
 ### Static JSON slices (no API)
@@ -197,9 +207,45 @@ VITE_STATIC_DATA_BASE_URL=https://cdn.example.com/data npm run dev
 
 The UI provides 6h/24h/3d/7d filters, groups triplets by rounded coordinates, colors markers by recency, and links back to the source articles.
 
+## Recent updates
+- Stats layout polish (month ticks, y-axis labels, captions, subtitle sizing) in `frontend/src/StatsPage.tsx` and `frontend/src/stats.css`.
+- New coverage cards (protest mix, child mentions, U.S. status, red/blue coverage, top states) in `frontend/src/StatsPage.tsx` with copy updates in `frontend/src/i18n.ts`.
+- Centralized child/U.S. status detection patterns, expanded to cover naturalization/birthright phrasing, in `frontend/src/mentionPatterns.ts`.
+- Added child and U.S. status badges in headlines/stats cards in `frontend/src/HeadlinesPage.tsx` and `frontend/src/StatsPage.tsx`.
+- Weekly ratios zero out low-volume weeks (fewer than 5 articles) in `frontend/src/StatsPage.tsx`.
+
 ## Environment variables
 - `NEWSAPI_KEY`: optional; NewsAPI free tier only covers ~30 days.
 - `GOOGLE_ACC_KEY`: optional; used as a fallback geocoder after Nominatim.
+- `NOTIFY_EMAIL`: recipient for run summary emails (defaults to `jon.skyclad@gmail.com` in `scripts/run_ingest_and_extract.sh`).
+- `NOTIFY_FROM`: sender address for run summary emails (defaults to `SMTP_USER`).
+- `SMTP_HOST`: SMTP host for email notifications (Gmail: `smtp.gmail.com`).
+- `SMTP_PORT`: SMTP port (Gmail STARTTLS: `587`).
+- `SMTP_USER`: SMTP username (Gmail address).
+- `SMTP_PASSWORD`: SMTP password (use a Gmail app password).
+- `SMTP_PASSWORD_FILE`: optional file path for SMTP password (e.g., `config/gm_app_pw.txt`).
+- `SMTP_STARTTLS`: set to `1` to use STARTTLS.
+- `SMTP_TLS`: set to `1` to use SMTP over SSL/TLS (usually port `465`).
+
+Email notifications are best-effort: the script uses `sendmail` if available, otherwise SMTP.
+The scheduled pipeline email from `scripts/run_ingest_and_extract.sh` includes both:
+- step health as `success (exit 0)` / `failure (exit N)` for ingest, extraction, export, deaths update, and upload
+- data volumes (for example `ingest_reports_written`, `triplet_articles_processed`, `triplets_extracted`, `triplet_file_rows`, and output file paths)
+
+This avoids confusion between Unix exit codes (`0` = success) and record totals.
+To test delivery:
+```bash
+SMTP_HOST=smtp.gmail.com \
+SMTP_PORT=587 \
+SMTP_STARTTLS=1 \
+SMTP_USER="your_gmail@gmail.com" \
+SMTP_PASSWORD_FILE=config/gm_app_pw.txt \
+python3 scripts/notify_run.py \
+  --to jon.skyclad@gmail.com \
+  --from your_gmail@gmail.com \
+  --subject "ICEActivity test" \
+  --body "Test email from notify_run.py"
+```
 
 ## Facility catalog
 - `assets/ice_facilities.csv` is loaded first; matches on facility names or city/state resolve immediately and do not hit external geocoders.
@@ -212,9 +258,10 @@ The UI provides 6h/24h/3d/7d filters, groups triplets by rounded coordinates, co
 
 ## Logging
 - Per-run CSV log: `datasets/news_ingest/run_log.csv`
-  - Fields: `timestamp_iso,new_articles,facility_hits,geocode_cache_hits,geocode_nominatim_hits,geocode_google_hits,geocode_failures`
+  - Fields: `timestamp_iso,new_articles,facility_hits,geocode_cache_hits,geocode_nominatim_hits,geocode_google_hits,geocode_failures,fetch_failures`
 - stdout logs show fetch progress, filter counts, content fetches, geocode attempts, and resolution paths.
 
 ## Notes
 - Respect Google and Nominatim terms; keep API keys out of version control.
 - `.gitignore` excludes `.env`, `.venv/`, datasets, and caches.***
+- **Workflow note:** Please put runnable commands/scripts in files inside the repo. I can't reliably copy/paste code from chat output.
