@@ -191,7 +191,8 @@ const MAP_URL = `${NAV_BASE_URL}`;
 const PROTESTS_URL = `${NAV_BASE_URL}protests.html`;
 const STATS_URL = `${NAV_BASE_URL}stats.html`;
 const RESOURCES_URL = `${NAV_BASE_URL}#resources`;
-const CHARTS_URL = `${NAV_BASE_URL}#charts`;
+const CHARTS_URL = `${NAV_BASE_URL}charts.html`;
+const DEATHS_URL = `${NAV_BASE_URL}deaths.html`;
 const ABOUT_URL = `${NAV_BASE_URL}#about`;
 const FEEDBACK_URL = "https://tally.so/r/lbOAvo";
 const ANALYTICS_PAGE = "headlines";
@@ -1133,6 +1134,7 @@ const HeadlinesPage = () => {
       <a href={RESOURCES_URL}>{t.resourcesTab}</a>
       <a href={CHARTS_URL}>{t.chartsTab}</a>
       <a href={STATS_URL}>{t.statsTab}</a>
+      <a href={DEATHS_URL}>Deaths</a>
       <a className="ghost" href={ABOUT_URL}>
         {ABOUT_CONTENT.title[language]}
       </a>
@@ -1464,7 +1466,7 @@ const HeadlinesPage = () => {
           <span className="nav-icon">
             <HeadlinesIcon />
           </span>
-          <span className="nav-label">{t.headlinesTab}</span>
+          <span className="nav-label">{t.newsTab}</span>
         </a>
         <a href={PROTESTS_URL}>
           <span className="nav-icon">
@@ -1490,6 +1492,12 @@ const HeadlinesPage = () => {
           </span>
           <span className="nav-label">{t.statsTab}</span>
         </a>
+        <a href={DEATHS_URL}>
+          <span className="nav-icon">
+            <StatsIcon />
+          </span>
+          <span className="nav-label">Deaths</span>
+        </a>
         <a href={ABOUT_URL}>
           <span className="nav-icon">
             <AboutIcon />
@@ -1503,6 +1511,9 @@ const HeadlinesPage = () => {
           <span className="nav-label">{t.feedbackTab}</span>
         </a>
       </nav>
+      <footer className="site-footer">
+        <p className="site-footer-note">{t.footerDisclaimer}</p>
+      </footer>
     </div>
   );
 };

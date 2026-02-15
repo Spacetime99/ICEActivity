@@ -6,7 +6,9 @@ import argparse
 import json
 import os
 import re
+import sys
 import tempfile
+import unicodedata
 import uuid
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
@@ -81,6 +83,22 @@ TRIANGULATION_REQUIRED_DOMAINS = {
     "nbcnews.com",
 }
 
+
+def _bool_env(name: str) -> bool:
+    value = os.getenv(name, "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _resolve_local_model_path(model_id: str) -> str | None:
+    if not (_bool_env("HF_HUB_OFFLINE") or _bool_env("TRANSFORMERS_OFFLINE")):
+        return None
+    try:
+        from huggingface_hub import snapshot_download
+
+        return snapshot_download(model_id, local_files_only=True)
+    except Exception:
+        return None
+
 DEATH_KEYWORDS = [
     "killed",
     "fatally",
@@ -154,6 +172,8 @@ FIELD_ORDER = [
     "city",
     "county",
     "state",
+    "initial_custody_location",
+    "death_location",
     "facility_or_location",
     "incident_date",
     "incident_time",
@@ -347,6 +367,242 @@ def _name_merge_key(name: str | None) -> str | None:
     return f"{first} {last}".lower()
 
 
+ROLE_NOUNS = {
+    "representative",
+    "spokesperson",
+    "official",
+    "officials",
+    "officer",
+    "officers",
+    "agent",
+    "agents",
+    "witness",
+    "attorney",
+    "lawyer",
+    "family",
+    "families",
+    "relative",
+    "relatives",
+    "advocate",
+    "activist",
+    "protester",
+    "protesters",
+    "suspect",
+    "victim",
+    "inspector",
+    "general",
+}
+
+
+def _strip_diacritics(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value)
+    return "".join(ch for ch in normalized if not unicodedata.combining(ch))
+
+
+def _canonical_person_tokens(name: str | None) -> list[str]:
+    if not name:
+        return []
+    text = _strip_diacritics(name)
+    text = text.replace("-", " ").replace("'", " ")
+    text = re.sub(r"[^A-Za-z ]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip().lower()
+    if not text:
+        return []
+    return [token for token in text.split(" ") if token]
+
+
+def _canonical_person_name(name: str | None) -> str | None:
+    tokens = _canonical_person_tokens(name)
+    if len(tokens) < 2:
+        return None
+    return " ".join(tokens)
+
+
+def _is_likely_person_name(name: str | None) -> bool:
+    tokens = _canonical_person_tokens(name)
+    if len(tokens) < 2:
+        return False
+    if len(tokens) > 5:
+        return False
+    if any(token in ROLE_NOUNS for token in tokens):
+        return False
+    if all(len(token) <= 2 for token in tokens):
+        return False
+    return True
+
+
+def _dates_within_days(first: str | None, second: str | None, max_days: int) -> bool:
+    first_date = _parse_date(first)
+    second_date = _parse_date(second)
+    if not first_date or not second_date:
+        return False
+    return abs((first_date - second_date).days) <= max_days
+
+
+def _source_url_set(record: dict[str, Any]) -> set[str]:
+    urls: set[str] = set()
+    for source in record.get("sources") or []:
+        url = _clean_string(source.get("url"))
+        if url:
+            urls.add(url)
+    primary = _clean_string(record.get("primary_report_url"))
+    if primary:
+        urls.add(primary)
+    return urls
+
+
+def _record_context(record: dict[str, Any]) -> str:
+    return _clean_string(record.get("death_context")) or DEFAULT_CONTEXT
+
+
+def _dates_within_context_window(first: str | None, second: str | None, context: str) -> bool:
+    # Street incidents are usually covered for days; detention reports can lag longer.
+    max_days = 14 if context == "street" else 180
+    return _dates_within_days(first, second, max_days=max_days)
+
+
+def _record_quality_score(record: dict[str, Any]) -> tuple[int, int, int]:
+    sources = record.get("sources") or []
+    source_types = {_clean_string(source.get("source_type")) for source in sources}
+    has_official_report = 1 if "official_report" in source_types else 0
+    has_known_location = 1 if _make_location_key(record) != "unknown" else 0
+    confidence = int(record.get("confidence_score") or 0)
+    return has_official_report, has_known_location, confidence
+
+
+def _prefer_date_of_death(current: str | None, incoming: str | None) -> str | None:
+    current_clean = _clean_string(current)
+    incoming_clean = _clean_string(incoming)
+    if not current_clean:
+        return incoming_clean
+    if not incoming_clean:
+        return current_clean
+    current_date = _parse_date(current_clean)
+    incoming_date = _parse_date(incoming_clean)
+    if current_date and incoming_date:
+        return current_clean if current_date <= incoming_date else incoming_clean
+    # Keep more specific YYYY-MM-DD over YYYY-MM / YYYY when parse fails or precision differs.
+    if len(incoming_clean) > len(current_clean):
+        return incoming_clean
+    return current_clean
+
+
+def _merge_duplicate_record(primary: dict[str, Any], duplicate: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(primary)
+    for field in FIELD_ORDER:
+        if field in {"id", "sources"}:
+            continue
+        current = merged.get(field)
+        incoming = duplicate.get(field)
+        if field == "date_of_death":
+            merged[field] = _prefer_date_of_death(current, incoming)
+            continue
+        if field == "person_name":
+            if not _is_likely_person_name(current) and _is_likely_person_name(incoming):
+                merged[field] = incoming
+            elif current is None and incoming is not None:
+                merged[field] = incoming
+            continue
+        if field == "manual_review":
+            merged[field] = bool(current) or bool(incoming)
+            continue
+        if field == "confidence_score":
+            merged[field] = max(int(current or 0), int(incoming or 0))
+            continue
+        if current in (None, "", [], {}):
+            if incoming not in (None, "", [], {}):
+                merged[field] = incoming
+
+    aliases = sorted(set((primary.get("aliases") or [])) | set((duplicate.get("aliases") or [])))
+    merged["aliases"] = aliases
+    merged_sources = _dedupe_sources(primary.get("sources", []), duplicate.get("sources", []))
+    merged["sources"] = merged_sources
+    merged["primary_report_url"] = _derive_primary_report_url(merged)
+    return _order_fields(merged, FIELD_ORDER)
+
+
+def _is_duplicate_pair(first: dict[str, Any], second: dict[str, Any]) -> bool:
+    first_name = _canonical_person_name(_clean_string(first.get("person_name")))
+    second_name = _canonical_person_name(_clean_string(second.get("person_name")))
+    if not first_name or first_name != second_name:
+        return False
+    first_context = _record_context(first)
+    second_context = _record_context(second)
+    if first_context != second_context:
+        return False
+
+    first_urls = _source_url_set(first)
+    second_urls = _source_url_set(second)
+    if first_urls and second_urls and first_urls.intersection(second_urls):
+        return True
+
+    first_date = _clean_string(first.get("date_of_death"))
+    second_date = _clean_string(second.get("date_of_death"))
+    first_location = _make_location_key(first).lower()
+    second_location = _make_location_key(second).lower()
+
+    if first_date and second_date and first_date == second_date:
+        if first_context == "detention":
+            return True
+        if first_location == "unknown" or second_location == "unknown" or first_location == second_location:
+            return True
+
+    if (
+        first_location != "unknown"
+        and second_location != "unknown"
+        and first_location == second_location
+        and _dates_within_context_window(first_date, second_date, context=first_context)
+    ):
+        return True
+
+    return False
+
+
+def collapse_duplicate_records(records: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    grouped: dict[tuple[str, str], list[str]] = {}
+    for record_id, record in records.items():
+        canonical = _canonical_person_name(_clean_string(record.get("person_name")))
+        if not canonical:
+            continue
+        context = _record_context(record)
+        grouped.setdefault((canonical, context), []).append(record_id)
+
+    for (_, _), ids in grouped.items():
+        if len(ids) < 2:
+            continue
+        candidate_ids = ids[:]
+        consumed: set[str] = set()
+        for idx, left_id in enumerate(candidate_ids):
+            if left_id in consumed or left_id not in records:
+                continue
+            left = records[left_id]
+            cluster = [left_id]
+            for right_id in candidate_ids[idx + 1 :]:
+                if right_id in consumed or right_id not in records:
+                    continue
+                right = records[right_id]
+                if _is_duplicate_pair(left, right):
+                    cluster.append(right_id)
+            if len(cluster) < 2:
+                continue
+
+            survivor_id = max(cluster, key=lambda rid: _record_quality_score(records[rid]))
+            merged = records[survivor_id]
+            for rid in cluster:
+                if rid == survivor_id:
+                    continue
+                merged = _merge_duplicate_record(merged, records[rid])
+            merged["id"] = survivor_id
+            records[survivor_id] = merged
+            for rid in cluster:
+                if rid == survivor_id:
+                    continue
+                consumed.add(rid)
+                records.pop(rid, None)
+
+    return records
+
+
 def _build_uuid(name: str | None, date_value: str | None, location: str, context: str) -> str:
     if name:
         base = f"{name}|{date_value or ''}|{location}"
@@ -388,6 +644,57 @@ def _normalize_location_category(value: str | None) -> str:
     if cleaned in ALLOWED_LOCATION_CATEGORY:
         return cleaned
     return "unknown"
+
+
+def _sanitize_city_value(value: str | None) -> str | None:
+    cleaned = _clean_string(value)
+    if not cleaned:
+        return None
+    if len(cleaned) > 60:
+        return None
+    parts = [part for part in re.split(r"\s+", cleaned) if part]
+    if len(parts) > 4:
+        return None
+    lowered = f" {cleaned.lower()} "
+    if any(token in lowered for token in (" detention ", " custody ", " passed away ", " death ")):
+        return None
+    if any(char.isdigit() for char in cleaned):
+        return None
+    return cleaned
+
+
+def _sanitize_state_value(value: str | None) -> str | None:
+    cleaned = _clean_string(value)
+    if not cleaned:
+        return None
+    if len(cleaned) > 30:
+        return None
+    parts = [part for part in re.split(r"\s+", cleaned) if part]
+    if len(parts) > 3:
+        return None
+    if any(char.isdigit() for char in cleaned):
+        return None
+    return cleaned
+
+
+def _sanitize_facility_or_location(value: str | None) -> str | None:
+    cleaned = _clean_string(value)
+    if not cleaned:
+        return None
+    sanitized = death_reports._sanitize_location_candidate(cleaned)
+    if sanitized:
+        return sanitized
+    if len(cleaned) > 110:
+        return None
+    if len(cleaned.split()) > 14:
+        return None
+    lowered = f" {cleaned.lower()} "
+    if any(
+        token in lowered
+        for token in (" who ", " which ", " that ", " pending ", " noted ", " assessment ", " on the same date ")
+    ):
+        return None
+    return cleaned
 
 
 def _derive_facility_name(record: dict[str, Any]) -> str | None:
@@ -507,11 +814,23 @@ class DeathDetailExtractor:
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        local_only = _bool_env("HF_HUB_OFFLINE") or _bool_env("TRANSFORMERS_OFFLINE")
+        cache_dir = os.getenv("HF_HUB_CACHE") or None
+        model_ref = model_id
+        local_path = _resolve_local_model_path(model_id) if local_only else None
+        if local_path:
+            model_ref = local_path
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            model_ref,
+            cache_dir=cache_dir,
+            local_files_only=local_only,
+        )
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_id,
+            model_ref,
             torch_dtype=dtype,
             device_map="auto",
+            cache_dir=cache_dir,
+            local_files_only=local_only,
         )
         self.temperature = temperature
         self.repetition_penalty = repetition_penalty
@@ -591,6 +910,27 @@ class DeathDetailExtractor:
         if "JSON:" in decoded:
             decoded = decoded.split("JSON:", 1)[-1]
         return _extract_json_object(decoded)
+
+    def close(self) -> None:
+        import gc
+
+        model = getattr(self, "model", None)
+        tokenizer = getattr(self, "tokenizer", None)
+        if model is not None:
+            del model
+        if tokenizer is not None:
+            del tokenizer
+        self.model = None
+        self.tokenizer = None
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
+        except Exception:
+            pass
+        gc.collect()
 
 
 def _normalize_sources(sources: Any, access_date: str) -> list[dict[str, Any]]:
@@ -694,10 +1034,14 @@ def normalize_record(record: dict[str, Any], access_date: str) -> dict[str, Any]
         "gender": _clean_string(record.get("gender")),
         "date_of_death": _clean_string(record.get("date_of_death")),
         "date_precision": _clean_string(record.get("date_precision")),
-        "city": _clean_string(record.get("city")),
+        "city": _sanitize_city_value(_clean_string(record.get("city"))),
         "county": _clean_string(record.get("county")),
-        "state": _clean_string(record.get("state")),
-        "facility_or_location": _clean_string(record.get("facility_or_location")),
+        "state": _sanitize_state_value(_clean_string(record.get("state"))),
+        "initial_custody_location": _sanitize_facility_or_location(
+            _clean_string(record.get("initial_custody_location")),
+        ),
+        "death_location": _sanitize_facility_or_location(_clean_string(record.get("death_location"))),
+        "facility_or_location": _sanitize_facility_or_location(_clean_string(record.get("facility_or_location"))),
         "incident_date": _clean_string(record.get("incident_date")),
         "incident_time": _clean_string(record.get("incident_time")),
         "incident_location": _clean_string(record.get("incident_location")),
@@ -745,6 +1089,14 @@ def normalize_record(record: dict[str, Any], access_date: str) -> dict[str, Any]
             cleaned,
             cleaned.get("facility_name"),
         )
+
+    is_news_street = cleaned.get("death_context") == "street" and any(
+        source.get("source_type") == "news" for source in cleaned.get("sources") or []
+    )
+    if is_news_street and not _is_likely_person_name(cleaned.get("person_name")):
+        cleaned["person_name"] = None
+        cleaned["manual_review"] = True
+        cleaned["confidence_score"] = min(int(cleaned.get("confidence_score") or 0), 35)
 
     if cleaned["suspect_identified"] is None:
         if cleaned.get("suspect_name") or cleaned.get("suspect_role"):
@@ -856,6 +1208,9 @@ def merge_records(
     diff_entries: list[dict[str, Any]] = []
     name_date_index: dict[str, str] = {}
     name_date_location_index: dict[str, str] = {}
+    canonical_name_index: dict[str, list[str]] = {}
+    merge_name_index: dict[str, list[str]] = {}
+    source_url_index: dict[str, list[str]] = {}
 
     for record_id, record in existing.items():
         name = _clean_string(record.get("person_name"))
@@ -869,24 +1224,100 @@ def merge_records(
         if normalized_name and location_key != "unknown":
             fuzzy_key = f"{normalized_name}|{date_value}|{location_key.lower()}"
             name_date_location_index.setdefault(fuzzy_key, record_id)
+        if normalized_name:
+            merge_name_index.setdefault(normalized_name, []).append(record_id)
+        canonical = _canonical_person_name(name)
+        if canonical:
+            canonical_name_index.setdefault(canonical, []).append(record_id)
+        for url in _source_url_set(record):
+            source_url_index.setdefault(url, []).append(record_id)
 
     for record in incoming:
         record_id = record["id"]
         if record_id not in existing:
             name = _clean_string(record.get("person_name"))
             date_value = _clean_string(record.get("date_of_death"))
+            context = _clean_string(record.get("death_context"))
+            location_key = _make_location_key(record)
+            canonical = _canonical_person_name(name)
+            source_urls = _source_url_set(record)
+            match_id = None
             if name and date_value:
                 key = f"{name.lower()}|{date_value}"
                 match_id = name_date_index.get(key)
                 if not match_id:
-                    location_key = _make_location_key(record)
                     normalized_name = _name_merge_key(name)
                     if normalized_name and location_key != "unknown":
                         fuzzy_key = f"{normalized_name}|{date_value}|{location_key.lower()}"
                         match_id = name_date_location_index.get(fuzzy_key)
-                if match_id:
-                    record_id = match_id
-                    record["id"] = match_id
+            if not match_id and canonical:
+                candidates = canonical_name_index.get(canonical, [])
+                for candidate_id in candidates:
+                    candidate = existing.get(candidate_id)
+                    if not candidate:
+                        continue
+                    if context and candidate.get("death_context") != context:
+                        continue
+                    candidate_location = _make_location_key(candidate)
+                    if (
+                        location_key != "unknown"
+                        and candidate_location != "unknown"
+                        and candidate_location.lower() != location_key.lower()
+                    ):
+                        continue
+                    if not _dates_within_days(
+                        _clean_string(candidate.get("date_of_death")),
+                        date_value,
+                        max_days=7,
+                    ):
+                        continue
+                    match_id = candidate_id
+                    break
+            if not match_id and name:
+                merge_name = _name_merge_key(name)
+                if merge_name:
+                    candidates = merge_name_index.get(merge_name, [])
+                    for candidate_id in candidates:
+                        candidate = existing.get(candidate_id)
+                        if not candidate:
+                            continue
+                        if context and candidate.get("death_context") != context:
+                            continue
+                        candidate_location = _make_location_key(candidate)
+                        if (
+                            location_key != "unknown"
+                            and candidate_location != "unknown"
+                            and candidate_location.lower() != location_key.lower()
+                        ):
+                            continue
+                        if not _dates_within_days(
+                            _clean_string(candidate.get("date_of_death")),
+                            date_value,
+                            max_days=7,
+                        ):
+                            continue
+                        match_id = candidate_id
+                        break
+            if not match_id and canonical and source_urls:
+                candidates: set[str] = set()
+                for url in source_urls:
+                    candidates.update(source_url_index.get(url, []))
+                for candidate_id in candidates:
+                    candidate = existing.get(candidate_id)
+                    if not candidate:
+                        continue
+                    candidate_canonical = _canonical_person_name(
+                        _clean_string(candidate.get("person_name")),
+                    )
+                    if candidate_canonical != canonical:
+                        continue
+                    if context and candidate.get("death_context") != context:
+                        continue
+                    match_id = candidate_id
+                    break
+            if match_id:
+                record_id = match_id
+                record["id"] = match_id
         if record_id not in existing:
             existing[record_id] = record
             added += 1
@@ -902,6 +1333,13 @@ def merge_records(
                 if normalized_name and location_key != "unknown":
                     fuzzy_key = f"{normalized_name}|{date_value}|{location_key.lower()}"
                     name_date_location_index.setdefault(fuzzy_key, record_id)
+                if normalized_name:
+                    merge_name_index.setdefault(normalized_name, []).append(record_id)
+                canonical = _canonical_person_name(name)
+                if canonical:
+                    canonical_name_index.setdefault(canonical, []).append(record_id)
+            for url in _source_url_set(record):
+                source_url_index.setdefault(url, []).append(record_id)
             diff = dict(record)
             diff["change_type"] = "added"
             diff_entries.append(diff)
@@ -940,6 +1378,8 @@ def merge_records(
         update_field("city", record.get("city"))
         update_field("county", record.get("county"))
         update_field("state", record.get("state"))
+        update_field("initial_custody_location", record.get("initial_custody_location"))
+        update_field("death_location", record.get("death_location"))
         update_field("facility_or_location", record.get("facility_or_location"))
         update_field("incident_date", record.get("incident_date"))
         update_field("incident_time", record.get("incident_time"))
@@ -983,6 +1423,20 @@ def merge_records(
         if len(sources_after) != len(sources_before):
             change_log.append(ChangeLog("sources", sources_before, sources_after))
             current["sources"] = sources_after
+        canonical = _canonical_person_name(_clean_string(current.get("person_name")))
+        merge_name = _name_merge_key(_clean_string(current.get("person_name")))
+        if canonical:
+            ids = canonical_name_index.setdefault(canonical, [])
+            if record_id not in ids:
+                ids.append(record_id)
+        if merge_name:
+            ids = merge_name_index.setdefault(merge_name, [])
+            if record_id not in ids:
+                ids.append(record_id)
+        for url in _source_url_set(current):
+            ids = source_url_index.setdefault(url, [])
+            if record_id not in ids:
+                ids.append(record_id)
 
         change_log.extend(_apply_source_requirements(current))
         change_log.extend(_apply_triangulation_requirements(current))
@@ -1141,11 +1595,13 @@ def _is_generic_actor(name: str | None) -> bool:
     if not name:
         return True
     lowered = name.lower()
-    return any(
+    blocked = any(
         phrase in lowered
         for phrase in (
-            "man",
-            "woman",
+            " a man",
+            " a woman",
+            "young man",
+            "young woman",
             "protester",
             "protesters",
             "protestor",
@@ -1168,6 +1624,9 @@ def _is_generic_actor(name: str | None) -> bool:
             "immigration officers",
         )
     )
+    if blocked:
+        return True
+    return not _is_likely_person_name(name)
 
 
 def _parse_location(where_text: str | None) -> tuple[str | None, str | None, str | None]:
@@ -1231,6 +1690,21 @@ def _extract_source_domains(record: dict[str, Any]) -> set[str]:
         if domain:
             domains.add(domain)
     return domains
+
+
+def _should_drop_record(record: dict[str, Any]) -> bool:
+    name = record.get("person_name")
+    has_news_or_release_source = any(
+        source.get("source_type") in {"news", "official_release"} for source in record.get("sources") or []
+    )
+    if has_news_or_release_source and not _is_likely_person_name(name):
+        return True
+    is_news_street = record.get("death_context") == "street" and any(
+        source.get("source_type") == "news" for source in record.get("sources") or []
+    )
+    if is_news_street and not _is_likely_person_name(name):
+        return True
+    return False
 
 
 
@@ -1318,8 +1792,9 @@ def triplets_to_records(
         title = _clean_string(triplet.get("title")) or ""
         who = _clean_string(triplet.get("who")) or ""
         what = _clean_string(triplet.get("what")) or ""
+        target = _clean_string(triplet.get("target")) or ""
         where_text = _clean_string(triplet.get("where")) or ""
-        base_text = " ".join(part for part in (title, who, what, where_text) if part).strip()
+        base_text = " ".join(part for part in (title, who, what, target, where_text) if part).strip()
         if not base_text:
             continue
         if not _is_death_lead(base_text) or not _is_ice_related(base_text):
@@ -1334,6 +1809,8 @@ def triplets_to_records(
         city, county, state = _parse_location(where_text or None)
 
         person_name = None if _is_generic_actor(who) else who
+        if not person_name and target and not _is_generic_actor(target):
+            person_name = target
         if not person_name:
             continue
         date_of_death = published_at.date().isoformat()
@@ -1464,6 +1941,8 @@ def ice_report_entry_to_record(
             "city": None,
             "county": None,
             "state": None,
+            "initial_custody_location": _clean_string(report.get("initial_custody_location")),
+            "death_location": _clean_string(report.get("death_location")),
             "facility_or_location": _clean_string(report.get("facility_or_location")),
             "lat": None,
             "lon": None,
@@ -1511,16 +1990,32 @@ def fetch_ice_report_records(
     use_playwright: bool,
     access_date: str,
     min_year: int,
+    llm_location_enrich: bool = False,
+    llm_model_id: str = death_reports.DEFAULT_LOCATION_LLM_MODEL_ID,
 ) -> list[dict[str, Any]]:
     if not urls and not include_index:
         return []
-    report_entries = death_reports.fetch_report_entries(
-        urls=urls,
-        include_index=include_index,
-        index_url=index_url,
-        use_playwright=use_playwright,
-        min_death_year=min_year,
-    )
+    llm_extractor = None
+    if llm_location_enrich:
+        try:
+            llm_extractor = death_reports.DeathReportLocationExtractor(model_id=llm_model_id)
+        except Exception as exc:
+            print(
+                f"Warning: ICE report location LLM init failed; continuing without it: {exc}",
+            )
+            llm_extractor = None
+    try:
+        report_entries = death_reports.fetch_report_entries(
+            urls=urls,
+            include_index=include_index,
+            index_url=index_url,
+            use_playwright=use_playwright,
+            min_death_year=min_year,
+            llm_extractor=llm_extractor,
+        )
+    finally:
+        if llm_extractor is not None:
+            llm_extractor.close()
     records: list[dict[str, Any]] = []
     for report in report_entries:
         record = ice_report_entry_to_record(report, access_date=access_date, min_year=min_year)
@@ -1680,6 +2175,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ice-report-include-index", action="store_true")
     parser.add_argument("--ice-report-index-url", type=str, default=death_reports.ICE_REPORTS_INDEX_URL)
     parser.add_argument("--ice-report-use-playwright", action="store_true")
+    parser.add_argument(
+        "--ice-report-llm-location-enrich",
+        action="store_true",
+        help="Use local LLM fallback for custody/death location extraction in ICE report text.",
+    )
+    parser.add_argument(
+        "--ice-report-llm-model-id",
+        type=str,
+        default=death_reports.DEFAULT_LOCATION_LLM_MODEL_ID,
+    )
     parser.add_argument("--skip-ice-reports", action="store_true")
     parser.add_argument("--ice-min-year", type=int, default=2025)
     args = parser.parse_args(argv)
@@ -1708,19 +2213,30 @@ def main(argv: list[str] | None = None) -> int:
             article_text_lookup = build_article_text_lookup(triplets, args.window_days)
         llm_extractor = None
         if args.triplet_llm_enrich:
-            llm_extractor = DeathDetailExtractor(
-                model_id=args.triplet_llm_model_id,
-                temperature=args.triplet_llm_temperature,
-                repetition_penalty=args.triplet_llm_repetition_penalty,
-                max_new_tokens=args.triplet_llm_max_new_tokens,
-                max_chars=args.triplet_llm_max_chars,
+            try:
+                llm_extractor = DeathDetailExtractor(
+                    model_id=args.triplet_llm_model_id,
+                    temperature=args.triplet_llm_temperature,
+                    repetition_penalty=args.triplet_llm_repetition_penalty,
+                    max_new_tokens=args.triplet_llm_max_new_tokens,
+                    max_chars=args.triplet_llm_max_chars,
+                )
+            except Exception as exc:
+                print(
+                    f"Warning: LLM init failed; continuing without LLM enrichment: {exc}",
+                    file=sys.stderr,
+                )
+                llm_extractor = None
+        try:
+            triplet_records = triplets_to_records(
+                triplets,
+                access_date,
+                article_text_lookup=article_text_lookup,
+                llm_extractor=llm_extractor,
             )
-        triplet_records = triplets_to_records(
-            triplets,
-            access_date,
-            article_text_lookup=article_text_lookup,
-            llm_extractor=llm_extractor,
-        )
+        finally:
+            if llm_extractor is not None:
+                llm_extractor.close()
         incoming_records.extend(triplet_records)
 
     if not args.skip_ice_reports:
@@ -1751,6 +2267,8 @@ def main(argv: list[str] | None = None) -> int:
                     use_playwright=args.ice_report_use_playwright,
                     access_date=access_date,
                     min_year=args.ice_min_year,
+                    llm_location_enrich=args.ice_report_llm_location_enrich,
+                    llm_model_id=args.ice_report_llm_model_id,
                 ),
             )
         except Exception as exc:
@@ -1777,8 +2295,9 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(_order_fields(record, FIELD_ORDER), ensure_ascii=True))
 
     merged, diff_entries, summary = merge_records(existing, incoming_records)
+    merged = collapse_duplicate_records(merged)
     ordered = sorted(
-        merged.values(),
+        [record for record in merged.values() if not _should_drop_record(record)],
         key=lambda record: (
             record.get("date_of_death") or "",
             record.get("person_name") or "",
@@ -1793,6 +2312,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.dry_run:
         write_jsonl_atomic(args.out / "deaths.jsonl", ordered)
+        write_json_atomic(args.out / "deaths.json", ordered)
         write_json_atomic(args.out / "index.json", build_index(ordered))
         diff_path = build_diff_path(args.out)
         if diff_entries:

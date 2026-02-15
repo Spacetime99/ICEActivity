@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SITE_DATA_DIR="${SITE_DATA_DIR:-${REPO_ROOT}/site/data}"
 SFTP_HOST="${SFTP_HOST:-www315.your-server.de}"
 SFTP_USER="${SFTP_USER:-efsxfy}"
 REMOTE_ROOT="${REMOTE_ROOT:-public_html}"
@@ -15,6 +17,23 @@ REDIRECT_ROOT="${REDIRECT_ROOT:-1}"
 HTACCESS_PATH="${HTACCESS_PATH:-}"
 ALLOW_ROOT_ROBOTS="${ALLOW_ROOT_ROBOTS:-1}"
 ROOT_ROBOTS_PATH="${ROOT_ROBOTS_PATH:-}"
+
+# Ensure data upload includes latest deaths artifacts.
+if [ -f "${SITE_DATA_DIR}/deaths.jsonl" ]; then
+  mkdir -p "${DATA_DIR}"
+  cp "${SITE_DATA_DIR}/deaths.jsonl" "${DATA_DIR}/deaths.jsonl"
+fi
+if [ ! -f "${SITE_DATA_DIR}/deaths.json" ] && [ -f "${SITE_DATA_DIR}/deaths.jsonl" ]; then
+  python3 -c 'import json,pathlib; p=pathlib.Path("site/data/deaths.jsonl"); o=pathlib.Path("site/data/deaths.json"); o.write_text(json.dumps([json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()], ensure_ascii=True, indent=2)+"\n", encoding="utf-8")'
+fi
+if [ -f "${SITE_DATA_DIR}/deaths.json" ]; then
+  mkdir -p "${DATA_DIR}"
+  cp "${SITE_DATA_DIR}/deaths.json" "${DATA_DIR}/deaths.json"
+fi
+if [ -f "${SITE_DATA_DIR}/index.json" ]; then
+  mkdir -p "${DATA_DIR}"
+  cp "${SITE_DATA_DIR}/index.json" "${DATA_DIR}/index.json"
+fi
 
 if [ ! -d "$DATA_DIR" ]; then
   echo "Data directory not found: $DATA_DIR" >&2
@@ -92,9 +111,11 @@ SFTP_BATCH="$(mktemp)"
   done < <(find "$DATA_DIR" -type f | sort)
   if [ "$REDIRECT_ROOT" = "1" ] && [ -n "$HTACCESS_PATH" ]; then
     echo "put ${HTACCESS_PATH} ${REMOTE_ROOT}/.htaccess"
+    echo "chmod 644 ${REMOTE_ROOT}/.htaccess"
   fi
   if [ "$ALLOW_ROOT_ROBOTS" = "1" ] && [ -n "$ROOT_ROBOTS_PATH" ]; then
     echo "put ${ROOT_ROBOTS_PATH} ${REMOTE_ROOT}/robots.txt"
+    echo "chmod 644 ${REMOTE_ROOT}/robots.txt"
   fi
 } > "$SFTP_BATCH"
 

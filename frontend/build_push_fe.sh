@@ -4,6 +4,27 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SITE_DATA_DIR="${SITE_DATA_DIR:-${REPO_ROOT}/site/data}"
+FRONTEND_DATA_DIR="${SCRIPT_DIR}/public/data"
+
+# Ensure frontend build includes latest deaths artifacts.
+if [ -f "${SITE_DATA_DIR}/deaths.jsonl" ]; then
+  mkdir -p "${FRONTEND_DATA_DIR}"
+  cp "${SITE_DATA_DIR}/deaths.jsonl" "${FRONTEND_DATA_DIR}/deaths.jsonl"
+fi
+if [ ! -f "${SITE_DATA_DIR}/deaths.json" ] && [ -f "${SITE_DATA_DIR}/deaths.jsonl" ]; then
+  python3 -c 'import json,pathlib; p=pathlib.Path("site/data/deaths.jsonl"); o=pathlib.Path("site/data/deaths.json"); o.write_text(json.dumps([json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()], ensure_ascii=True, indent=2)+"\n", encoding="utf-8")'
+fi
+if [ -f "${SITE_DATA_DIR}/deaths.json" ]; then
+  mkdir -p "${FRONTEND_DATA_DIR}"
+  cp "${SITE_DATA_DIR}/deaths.json" "${FRONTEND_DATA_DIR}/deaths.json"
+fi
+if [ -f "${SITE_DATA_DIR}/index.json" ]; then
+  mkdir -p "${FRONTEND_DATA_DIR}"
+  cp "${SITE_DATA_DIR}/index.json" "${FRONTEND_DATA_DIR}/index.json"
+fi
+
 npm run build
 SFTP_HOST="${SFTP_HOST:-www315.your-server.de}"
 SFTP_USER="${SFTP_USER:-efsxfy}"
@@ -89,9 +110,11 @@ SFTP_BATCH="$(mktemp)"
   done < <(find dist -type f | sort)
   if [ "$REDIRECT_ROOT" = "1" ] && [ -n "$HTACCESS_PATH" ]; then
     echo "put ${HTACCESS_PATH} ${REMOTE_ROOT}/.htaccess"
+    echo "chmod 644 ${REMOTE_ROOT}/.htaccess"
   fi
   if [ "$ALLOW_ROOT_ROBOTS" = "1" ] && [ -n "$ROOT_ROBOTS_PATH" ]; then
     echo "put ${ROOT_ROBOTS_PATH} ${REMOTE_ROOT}/robots.txt"
+    echo "chmod 644 ${REMOTE_ROOT}/robots.txt"
   fi
 } > "$SFTP_BATCH"
 

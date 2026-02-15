@@ -7,6 +7,7 @@ import {
   useMap,
   Marker,
   Tooltip,
+  Pane,
 } from "react-leaflet";
 import L, { LatLngBoundsExpression } from "leaflet";
 import { STATIC_DATA_BASE_URL } from "./config";
@@ -17,7 +18,7 @@ import type { DetentionFacility } from "./detentionFacilities";
 import { getResourceSections } from "./resources";
 import type { FieldOffice } from "./fieldOffices";
 import { DEFAULT_LANGUAGE, LANGUAGE_LABELS, TRANSLATIONS, type Language } from "./i18n";
-import { CHARTS, type ChartItem } from "./charts";
+import ChartsView from "./ChartsView";
 import {
   buildTripletBlob,
   isChildMention,
@@ -194,6 +195,8 @@ const NAV_BASE_URL = import.meta.env.BASE_URL ?? "/";
 const HEADLINES_URL = `${NAV_BASE_URL}headlines.html`;
 const PROTESTS_URL = `${NAV_BASE_URL}protests.html`;
 const STATS_URL = `${NAV_BASE_URL}stats.html`;
+const CHARTS_URL = `${NAV_BASE_URL}charts.html`;
+const DEATHS_URL = `${NAV_BASE_URL}deaths.html`;
 const DEFAULT_TOPIC = "Immigration";
 const DEFAULT_IMPACT = "Enforcement";
 
@@ -899,9 +902,9 @@ const TripletsMap = () => {
     () =>
       new L.DivIcon({
         className: "custom-marker camp-marker",
-        html: "<div>☠</div>",
-        iconSize: [30, 30],
-        iconAnchor: [15, 15],
+        html: '<div class="detention-marker-symbol">☠</div>',
+        iconSize: [60, 60],
+        iconAnchor: [30, 30],
       }),
     [],
   );
@@ -938,8 +941,8 @@ const TripletsMap = () => {
     const icon = new L.DivIcon({
       className: "custom-marker camp-marker detention-marker",
       html: `<div class="detention-marker-wrap"><div class="detention-marker-symbol">☠</div><div class="detention-marker-label">${label}</div></div>`,
-      iconSize: [40, 36],
-      iconAnchor: [20, 18],
+      iconSize: [80, 72],
+      iconAnchor: [40, 36],
     });
     detentionIconCache.set(label, icon);
     return icon;
@@ -978,15 +981,6 @@ const TripletsMap = () => {
       window.history.replaceState(null, "", "#resources");
     }
     trackNav("resources", "#resources");
-  };
-  const openCharts = () => {
-    setViewMode("charts");
-    setShowAbout(false);
-    setShowMethodology(false);
-    if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", "#charts");
-    }
-    trackNav("charts", "#charts");
   };
   const openAbout = () => {
     setShowAbout(true);
@@ -1312,91 +1306,7 @@ const TripletsMap = () => {
       ))}
     </div>
   );
-  const gridCharts = CHARTS.filter(
-    (chart) => !chart.linkOnly && chart.layout !== "wide",
-  );
-  const wideCharts = CHARTS.filter(
-    (chart) => !chart.linkOnly && chart.layout === "wide",
-  );
-  const linkCharts = CHARTS.filter((chart) => chart.linkOnly);
-  const renderChartCard = (chart: ChartItem) => (
-    <section key={chart.href} className="resource-card chart-card">
-      <h2>{chart.title}</h2>
-      {chart.imgSrc ? (
-        <a
-          href={chart.href}
-          target="_blank"
-          rel="noreferrer"
-          onClick={handleOutboundClick(chart.title, chart.href, "charts")}
-        >
-          <img src={chart.imgSrc} alt={chart.imgAlt ?? chart.title} />
-        </a>
-      ) : (
-        <div className="chart-embed">
-          {chart.embedUrl && (
-            <iframe title={chart.title} src={chart.embedUrl} loading="lazy" />
-          )}
-          <a
-            className="chart-embed-link"
-            href={chart.href}
-            target="_blank"
-            rel="noreferrer"
-            onClick={handleOutboundClick(chart.title, chart.href, "charts")}
-          >
-            Open chart
-          </a>
-        </div>
-      )}
-      {chart.creditText && chart.creditHref && chart.creditLabel && (
-        <p className="chart-credit">
-          {chart.creditText}{" "}
-          <a
-            href={chart.creditHref}
-            target="_blank"
-            rel="noreferrer"
-            onClick={handleOutboundClick(
-              chart.creditLabel,
-              chart.creditHref,
-              "charts",
-            )}
-          >
-            {chart.creditLabel}
-          </a>
-          .
-        </p>
-      )}
-    </section>
-  );
-  const chartsView = (
-    <div className="charts-view-wrapper">
-      <div className="resources-view charts-view">
-        {gridCharts.map((chart) => renderChartCard(chart))}
-      </div>
-      {wideCharts.length > 0 && (
-        <div className="charts-wide">
-          {wideCharts.map((chart) => renderChartCard(chart))}
-        </div>
-      )}
-      {linkCharts.length > 0 && (
-        <div className="chart-links">
-          {linkCharts.map((chart) => (
-            <div className="chart-link-row" key={chart.href}>
-              <span className="chart-link-text">{chart.title}</span>
-              <a
-                className="chart-link-action"
-                href={chart.href}
-                target="_blank"
-                rel="noreferrer"
-                onClick={handleOutboundClick(chart.title, chart.href, "charts")}
-              >
-                Open chart
-              </a>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  const chartsView = <ChartsView analyticsPage={ANALYTICS_PAGE} />;
   const updatedLabel = (() => {
     const formatted = formatUpdatedAt(lastUpdated);
     if (!formatted) {
@@ -1432,15 +1342,18 @@ const TripletsMap = () => {
       >
         {t.resourcesTab}
       </button>
-      <button
-        type="button"
+      <a
         className={viewMode === "charts" ? "active" : ""}
-        onClick={openCharts}
+        href={CHARTS_URL}
+        onClick={() => trackNav("charts", CHARTS_URL)}
       >
         {t.chartsTab}
-      </button>
+      </a>
       <a href={STATS_URL} onClick={() => trackNav("stats", STATS_URL)}>
         {t.statsTab}
+      </a>
+      <a href={DEATHS_URL} onClick={() => trackNav("deaths", DEATHS_URL)}>
+        Deaths
       </a>
       <button type="button" className="ghost" onClick={openAbout}>
         {ABOUT_CONTENT.title[language]}
@@ -1712,78 +1625,82 @@ const TripletsMap = () => {
                   )}
                 </Marker>
               ))}
-            {showDetentionFacilities &&
-              detentionFacilities.map((facility) => (
-                <Marker
-                  key={`${facility.name}-${facility.city}-${facility.state}`}
-                  position={[facility.latitude, facility.longitude]}
-                  icon={getDetentionIcon(
-                    formatPopulationLabel(facility.tracAverageDailyPopulation),
-                  )}
-                  eventHandlers={{
-                    click() {
-                      if (isMobile) {
-                        setSelectedDetentionFacility(facility);
-                        setSelectedGroupKey(null);
-                        setSelectedFieldOffice(null);
-                        setSelectedStaticLocation(null);
-                        return;
-                      }
-                      focusMapOnMarker(facility.latitude, facility.longitude);
-                    },
-                  }}
-                >
-                  {!isMobile && (
-                    <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
-                      {facility.name}
-                    </Tooltip>
-                  )}
-                  {!isMobile && (
-                    <Popup {...popupProps}>
-                      <strong>{facility.name}</strong>
-                      <div>{t.detentionFacilityType}</div>
-                      <div className="popup-address">
-                        {facility.addressFull ||
-                          `${facility.city}, ${facility.state} ${facility.postalCode}`}
-                      </div>
-                      {facility.tracTypeDetailed && (
-                        <div>
-                          {t.tracTypeLabel}: {facility.tracTypeDetailed}
+            {showDetentionFacilities && (
+              <Pane name="detentionPane" style={{ zIndex: 350 }}>
+                {detentionFacilities.map((facility) => (
+                  <Marker
+                    key={`${facility.name}-${facility.city}-${facility.state}`}
+                    position={[facility.latitude, facility.longitude]}
+                    icon={getDetentionIcon(
+                      formatPopulationLabel(facility.tracAverageDailyPopulation),
+                    )}
+                    pane="detentionPane"
+                    eventHandlers={{
+                      click() {
+                        if (isMobile) {
+                          setSelectedDetentionFacility(facility);
+                          setSelectedGroupKey(null);
+                          setSelectedFieldOffice(null);
+                          setSelectedStaticLocation(null);
+                          return;
+                        }
+                        focusMapOnMarker(facility.latitude, facility.longitude);
+                      },
+                    }}
+                  >
+                    {!isMobile && (
+                      <Tooltip direction="top" offset={[0, -10]} opacity={0.9}>
+                        {facility.name}
+                      </Tooltip>
+                    )}
+                    {!isMobile && (
+                      <Popup {...popupProps}>
+                        <strong>{facility.name}</strong>
+                        <div>{t.detentionFacilityType}</div>
+                        <div className="popup-address">
+                          {facility.addressFull ||
+                            `${facility.city}, ${facility.state} ${facility.postalCode}`}
                         </div>
-                      )}
-                      {facility.tracAverageDailyPopulation && (
-                        <div>
-                          {t.tracAverageDailyPopulationLabel}: {facility.tracAverageDailyPopulation}
-                        </div>
-                      )}
-                      {facility.tracGuaranteedMinimum && (
-                        <div>
-                          {t.tracGuaranteedMinimumLabel}: {facility.tracGuaranteedMinimum}
-                        </div>
-                      )}
-                      {facility.tracAsOf && (
-                        <div>
-                          {t.tracAsOfLabel}: {facility.tracAsOf}
-                        </div>
-                      )}
-                      {facility.detailUrl && (
-                        <a
-                          href={facility.detailUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={handleOutboundClick(
-                            facility.name,
-                            facility.detailUrl,
-                            "facility",
-                          )}
-                        >
-                          {t.viewFacility}
-                        </a>
-                      )}
-                    </Popup>
-                  )}
-                </Marker>
-              ))}
+                        {facility.tracTypeDetailed && (
+                          <div>
+                            {t.tracTypeLabel}: {facility.tracTypeDetailed}
+                          </div>
+                        )}
+                        {facility.tracAverageDailyPopulation && (
+                          <div>
+                            {t.tracAverageDailyPopulationLabel}: {facility.tracAverageDailyPopulation}
+                          </div>
+                        )}
+                        {facility.tracGuaranteedMinimum && (
+                          <div>
+                            {t.tracGuaranteedMinimumLabel}: {facility.tracGuaranteedMinimum}
+                          </div>
+                        )}
+                        {facility.tracAsOf && (
+                          <div>
+                            {t.tracAsOfLabel}: {facility.tracAsOf}
+                          </div>
+                        )}
+                        {facility.detailUrl && (
+                          <a
+                            href={facility.detailUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={handleOutboundClick(
+                              facility.name,
+                              facility.detailUrl,
+                              "facility",
+                            )}
+                          >
+                            {t.viewFacility}
+                          </a>
+                        )}
+                      </Popup>
+                    )}
+                  </Marker>
+                ))}
+              </Pane>
+            )}
             {showFieldOffices &&
               FIELD_OFFICES.map((office) => (
                 <Marker
@@ -1874,7 +1791,7 @@ const TripletsMap = () => {
                 <span className="nav-icon">
                   <HeadlinesIcon />
                 </span>
-                <span className="nav-label">{t.headlinesTab}</span>
+                <span className="nav-label">{t.newsTab}</span>
               </a>
               <a
                 href={PROTESTS_URL}
@@ -1897,21 +1814,27 @@ const TripletsMap = () => {
                   {t.resourcesTabMobile ?? t.resourcesTab}
                 </span>
               </button>
-              <button
-                type="button"
+              <a
                 className={viewMode === "charts" ? "active" : ""}
-                onClick={openCharts}
+                href={CHARTS_URL}
+                onClick={() => trackNav("charts", CHARTS_URL)}
               >
                 <span className="nav-icon">
                   <ChartsIcon />
                 </span>
                 <span className="nav-label">{t.chartsTab}</span>
-              </button>
+              </a>
               <a href={STATS_URL} onClick={() => trackNav("stats", STATS_URL)}>
                 <span className="nav-icon">
                   <StatsIcon />
                 </span>
                 <span className="nav-label">{t.statsTab}</span>
+              </a>
+              <a href={DEATHS_URL} onClick={() => trackNav("deaths", DEATHS_URL)}>
+                <span className="nav-icon">
+                  <StatsIcon />
+                </span>
+                <span className="nav-label">Deaths</span>
               </a>
               <button type="button" onClick={openAbout}>
                 <span className="nav-icon">
@@ -2059,6 +1982,9 @@ const TripletsMap = () => {
               )}
           </div>
         )}
+      <footer className="site-footer">
+        <p className="site-footer-note">{t.footerDisclaimer}</p>
+      </footer>
       {(showAbout || showMethodology) && (
         <div className="modal-backdrop" onClick={closeOverlays}>
           <div

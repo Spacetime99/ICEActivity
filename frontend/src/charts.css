@@ -1,0 +1,16 @@
+.charts-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.charts-content {
+  flex: 1;
+  padding: 1.25rem 2rem 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .charts-content {
+    padding: 1rem 1rem 2rem;
+  }
+}

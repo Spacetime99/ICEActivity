@@ -1,0 +1,60 @@
+.deaths-page {
+  background: #fffdfa;
+}
+
+.deaths-table-wrap {
+  padding: 1rem 1.25rem 1.5rem;
+  overflow-x: auto;
+}
+
+.deaths-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  table-layout: auto;
+}
+
+.deaths-table th,
+.deaths-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.35rem 0.45rem;
+  vertical-align: top;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.deaths-table th {
+  background: #fff7ed;
+  color: #334155;
+  text-align: left;
+}
+
+.deaths-table td:nth-child(1) {
+  width: 18%;
+}
+
+.deaths-table td:nth-child(2) {
+  width: 1%;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.deaths-table td:nth-child(3) {
+  width: 39%;
+}
+
+.deaths-table td:nth-child(4) {
+  width: 11%;
+  white-space: nowrap;
+}
+
+.deaths-table td:nth-child(5) {
+  width: 10%;
+}
+
+@media (max-width: 900px) {
+  .deaths-table {
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="ICEMap Stats tracks weekly ratios for shootings, protests, enforcement actions, and facility-related coverage."
+    />
+    <link rel="canonical" href="https://icemap.org/ice/stats.html" />
+    <meta property="og:title" content="ICEMap Stats" />
+    <meta
+      property="og:description"
+      content="Weekly ratios of key signals in ICE-related reporting over the last 3 months."
+    />
+    <meta property="og:url" content="https://icemap.org/ice/stats.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ICEMap" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ICEMap Stats" />
+    <meta
+      name="twitter:description"
+      content="Weekly ratios of key signals in ICE-related reporting over the last 3 months."
+    />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-110DEDEPKT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-110DEDEPKT");
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "ICEMap Stats",
+        "description": "Weekly ratios for key signals in ICE-related coverage.",
+        "url": "https://icemap.org/ice/stats.html",
+        "about": ["ICE", "immigration enforcement", "detention centers", "protests"],
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "ICEMap",
+          "url": "https://icemap.org/ice/"
+        }
+      }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>ICEMap Stats | Weekly ICE Coverage Ratios</title>
+  </head>
+  <body>
+    <div id="stats-root"></div>
+    <script type="module" src="/src/stats.tsx"></script>
+  </body>
+</html>

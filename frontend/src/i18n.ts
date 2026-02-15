@@ -21,6 +21,7 @@ export const TRANSLATIONS = {
     generalCountLabel: "general",
     mapTab: "Map",
     headlinesTab: "Headlines",
+    newsTab: "News",
     resourcesTab: "Resources",
     resourcesTabMobile: "Links",
     chartsTab: "Charts",
@@ -95,6 +96,8 @@ export const TRANSLATIONS = {
     feedbackMessageLabel: "Message",
     feedbackSendLabel: "Send feedback",
     feedbackPrivacyNote: "Email addresses are not anonymous. Leave it blank to stay private.",
+    footerDisclaimer:
+      "This site does not make legal determinations. All information reflects published sources.",
     protestsTab: "Protests",
     protestsPageTitle: "Protests & Activism",
     protestsPageSubtitle:
@@ -113,6 +116,9 @@ export const TRANSLATIONS = {
     protestsPageSearchPlaceholder: "Search by organizer name or focus",
     protestsPageEventHubs: "Check upcoming protests",
     protestsPageOfficialSite: "Official site",
+    chartsPageTitle: "Charts & Data",
+    chartsPageSubtitle:
+      "External dashboards, infographics, and data sources tracking ICE enforcement and detention trends.",
     statsPageTitle: "Stats & Trends",
     statsPageSubtitle: "Weekly ratios for key signals in ICE-related coverage.",
     statsPageIntro:
@@ -224,6 +230,7 @@ export const TRANSLATIONS = {
     generalCountLabel: "general",
     mapTab: "Mapa",
     headlinesTab: "Titulares",
+    newsTab: "Noticias",
     resourcesTab: "Recursos",
     resourcesTabMobile: "Enlaces",
     chartsTab: "Graficas",
@@ -300,6 +307,8 @@ export const TRANSLATIONS = {
     feedbackMessageLabel: "Mensaje",
     feedbackSendLabel: "Enviar",
     feedbackPrivacyNote: "Los correos no son anonimos. Dejalo en blanco si prefieres privacidad.",
+    footerDisclaimer:
+      "Este sitio no hace determinaciones legales. Toda la informacion refleja fuentes publicas.",
     protestsTab: "Protestas",
     protestsPageTitle: "Protestas y activismo",
     protestsPageSubtitle:
@@ -317,6 +326,9 @@ export const TRANSLATIONS = {
     protestsPageSearchPlaceholder: "Busca por nombre u objetivo",
     protestsPageEventHubs: "Busca protestas cercanas",
     protestsPageOfficialSite: "Sitio oficial",
+    chartsPageTitle: "Graficas y datos",
+    chartsPageSubtitle:
+      "Tableros externos, infografias y fuentes de datos sobre ICE y tendencias de detencion.",
     statsPageTitle: "Estadisticas y tendencias",
     statsPageSubtitle: "Ratios semanales de senales clave en cobertura de ICE.",
     statsPageIntro:

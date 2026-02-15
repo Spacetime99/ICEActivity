@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="ICEMap Headlines is a searchable feed of ICE-related reporting with filters for state, city, date range, source, and event type."
+    />
+    <link rel="canonical" href="https://icemap.org/ice/headlines.html" />
+    <meta property="og:title" content="ICEMap Headlines" />
+    <meta
+      property="og:description"
+      content="Browse ICE-related headlines with filters for state, city, date range, source, and event type."
+    />
+    <meta property="og:url" content="https://icemap.org/ice/headlines.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ICEMap" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ICEMap Headlines" />
+    <meta
+      name="twitter:description"
+      content="Browse ICE-related headlines with filters for state, city, date range, source, and event type."
+    />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-110DEDEPKT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-110DEDEPKT");
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "ICEMap Headlines",
+        "description": "Searchable headlines for ICE-related reporting with filters by location, date, and source.",
+        "url": "https://icemap.org/ice/headlines.html",
+        "about": ["ICE", "immigration enforcement", "detention centers", "ICE raids"],
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "ICEMap",
+          "url": "https://icemap.org/ice/"
+        }
+      }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>ICEMap Headlines | Latest ICE Coverage</title>
+  </head>
+  <body>
+    <div id="headlines-root"></div>
+    <script type="module" src="/src/headlines.tsx"></script>
+  </body>
+</html>

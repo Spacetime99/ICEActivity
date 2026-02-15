@@ -40,6 +40,25 @@ const RESOURCE_SECTIONS_DATA: ResourceSectionData[] = [
         },
       },
       {
+        label: {
+          en: "Headlines & latest coverage",
+          es: "Titulares y cobertura reciente",
+        },
+        url: "headlines.html",
+        description: {
+          en: "Dedicated landing page with searchable headlines and location filters.",
+          es: "Pagina dedicada con titulares buscables y filtros por ubicacion.",
+        },
+      },
+      {
+        label: { en: "Protests & activism", es: "Protestas y activismo" },
+        url: "protests.html",
+        description: {
+          en: "Organizer resources and event hubs for protests and actions.",
+          es: "Recursos de organizaciones y hubs de eventos para protestas.",
+        },
+      },
+      {
         label: { en: "Methodology", es: "Metodologia" },
         url: "#methodology",
         description: {

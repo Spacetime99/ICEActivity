@@ -68,6 +68,9 @@ INGEST_REPORTS_WRITTEN="n/a"
 TRIPLET_FILE_ROWS="n/a"
 TRIPLET_ARTICLES_PROCESSED="n/a"
 TRIPLET_TRIPLETS_EXTRACTED="n/a"
+DEATHS_TOTAL="n/a"
+DEATHS_DETENTION="n/a"
+DEATHS_STREET="n/a"
 if [[ "${PRECACHE_MODELS:-0}" = "1" ]]; then
   echo "[${timestamp}] Pre-caching HF models (best effort)..." | tee -a "${RUN_LOG}"
   run_cmd "precache" python3 scripts/precache_models.py --best-effort || true
@@ -137,6 +140,8 @@ DEATH_REPORT_ARGS=(
   --out "${REPO_ROOT}/site/data"
   --ice-report-include-index
   --ice-report-use-playwright
+  --ice-report-llm-location-enrich
+  --ice-report-llm-model-id "${DEATH_MODEL_ID}"
   --include-triplets
   --triplet-article-text
 )
@@ -154,6 +159,13 @@ else
   echo "[${timestamp}] Running deaths update without LLM enrichment (model cache missing)." | tee -a "${RUN_LOG}"
   run_cmd "deaths update" python3 scripts/run_daily.py "${DEATH_REPORT_ARGS[@]}"
   DEATHS_STATUS=$?
+fi
+
+if [[ -f "${REPO_ROOT}/site/data/index.json" ]]; then
+  DEATH_COUNTS="$(python3 -c 'import json, pathlib; d = json.loads(pathlib.Path("site/data/index.json").read_text(encoding="utf-8")); c = d.get("counts", {}) if isinstance(d, dict) else {}; ctx = c.get("context", {}) if isinstance(c, dict) else {}; det = ctx.get("detention", "n/a"); st = ctx.get("street", "n/a"); total = c.get("total", (det + st) if isinstance(det, int) and isinstance(st, int) else "n/a"); print("{}|{}|{}".format(total, det, st))' 2>/dev/null || true)"
+  if [[ -n "${DEATH_COUNTS}" ]]; then
+    IFS='|' read -r DEATHS_TOTAL DEATHS_DETENTION DEATHS_STREET <<< "${DEATH_COUNTS}"
+  fi
 fi
 
 UPLOAD_STATUS=0
@@ -199,6 +211,9 @@ SUMMARY_FILE="$(mktemp)"
   if [[ -n "${LATEST_TRIPLET_FILE}" ]]; then
     echo "  triplet_output_file: ${LATEST_TRIPLET_FILE}"
   fi
+  echo "  deaths_total_reported: ${DEATHS_TOTAL}"
+  echo "  deaths_detention: ${DEATHS_DETENTION}"
+  echo "  deaths_street: ${DEATHS_STREET}"
   echo ""
   echo "Recent log tail:"
   tail -n 80 "${RUN_LOG}"

@@ -1,10 +1,14 @@
 export type ChartItem = {
   title: string;
   href: string;
-  imgSrc: string;
-  imgAlt: string;
-  creditText: string;
-  creditHref: string;
+  imgSrc?: string;
+  imgAlt?: string;
+  creditText?: string;
+  creditHref?: string;
+  creditLabel?: string;
+  embedUrl?: string;
+  linkOnly?: boolean;
+  layout?: "wide";
 };
 
 export const CHARTS: ChartItem[] = [
@@ -15,6 +19,7 @@ export const CHARTS: ChartItem[] = [
     imgAlt: "Infographic: Number of ICE Detainees Surged 65% in 2025 | Statista",
     creditText: "You will find more infographics at",
     creditHref: "https://www.statista.com/chartoftheday/",
+    creditLabel: "Statista",
   },
   {
     title: "Infographic: Woman Killed in Minneapolis Not the First ICE Shooting | Statista",
@@ -23,6 +28,7 @@ export const CHARTS: ChartItem[] = [
     imgAlt: "Infographic: Woman Killed in Minneapolis Not the First ICE Shooting | Statista",
     creditText: "You will find more infographics at",
     creditHref: "https://www.statista.com/chartoftheday/",
+    creditLabel: "Statista",
   },
   {
     title:
@@ -33,6 +39,7 @@ export const CHARTS: ChartItem[] = [
       "Statistic: Resident population of the United States in July 2000 and July 2024, by race (in millions) | Statista",
     creditText: "Find more statistics at",
     creditHref: "https://www.statista.com",
+    creditLabel: "Statista",
   },
   {
     title: "Infographic: Has ICE Been More Active Under Trump? | Statista",
@@ -41,5 +48,58 @@ export const CHARTS: ChartItem[] = [
     imgAlt: "Infographic: Has ICE Been More Active Under Trump? | Statista",
     creditText: "You will find more infographics at",
     creditHref: "https://www.statista.com/chartoftheday/",
+    creditLabel: "Statista",
+  },
+  {
+    title: "TRAC - Immigration Detention Quick Facts",
+    href: "https://tracreports.org/immigration/quickfacts/",
+    embedUrl: "https://tracreports.org/immigration/quickfacts/",
+    layout: "wide",
+  },
+  {
+    title: "TRAC - All ICE Removals",
+    href: "https://tracreports.org/phptools/immigration/remove/about_data.html",
+    embedUrl: "https://tracreports.org/phptools/immigration/remove/about_data.html",
+  },
+  {
+    title: "Vera - ICE Detention Trends",
+    href: "https://www.vera.org/ice-detention-trends",
+    embedUrl: "https://www.vera.org/ice-detention-trends",
+  },
+  {
+    title: "OpenICE - detention facility map + population estimates",
+    href: "https://www.openice.org/",
+    embedUrl: "https://www.openice.org/",
+  },
+  {
+    title: "Immigration Enforcement Dashboard",
+    href: "https://enforcementdashboard.com/",
+    embedUrl: "https://enforcementdashboard.com/",
+  },
+  {
+    title: "Fatal Encounters - Visualizations",
+    href: "https://fatalencounters.org/our-visualizations/",
+    embedUrl: "https://fatalencounters.org/our-visualizations/",
+    layout: "wide",
+  },
+  {
+    title: "CBP - Southwest Land Border Encounters",
+    href: "https://www.cbp.gov/newsroom/stats/southwest-land-border-encounters",
+    linkOnly: true,
+  },
+  {
+    title: "CBP - Stats & Summaries hub",
+    href: "https://www.cbp.gov/newsroom/stats",
+    linkOnly: true,
+  },
+  {
+    title: "CBP - Public Data Portal",
+    href: "https://www.cbp.gov/newsroom/stats/cbp-public-data-portal",
+    linkOnly: true,
+  },
+  {
+    title: "ICE - ERO Statistics dashboards",
+    href: "https://www.ice.gov/statistics",
+    linkOnly: true,
   },
 ];

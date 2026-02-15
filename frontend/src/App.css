@@ -5,6 +5,19 @@
   min-height: 100vh;
 }
 
+.site-footer {
+  padding: 0.75rem 1.5rem 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.site-footer-note {
+  margin: 0;
+  font-size: 0.75rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
 .map-header {
   display: flex;
   flex-direction: column;
@@ -57,6 +70,23 @@
   max-width: 100%;
 }
 
+.fatalities-banner {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.fatalities-banner a {
+  color: #b45309;
+  text-decoration: none;
+}
+
+.fatalities-banner a:hover {
+  text-decoration: underline;
+}
+
 .controls {
   display: flex;
   gap: 0.5rem;
@@ -69,12 +99,16 @@
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
 }
 
-.header-actions .language-select {
+.header-right {
   margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
 }
 
 .controls button {
@@ -133,7 +167,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding-left: 0.25rem;
+  padding-left: 0;
 }
 
 .eyebrow-row {
@@ -424,7 +458,7 @@
 }
 
 .detention-marker-symbol {
-  font-size: 16px;
+  font-size: 32px;
 }
 
 .detention-marker-label {
@@ -793,6 +827,7 @@
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
   box-shadow: 0 -6px 16px rgba(15, 23, 42, 0.15);
+  z-index: 1200;
 }
 
 .bottom-nav button {
@@ -1137,8 +1172,13 @@
     align-items: flex-start;
   }
 
-  .header-actions .language-select {
+  .header-right {
     margin-left: 0;
+    align-items: flex-start;
+  }
+
+  .fatalities-banner {
+    text-align: left;
   }
 
   .map-content {
@@ -1245,7 +1285,7 @@
 
   .map-frame .leaflet-container {
     border-radius: 0;
-    min-height: 60vh;
+    min-height: 57vh;
   }
 
   .list-card h3 {
